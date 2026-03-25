@@ -632,6 +632,7 @@
     <div class="nav-sidebar-role">Enterprise Admin ▾</div>
   </div>
   <nav class="nav-sidebar-nav">
+    <a href="coordinator-dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
     <a href="timeslot_scheduler_mockup.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
     <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
     <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
@@ -771,8 +772,8 @@
               <span>09:30 – 14:00<br/>Vaccination Bay</span>
             </div>
             <div class="resource-head">
-              <strong>Treatment Room 2</strong>
-              <span>08:30 – 13:30<br/>Procedure Room</span>
+              <strong>Dr Wei Chen</strong>
+              <span>09:00 – 14:00<br/>Speech Therapy Room D</span>
             </div>
           </div>
 
@@ -802,11 +803,7 @@
                 </div>
                 <div class="slot-block available" style="top:230px; height:58px;" data-time="10:00" data-resource="Dr Angela Lim">10:00</div>
                 <div class="slot-block available" style="top:304px; height:58px;" data-time="10:30" data-resource="Dr Angela Lim">10:30</div>
-                <div class="slot-block unavailable" style="top:378px; height:58px;">
-                  <div class="slot-time">11:00</div>
-                  <div class="slot-title">Meeting</div>
-                  <button class="detail-icon" type="button" data-detail-title="Dr Angela Lim · 11:00" data-detail-body="Unavailable due to internal case review meeting.">i</button>
-                </div>
+                <div class="slot-block available" style="top:378px; height:58px;" data-time="11:00" data-resource="Dr Angela Lim">11:00</div>
                 <div class="slot-block available" style="top:452px; height:58px;" data-time="11:30" data-resource="Dr Angela Lim">11:30</div>
                 <div class="slot-block available" style="top:526px; height:58px;" data-time="13:00" data-resource="Dr Angela Lim">13:00</div>
                 <div class="slot-block booked" style="top:600px; height:58px;">
@@ -847,11 +844,7 @@
                   <button class="detail-icon" type="button" data-detail-title="Nurse Janice Tan · Morning" data-detail-body="Unavailable because Nurse Janice Tan starts at 09:30.">i</button>
                 </div>
                 <div class="slot-block available" style="top:156px; height:58px;" data-time="09:30" data-resource="Nurse Janice Tan">09:30</div>
-                <div class="slot-block unavailable" style="top:230px; height:132px;">
-                  <div class="slot-time">10:00 - 11:00</div>
-                  <div class="slot-title">Vaccination break</div>
-                  <button class="detail-icon" type="button" data-detail-title="Nurse Janice Tan · 10:00" data-detail-body="Unavailable due to vaccination break window and replenishment.">i</button>
-                </div>
+                <div class="slot-block available" style="top:230px; height:132px;" data-time="10:00 - 11:00" data-resource="Nurse Janice Tan">10:00 - 11:00</div>
                 <div class="slot-block available" style="top:378px; height:58px;" data-time="11:00" data-resource="Nurse Janice Tan">11:00</div>
                 <div class="slot-block booked" style="top:452px; height:58px;">
                   <div class="slot-time">11:30</div>
@@ -869,25 +862,27 @@
               </div>
 
               <div class="lane">
-                <div class="slot-block booked" style="top:8px; height:132px;">
-                  <div class="slot-time">08:30 - 09:30</div>
-                  <div class="slot-title">Booked · Mr Tan Wei Ming</div>
-                  <div class="slot-sub">Wound dressing</div>
-                  <button class="detail-icon" type="button" data-detail-title="Treatment Room 2 · 08:30" data-detail-body="Booked by Mr Tan Wei Ming for wound dressing. Ref: APT-10482.">i</button>
+                <div class="slot-block unavailable" style="top:8px; height:58px;">
+                  <div class="slot-time">08:30</div>
+                  <div class="slot-title">Not started</div>
+                  <button class="detail-icon" type="button" data-detail-title="Dr Wei Chen · 08:30" data-detail-body="Unavailable — Dr Wei Chen starts at 09:00.">i</button>
                 </div>
-                <div class="slot-block unavailable" style="top:156px; height:58px;">
+                <div class="slot-block available" style="top:82px; height:58px;" data-time="09:00" data-resource="Dr Wei Chen">09:00</div>
+                <div class="slot-block booked" style="top:156px; height:58px;">
                   <div class="slot-time">09:30</div>
-                  <div class="slot-title">Preparation</div>
-                  <button class="detail-icon" type="button" data-detail-title="Treatment Room 2 · 09:30" data-detail-body="Unavailable because the procedure room is being prepared.">i</button>
+                  <div class="slot-title">Booked · Mdm Siti Rahimah</div>
+                  <div class="slot-sub">Speech therapy</div>
+                  <button class="detail-icon" type="button" data-detail-title="Dr Wei Chen · 09:30" data-detail-body="Booked with Mdm Siti Rahimah for speech therapy session. Ref: APT-10622.">i</button>
                 </div>
-                <div class="slot-block available" style="top:230px; height:132px;" data-time="10:00 - 11:00" data-resource="Treatment Room 2">10:00 - 11:00</div>
-                <div class="slot-block available" style="top:378px; height:132px;" data-time="11:00 - 12:00" data-resource="Treatment Room 2">11:00 - 12:00</div>
-                <div class="slot-block booked" style="top:526px; height:132px;">
-                  <div class="slot-time">13:00 - 14:00</div>
-                  <div class="slot-title">Booked · Mr Daniel Teo</div>
-                  <div class="slot-sub">Minor procedure</div>
-                  <button class="detail-icon" type="button" data-detail-title="Treatment Room 2 · 13:00" data-detail-body="Booked by Mr Daniel Teo for minor procedure. Ref: APT-10605.">i</button>
+                <div class="slot-block available" style="top:230px; height:58px;" data-time="10:00" data-resource="Dr Wei Chen">10:00</div>
+                <div class="slot-block booked" style="top:304px; height:132px;">
+                  <div class="slot-time">10:30 - 11:30</div>
+                  <div class="slot-title">Booked · Mr Lee Chong Wei</div>
+                  <div class="slot-sub">Dysphagia assessment</div>
+                  <button class="detail-icon" type="button" data-detail-title="Dr Wei Chen · 10:30" data-detail-body="Booked with Mr Lee Chong Wei for dysphagia assessment. Ref: APT-10641.">i</button>
                 </div>
+                <div class="slot-block available" style="top:452px; height:58px;" data-time="11:30" data-resource="Dr Wei Chen">11:30</div>
+                <div class="slot-block available" style="top:526px; height:132px;" data-time="13:00 - 14:00" data-resource="Dr Wei Chen">13:00 - 14:00</div>
               </div>
             </div>
           </div>

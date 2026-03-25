@@ -1,0 +1,680 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coordinator Dashboard — CARES Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0d9488;
+      --primary-dk: #0f766e;
+      --primary-xdk: #134e4a;
+      --primary-light: #f0fdf9;
+      --primary-mid: #ccfbf1;
+      --nav-bg: #1a2e2c;
+      --bg: #f0fdf9;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --radius: 16px;
+      --green: #10b981;
+      --blue: #3b82f6;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --purple: #8b5cf6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); display: flex !important; min-height: 100vh; }
+
+    /* ===== SIDEBAR NAV ===== */
+    .nav-sidebar {
+      width: 200px; min-width: 200px; background: #1a2e2c;
+      position: fixed; top: 0; left: 0; height: 100vh;
+      overflow-y: auto; z-index: 200; display: flex; flex-direction: column;
+    }
+    .nav-sidebar-profile { padding: 20px 14px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .nav-sidebar-avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: rgba(13,148,136,0.25); border: 2px solid rgba(13,148,136,0.45);
+      display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 9px;
+    }
+    .nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
+    .nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; cursor: pointer; }
+    .nav-sidebar-nav { flex: 1; padding: 4px 0; }
+    .nav-sidebar-link {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px; color: rgba(255,255,255,0.68);
+      text-decoration: none; font-size: 12px; font-weight: 500;
+      transition: all 0.15s; border-left: 3px solid transparent;
+    }
+    .nav-sidebar-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.95); }
+    .nav-sidebar-link.active { background: rgba(13,148,136,0.18); color: #5eead4; border-left-color: #0d9488; }
+    .nav-sidebar-link-inner { display: flex; align-items: center; gap: 8px; }
+    .nav-chevron { font-size: 10px; opacity: 0.35; }
+
+    /* ===== TOPBAR ===== */
+    .main-wrapper { margin-left: 200px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar {
+      background: #fff; border-bottom: 1px solid #e5e7eb;
+      padding: 0 20px; height: 46px; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-hamburger {
+      background: #0d9488; border: none; border-radius: 5px; color: white;
+      width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+      font-size: 15px; cursor: pointer;
+    }
+    .topbar-logo { font-size: 22px; }
+    .topbar-session { font-size: 11.5px; color: #6b7280; }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .topbar-welcome { font-size: 11.5px; color: #9ca3af; }
+    .topbar-facility {
+      border: 1px solid #d1d5db; border-radius: 6px; padding: 3px 8px;
+      font-size: 11px; color: #374151; background: white; max-width: 230px; cursor: pointer;
+    }
+    .topbar-notif { position: relative; background: none; border: none; cursor: pointer; font-size: 17px; padding: 0; }
+    .topbar-notif-badge {
+      position: absolute; top: -4px; right: -5px; background: #f59e0b; color: white;
+      border-radius: 10px; font-size: 9px; padding: 1px 4px; font-weight: 700;
+    }
+    .topbar-logout { color: #6b7280; font-size: 11.5px; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+    .topbar-logout:hover { color: #374151; }
+    .page-loaded-bar { background: #fff; border-bottom: 1px solid #f3f4f6; padding: 3px 20px; font-size: 11px; color: #9ca3af; }
+
+    /* ===== DASHBOARD LAYOUT ===== */
+    .dash-page { padding: 22px 24px; display: flex; flex-direction: column; gap: 18px; }
+
+    /* Welcome Banner */
+    .welcome-banner {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dk) 55%, var(--primary-xdk) 100%);
+      border-radius: var(--radius); padding: 22px 28px;
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+      color: white; box-shadow: var(--shadow-md);
+    }
+    .welcome-left { flex: 1; }
+    .welcome-date { font-size: 11.5px; opacity: 0.7; margin-bottom: 5px; font-weight: 500; }
+    .welcome-greeting { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
+    .welcome-sub { font-size: 13px; opacity: 0.8; margin-top: 5px; }
+    .welcome-stats { display: flex; align-items: center; gap: 0; }
+    .welcome-stat { text-align: center; padding: 0 24px; }
+    .welcome-stat-val { font-size: 30px; font-weight: 800; line-height: 1; }
+    .welcome-stat-lbl { font-size: 11px; opacity: 0.72; margin-top: 3px; }
+    .welcome-divider { width: 1px; height: 44px; background: rgba(255,255,255,0.25); }
+    .alert-pill {
+      background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 99px; padding: 5px 14px; font-size: 12px; font-weight: 600;
+      display: flex; align-items: center; gap: 6px; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .alert-pill:hover { background: rgba(255,255,255,0.28); }
+
+    /* KPI Row */
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .kpi-card {
+      background: white; border-radius: 14px; padding: 16px 18px;
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .kpi-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 21px; flex-shrink: 0;
+    }
+    .kpi-icon.teal   { background: #f0fdf9; }
+    .kpi-icon.blue   { background: #eff6ff; }
+    .kpi-icon.amber  { background: #fffbeb; }
+    .kpi-icon.red    { background: #fef2f2; }
+    .kpi-icon.purple { background: #f5f3ff; }
+    .kpi-body { flex: 1; min-width: 0; }
+    .kpi-val { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1; }
+    .kpi-lbl { font-size: 12px; color: var(--muted); margin-top: 3px; white-space: nowrap; }
+    .kpi-trend { font-size: 11px; font-weight: 600; margin-top: 5px; display: flex; align-items: center; gap: 4px; }
+    .kpi-trend.good   { color: var(--green); }
+    .kpi-trend.warn   { color: var(--amber); }
+    .kpi-trend.bad    { color: var(--red); }
+    .kpi-trend.neutral{ color: var(--muted); }
+
+    /* Main grid */
+    .main-grid { display: grid; grid-template-columns: 1fr 308px; gap: 18px; }
+
+    /* Generic Panel */
+    .panel { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
+    .panel-header {
+      padding: 14px 18px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-title { font-size: 13.5px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .panel-badge { padding: 2px 9px; border-radius: 99px; font-size: 11px; font-weight: 700; background: var(--primary-mid); color: var(--primary); }
+    .panel-link { font-size: 12px; color: var(--primary); text-decoration: none; font-weight: 600; }
+    .panel-link:hover { text-decoration: underline; }
+    .panel-body { padding: 14px 18px; }
+
+    /* Therapist Table */
+    .t-table { width: 100%; border-collapse: collapse; }
+    .t-table th {
+      font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--muted); padding: 0 10px 10px; text-align: left;
+    }
+    .t-table td { padding: 10px 10px; border-top: 1px solid #f1f5f9; vertical-align: middle; }
+    .t-table tr:hover td { background: #fafffe; }
+    .t-row-leave td { opacity: 0.55; }
+
+    .t-name-cell { display: flex; align-items: center; gap: 10px; }
+    .t-avatar {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: white;
+    }
+    .t-avatar.av-teal   { background: linear-gradient(135deg,#0d9488,#0891b2); }
+    .t-avatar.av-blue   { background: linear-gradient(135deg,#3b82f6,#8b5cf6); }
+    .t-avatar.av-amber  { background: linear-gradient(135deg,#f59e0b,#ef4444); }
+    .t-avatar.av-green  { background: linear-gradient(135deg,#10b981,#0d9488); }
+    .t-fullname { font-size: 13px; font-weight: 600; }
+    .t-role     { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;
+    }
+    .status-badge::before { content:''; width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+    .sb-available  { background:#ecfdf5; color:#059669; }
+    .sb-available::before  { background:#10b981; box-shadow:0 0 0 2px rgba(16,185,129,.25); }
+    .sb-in-session { background:#eff6ff; color:#2563eb; }
+    .sb-in-session::before { background:#3b82f6; }
+    .sb-next       { background:#fefce8; color:#b45309; }
+    .sb-next::before       { background:#f59e0b; }
+    .sb-on-leave   { background:#fef2f2; color:#dc2626; }
+    .sb-on-leave::before   { background:#ef4444; }
+
+    .util-wrap { display: flex; flex-direction: column; gap: 3px; }
+    .util-bar  { width: 90px; height: 5px; background: #e5e7eb; border-radius: 99px; overflow: hidden; }
+    .util-fill { height: 100%; border-radius: 99px; }
+    .util-text { font-size: 10.5px; color: var(--muted); }
+
+    .action-btns { display: flex; gap: 5px; flex-wrap: wrap; }
+    .btn-xs {
+      padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600;
+      border: none; cursor: pointer; transition: all 0.15s; font-family: 'Outfit', sans-serif;
+    }
+    .btn-xs.p { background: var(--primary); color: white; }
+    .btn-xs.p:hover { background: var(--primary-dk); }
+    .btn-xs.g { background: #f1f5f9; color: var(--text); }
+    .btn-xs.g:hover { background: #e2e8f0; }
+    .btn-xs.w { background: #fff7ed; color: #c2410c; }
+    .btn-xs.w:hover { background: #fed7aa; }
+    .btn-xs.d { background: #fef2f2; color: var(--red); }
+
+    /* Right column */
+    .right-col { display: flex; flex-direction: column; gap: 14px; }
+
+    /* Quick actions */
+    .qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px; }
+    .qa-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      padding: 13px 8px; border-radius: 12px; border: 1.5px solid var(--border);
+      background: white; cursor: pointer; transition: all 0.18s;
+      font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 600; color: var(--text);
+      text-align: center;
+    }
+    .qa-btn:hover { border-color: var(--primary); background: var(--primary-light); color: var(--primary); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .qa-icon { font-size: 22px; }
+
+    /* Donut chart */
+    .donut-section { padding: 14px 18px 10px; }
+    .donut-container { display: flex; align-items: center; gap: 18px; }
+    .donut-wrap { position: relative; width: 100px; height: 100px; flex-shrink: 0; }
+    .donut-ring {
+      width: 100px; height: 100px; border-radius: 50%;
+      background: conic-gradient(
+        #3b82f6 0% 43.75%,
+        #10b981 43.75% 59.375%,
+        #0d9488 59.375% 90.625%,
+        #ef4444 90.625% 100%
+      );
+      display: flex; align-items: center; justify-content: center;
+    }
+    .donut-hole {
+      width: 64px; height: 64px; border-radius: 50%; background: white;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .donut-center-val { font-size: 18px; font-weight: 800; color: var(--text); line-height: 1; }
+    .donut-center-lbl { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .donut-legend { display: flex; flex-direction: column; gap: 7px; flex: 1; }
+    .dl-item { display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; }
+    .dl-dot-lbl { display: flex; align-items: center; gap: 7px; }
+    .dl-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+    .dl-lbl { color: var(--muted); }
+    .dl-val { font-weight: 700; color: var(--text); }
+
+    /* No-show risk */
+    .risk-list { padding: 4px 18px 14px; display: flex; flex-direction: column; gap: 0; }
+    .risk-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid #f8fafc;
+    }
+    .risk-item:last-child { border-bottom: none; }
+    .risk-pill { padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    .rp-high { background: #fef2f2; color: var(--red); }
+    .rp-med  { background: #fff7ed; color: #c2410c; }
+    .risk-info { flex: 1; min-width: 0; }
+    .risk-name { font-size: 12.5px; font-weight: 600; }
+    .risk-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .risk-action { font-size: 11px; color: var(--primary); font-weight: 600; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+
+    /* Bottom row */
+    .bottom-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+
+    /* Next best slots */
+    .slot-pills { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 18px; }
+    .slot-pill {
+      display: flex; align-items: center; gap: 8px; padding: 8px 13px;
+      background: var(--primary-light); border: 1.5px solid var(--primary-mid);
+      border-radius: 12px; font-size: 12px; cursor: pointer; transition: all 0.15s;
+    }
+    .slot-pill:hover { background: var(--primary-mid); border-color: var(--primary); transform: translateY(-1px); }
+    .sp-time { font-weight: 700; color: var(--primary); }
+    .sp-who  { color: var(--muted); font-size: 11px; }
+    .sp-type { font-size: 10px; background: white; color: var(--primary); padding: 1px 6px; border-radius: 99px; border: 1px solid var(--primary-mid); }
+
+    /* Waitlist */
+    .wl-list { padding: 4px 18px 14px; display: flex; flex-direction: column; }
+    .wl-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid #f8fafc;
+    }
+    .wl-item:last-child { border-bottom: none; }
+    .wl-avatar {
+      width: 33px; height: 33px; border-radius: 50%; flex-shrink: 0;
+      background: var(--primary-light); color: var(--primary); font-weight: 700;
+      font-size: 11px; display: flex; align-items: center; justify-content: center;
+      border: 1.5px solid var(--primary-mid);
+    }
+    .wl-body { flex: 1; min-width: 0; }
+    .wl-name { font-size: 13px; font-weight: 600; }
+    .wl-sub  { font-size: 11px; color: var(--muted); }
+    .wl-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .wl-wait { font-size: 11px; font-weight: 600; color: var(--amber); }
+    .wl-btn  {
+      padding: 3px 10px; border-radius: 8px; font-size: 11px; font-weight: 600;
+      background: var(--primary); color: white; border: none; cursor: pointer;
+      font-family: 'Outfit', sans-serif; transition: background 0.15s;
+    }
+    .wl-btn:hover { background: var(--primary-dk); }
+
+    /* Section label */
+    .section-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--muted); padding: 0 18px 6px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════ LEFT SIDEBAR ════ -->
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-profile">
+    <div class="nav-sidebar-avatar">🤖</div>
+    <div class="nav-sidebar-name">Cares Admin<br>TETSUYU</div>
+    <div class="nav-sidebar-role">Enterprise Admin ▾</div>
+  </div>
+  <nav class="nav-sidebar-nav">
+    <a href="coordinator-dashboard.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
+    <a href="timeslot_scheduler_mockup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
+    <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
+    <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
+    <a href="appointments.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <a href="recurring-edit.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔄</span><span>Recurring</span></span><span class="nav-chevron">‹</span></a>
+    <a href="therapist-change.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔀</span><span>Change Therapist</span></span><span class="nav-chevron">‹</span></a>
+  </nav>
+</aside>
+
+<!-- ════ MAIN WRAPPER ════ -->
+<div class="main-wrapper">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-hamburger">☰</button>
+      <span class="topbar-logo">🏥</span>
+      <span class="topbar-session">Session logout in 1772 seconds</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-welcome">Welcome to CARES</span>
+      <select class="topbar-facility"><option>SCC @ Tampines</option></select>
+      <button class="topbar-notif">🔔<span class="topbar-notif-badge">5</span></button>
+      <a class="topbar-logout" href="#">↪ Log out</a>
+    </div>
+  </div>
+  <div class="page-loaded-bar">Page Loaded on: 25-Mar-2026 3:00 PM</div>
+
+  <!-- ════ DASHBOARD ════ -->
+  <div class="dash-page">
+
+    <!-- ── Welcome Banner ── -->
+    <div class="welcome-banner">
+      <div class="welcome-left">
+        <div class="welcome-date">Wednesday, 25 March 2026</div>
+        <div class="welcome-greeting">Good afternoon, Angela 👋</div>
+        <div class="welcome-sub">Here's your situational overview for today's therapy sessions.</div>
+      </div>
+      <div class="welcome-stats">
+        <div class="welcome-stat">
+          <div class="welcome-stat-val">32</div>
+          <div class="welcome-stat-lbl">Today's Appointments</div>
+        </div>
+        <div class="welcome-divider"></div>
+        <div class="welcome-stat">
+          <div class="welcome-stat-val">18</div>
+          <div class="welcome-stat-lbl">Open Slots</div>
+        </div>
+        <div class="welcome-divider"></div>
+        <div class="welcome-stat">
+          <div class="welcome-stat-val">9/10</div>
+          <div class="welcome-stat-lbl">Therapists Working</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-left:20px;">
+        <div class="alert-pill">⚠️ 3 No-show Risks</div>
+      </div>
+    </div>
+
+    <!-- ── KPI Cards ── -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-icon teal">📅</div>
+        <div class="kpi-body">
+          <div class="kpi-val">32</div>
+          <div class="kpi-lbl">Today's Appointments</div>
+          <div class="kpi-trend good">↑ 4 vs yesterday</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon blue">🟢</div>
+        <div class="kpi-body">
+          <div class="kpi-val">18</div>
+          <div class="kpi-lbl">Open Slots Available</div>
+          <div class="kpi-trend neutral">across 4 therapists</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon amber">📋</div>
+        <div class="kpi-body">
+          <div class="kpi-val">5</div>
+          <div class="kpi-lbl">Pending Reassignments</div>
+          <div class="kpi-trend warn">⚠ Leave conflicts</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon red">🚨</div>
+        <div class="kpi-body">
+          <div class="kpi-val">3</div>
+          <div class="kpi-lbl">No-show Risks Today</div>
+          <div class="kpi-trend bad">Needs follow-up</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Main Grid ── -->
+    <div class="main-grid">
+
+      <!-- Left: Therapist Status Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">👨‍⚕️ Therapist Status <span class="panel-badge">4 therapists</span></div>
+          <a href="shift-setup.html" class="panel-link">Manage Shifts →</a>
+        </div>
+        <div class="panel-body" style="padding:0 0 4px;">
+          <table class="t-table">
+            <thead>
+              <tr>
+                <th style="padding-left:18px;">Therapist</th>
+                <th>Status</th>
+                <th>Next Free</th>
+                <th>Sessions</th>
+                <th>Utilisation</th>
+                <th style="padding-right:18px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Angela Lim -->
+              <tr>
+                <td style="padding-left:18px;">
+                  <div class="t-name-cell">
+                    <div class="t-avatar av-teal">AL</div>
+                    <div><div class="t-fullname">Dr Angela Lim</div><div class="t-role">Occupational Therapist</div></div>
+                  </div>
+                </td>
+                <td><span class="status-badge sb-available">Available</span></td>
+                <td style="font-size:12px;color:var(--text);font-weight:600;">Now</td>
+                <td style="font-size:13px;font-weight:700;">8 <span style="color:var(--muted);font-weight:400;font-size:11px;">/ 10</span></td>
+                <td>
+                  <div class="util-wrap">
+                    <div class="util-bar"><div class="util-fill" style="width:80%;background:#10b981;"></div></div>
+                    <div class="util-text">80%</div>
+                  </div>
+                </td>
+                <td style="padding-right:18px;">
+                  <div class="action-btns">
+                    <button class="btn-xs p" onclick="window.location='book-appointment.html'">+ Book</button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Janice Tan -->
+              <tr>
+                <td style="padding-left:18px;">
+                  <div class="t-name-cell">
+                    <div class="t-avatar av-blue">JT</div>
+                    <div><div class="t-fullname">Nurse Janice Tan</div><div class="t-role">Physiotherapist</div></div>
+                  </div>
+                </td>
+                <td><span class="status-badge sb-next">Next 2:30 PM</span></td>
+                <td style="font-size:12px;color:var(--text);font-weight:600;">2:30 PM</td>
+                <td style="font-size:13px;font-weight:700;">6 <span style="color:var(--muted);font-weight:400;font-size:11px;">/ 10</span></td>
+                <td>
+                  <div class="util-wrap">
+                    <div class="util-bar"><div class="util-fill" style="width:60%;background:#3b82f6;"></div></div>
+                    <div class="util-text">60%</div>
+                  </div>
+                </td>
+                <td style="padding-right:18px;">
+                  <div class="action-btns">
+                    <button class="btn-xs p" onclick="window.location='book-appointment.html'">+ Book</button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Wei Chen -->
+              <tr>
+                <td style="padding-left:18px;">
+                  <div class="t-name-cell">
+                    <div class="t-avatar av-green">WC</div>
+                    <div><div class="t-fullname">Dr Wei Chen</div><div class="t-role">Speech Therapist</div></div>
+                  </div>
+                </td>
+                <td><span class="status-badge sb-in-session">In Session</span></td>
+                <td style="font-size:12px;color:var(--text);font-weight:600;">3:00 PM</td>
+                <td style="font-size:13px;font-weight:700;">10 <span style="color:var(--muted);font-weight:400;font-size:11px;">/ 10</span></td>
+                <td>
+                  <div class="util-wrap">
+                    <div class="util-bar"><div class="util-fill" style="width:100%;background:#f59e0b;"></div></div>
+                    <div class="util-text">100% — full</div>
+                  </div>
+                </td>
+                <td style="padding-right:18px;">
+                  <div class="action-btns">
+                    <button class="btn-xs p" onclick="window.location='book-appointment.html'">+ Book</button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Marcus Lee -->
+              <tr class="t-row-leave">
+                <td style="padding-left:18px;">
+                  <div class="t-name-cell">
+                    <div class="t-avatar av-amber">ML</div>
+                    <div><div class="t-fullname">Dr Marcus Lee</div><div class="t-role">Occupational Therapist</div></div>
+                  </div>
+                </td>
+                <td><span class="status-badge sb-on-leave">On Leave</span></td>
+                <td style="font-size:12px;color:var(--muted);">Apr 13</td>
+                <td style="font-size:13px;color:var(--muted);">— <span style="font-size:11px;">/ 0</span></td>
+                <td>
+                  <div class="util-wrap">
+                    <div class="util-bar"><div class="util-fill" style="width:0%;background:#e5e7eb;"></div></div>
+                    <div class="util-text">On leave</div>
+                  </div>
+                </td>
+                <td style="padding-right:18px;">
+                  <div class="action-btns">
+                    <button class="btn-xs p" onclick="window.location='book-appointment.html'">+ Book</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div class="right-col">
+
+        <!-- Quick Actions -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">⚡ Quick Actions</div>
+          </div>
+          <div class="qa-grid">
+            <button class="qa-btn" onclick="window.location='book-appointment.html'">
+              <span class="qa-icon">➕</span><span>Book Slot</span>
+            </button>
+            <button class="qa-btn" onclick="window.location='therapist-change.html'">
+              <span class="qa-icon">🔀</span><span>Change Therapist</span>
+            </button>
+            <button class="qa-btn" onclick="window.location='appointments.html'">
+              <span class="qa-icon">📋</span><span>View Appointments</span>
+            </button>
+            <button class="qa-btn" onclick="window.location='shift-setup.html'">
+              <span class="qa-icon">📆</span><span>Manage Shifts</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Today's Sessions Breakdown -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">📊 Today's Sessions</div>
+            <span style="font-size:11px;color:var(--muted);">32 total</span>
+          </div>
+          <div class="donut-section">
+            <div class="donut-container">
+              <div class="donut-wrap">
+                <div class="donut-ring">
+                  <div class="donut-hole">
+                    <div class="donut-center-val">32</div>
+                    <div class="donut-center-lbl">sessions</div>
+                  </div>
+                </div>
+              </div>
+              <div class="donut-legend">
+                <div class="dl-item">
+                  <div class="dl-dot-lbl"><div class="dl-dot" style="background:#3b82f6;"></div><span class="dl-lbl">Completed</span></div>
+                  <span class="dl-val">14</span>
+                </div>
+                <div class="dl-item">
+                  <div class="dl-dot-lbl"><div class="dl-dot" style="background:#10b981;"></div><span class="dl-lbl">In Session</span></div>
+                  <span class="dl-val">5</span>
+                </div>
+                <div class="dl-item">
+                  <div class="dl-dot-lbl"><div class="dl-dot" style="background:#0d9488;"></div><span class="dl-lbl">Upcoming</span></div>
+                  <span class="dl-val">10</span>
+                </div>
+                <div class="dl-item">
+                  <div class="dl-dot-lbl"><div class="dl-dot" style="background:#ef4444;"></div><span class="dl-lbl">No-show</span></div>
+                  <span class="dl-val">3</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No-show Risk -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">⚠️ No-show Risk <span class="panel-badge" style="background:#fef2f2;color:#dc2626;">3</span></div>
+          </div>
+          <div class="risk-list">
+            <div class="risk-item">
+              <span class="risk-pill rp-high">HIGH</span>
+              <div class="risk-info">
+                <div class="risk-name">Mdm Lim Siew Lan</div>
+                <div class="risk-sub">OT · 3:00 PM · Missed last 2</div>
+              </div>
+              <span class="risk-action" onclick="window.location='appointments.html'">Call →</span>
+            </div>
+            <div class="risk-item">
+              <span class="risk-pill rp-med">MED</span>
+              <div class="risk-info">
+                <div class="risk-name">Mr Tan Boon Kiat</div>
+                <div class="risk-sub">PT · 3:30 PM · Late arrivals</div>
+              </div>
+              <span class="risk-action">Call →</span>
+            </div>
+            <div class="risk-item">
+              <span class="risk-pill rp-med">MED</span>
+              <div class="risk-info">
+                <div class="risk-name">Mdm Foo Mei Ling</div>
+                <div class="risk-sub">ST · 4:00 PM · 1 prior no-show</div>
+              </div>
+              <span class="risk-action">Call →</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /right-col -->
+    </div><!-- /main-grid -->
+
+    <!-- ── Bottom Row ── -->
+    <div class="bottom-grid">
+
+      <!-- Next Best Available Slots -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">🟢 Next Best Available Slots</div>
+          <a href="timeslot_scheduler_mockup.html" class="panel-link">View Schedule →</a>
+        </div>
+        <div class="section-label" style="padding-top:12px;">Today · 25 Mar</div>
+        <div class="slot-pills">
+          <div class="slot-pill" onclick="window.location='book-appointment.html'">
+            <span class="sp-time">3:00 PM</span><span class="sp-who">Dr Angela Lim</span><span class="sp-type">OT</span>
+          </div>
+          <div class="slot-pill" onclick="window.location='book-appointment.html'">
+            <span class="sp-time">3:30 PM</span><span class="sp-who">Nurse Janice Tan</span><span class="sp-type">PT</span>
+          </div>
+          <div class="slot-pill" onclick="window.location='book-appointment.html'">
+            <span class="sp-time">4:00 PM</span><span class="sp-who">Dr Angela Lim</span><span class="sp-type">OT</span>
+          </div>
+          <div class="slot-pill" onclick="window.location='book-appointment.html'">
+            <span class="sp-time">4:30 PM</span><span class="sp-who">Nurse Janice Tan</span><span class="sp-type">PT</span>
+          </div>
+        </div>
+        <div class="section-label" style="padding-top:12px;">Tomorrow · 26 Mar</div>
+        <div class="slot-pills">
+          <div class="slot-pill" onclick="window.location='book-appointment.html'">
+            <span class="sp-time">9:00 AM</span><span class="sp-who">Dr Angela Lim</span><span class="sp-type">OT</span>
+          </div>
+          <div class="slot-pill" onclick="window.location='book-appointment.html'">
+            <span class="sp-time">9:30 AM</span><span class="sp-who">Dr Wei Chen</span><span class="sp-type">ST</span>
+          </div>
+          <div class="slot-pill" onclick="window.location='book-appointment.html'">
+            <span class="sp-time">10:00 AM</span><span class="sp-who">Nurse Janice Tan</span><span class="sp-type">PT</span>
+          </div>
+        </div>
+      </div>
+    </div><!-- /bottom-grid -->
+
+  </div><!-- /dash-page -->
+</div><!-- /main-wrapper -->
+
+</body>
+</html>

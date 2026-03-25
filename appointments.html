@@ -50,7 +50,38 @@
     .avatar { width: 32px; height: 32px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
 
     /* PAGE LAYOUT */
-    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+    .page-wrap { max-width: 1300px; margin: 0 auto; padding: 28px 20px 60px; display: grid; grid-template-columns: 1fr 260px; grid-template-rows: auto auto auto 1fr; gap: 0 20px; }
+    .page-header { grid-column: 1 / -1; }
+    .view-toggle-row { grid-column: 1 / -1; }
+    .appt-main { grid-column: 1; }
+    .appt-sidebar { grid-column: 2; grid-row: 3 / 6; padding-top: 0; }
+
+    /* Mini calendar sidebar */
+    .mini-cal-card { background: white; border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 14px 16px; position: sticky; top: 56px; }
+    .mini-cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .mini-cal-title { font-size: 13px; font-weight: 700; color: var(--text); }
+    .mini-cal-nav { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 2px 5px; border-radius: 6px; }
+    .mini-cal-nav:hover { background: var(--primary-light); color: var(--primary); }
+    .mini-cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+    .mini-cal-dow { font-size: 9.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); text-align: center; padding: 2px 0 5px; }
+    .mini-cal-day {
+      aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 11px; border-radius: 7px; cursor: pointer; position: relative; gap: 1px;
+      transition: background 0.12s;
+    }
+    .mini-cal-day:hover:not(.empty):not(.other-month) { background: var(--primary-light); color: var(--primary); }
+    .mini-cal-day.today { background: var(--primary); color: white; font-weight: 700; }
+    .mini-cal-day.selected { background: var(--primary-light); color: var(--primary); font-weight: 700; border: 1.5px solid var(--primary); }
+    .mini-cal-day.other-month { color: #cbd5e1; cursor: default; }
+    .mini-cal-day.empty { cursor: default; }
+    .mini-cal-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--primary); opacity: 0.7; }
+    .mini-cal-day.today .mini-cal-dot { background: white; }
+    .mini-cal-legend { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .mini-cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+    .mini-cal-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .mini-cal-selected-info { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; font-size: 12px; }
+    .mini-cal-selected-date { font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .mini-cal-appt-count { color: var(--primary); font-weight: 600; }
 
     /* PAGE HEADER */
     .page-header { margin-bottom: 24px; }
@@ -346,6 +377,7 @@
     <div class="nav-sidebar-role">Enterprise Admin ▾</div>
   </div>
   <nav class="nav-sidebar-nav">
+    <a href="coordinator-dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
     <a href="timeslot_scheduler_mockup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
     <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
     <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
@@ -391,6 +423,9 @@
       Showing <strong id="viewCount">14</strong> appointments
     </div>
   </div>
+
+  <!-- ── MAIN CONTENT + SIDEBAR wrapper ── -->
+  <div style="display:contents;" id="apptMainWrapper">
 
   <!-- PERSON SELECTOR — SENIORS (searchable combobox) -->
   <div id="selectorSeniors">
@@ -987,6 +1022,27 @@
     </div>
   </div>
 
+<!-- MINI CALENDAR SIDEBAR (grid column 2, rows 3-6) -->
+  <div class="appt-sidebar" style="grid-column:2;grid-row:3/7;padding-top:0;">
+    <div class="mini-cal-card">
+      <div class="mini-cal-header">
+        <button class="mini-cal-nav" onclick="miniCalNav(-1)">‹</button>
+        <span class="mini-cal-title" id="miniCalTitle">April 2026</span>
+        <button class="mini-cal-nav" onclick="miniCalNav(1)">›</button>
+      </div>
+      <div class="mini-cal-grid" id="miniCalGrid"><!-- filled by JS --></div>
+      <div class="mini-cal-legend">
+        <div class="mini-cal-legend-item"><div class="mini-cal-legend-dot" style="background:var(--primary);"></div> Has appointments</div>
+        <div class="mini-cal-legend-item"><div class="mini-cal-legend-dot" style="background:#ef4444;"></div> Has conflict</div>
+        <div class="mini-cal-legend-item"><div class="mini-cal-legend-dot" style="background:#f59e0b;"></div> Leave affected</div>
+      </div>
+</div><!-- /page-wrap -->
+      <div class="mini-cal-selected-info" id="miniCalInfo">
+        <div class="mini-cal-selected-date" id="miniCalSelDate">Wed, 1 Apr 2026</div>
+        <div class="mini-cal-appt-count" id="miniCalSelCount">2 appointments</div>
+      </div>
+    </div>
+  </div>
 </div><!-- /page-wrap -->
 
 <!-- ============================== CANCEL MODAL ============================== -->
@@ -1310,13 +1366,126 @@
     setTimeout(() => t.remove(), 3000);
   }
 
-  // Open OT series expanded by default to showcase the feature
-  window.addEventListener('DOMContentLoaded', () => {
-    // Pre-select Mdm Lim Siew Lan on load
+  // ——————————————————————————————————
+  // MINI CALENDAR
+  // ——————————————————————————————————
+  const MINI_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const MINI_DOWS   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  // Appointment date data: keyed 'YYYY-M-D' → {count, conflict, leave}
+  const miniApptData = {
+    '2026-4-1':  { count:2 }, '2026-4-6':  { count:2, leave:true, conflict:true },
+    '2026-4-7':  { count:1, leave:true }, '2026-4-8':  { count:1, leave:true },
+    '2026-4-9':  { count:1, leave:true }, '2026-4-13': { count:2, leave:true, conflict:true },
+    '2026-4-14': { count:3 }, '2026-4-20': { count:2 }, '2026-4-21': { count:2 },
+    '2026-4-22': { count:1 }, '2026-4-27': { count:2 }, '2026-4-28': { count:2 },
+    '2026-3-24': { count:1 }, '2026-3-25': { count:3 }, '2026-3-26': { count:2 },
+    '2026-5-4':  { count:2 }, '2026-5-11': { count:2 }, '2026-5-18': { count:2 }, '2026-5-25': { count:2 }
+  };
+  let miniYear = 2026, miniMonth = 3; // April
+  let miniSelected = { y:2026, m:3, d:1 };
+  const miniToday = { y:2026, m:2, d:25 }; // mock today = Mar 25
+
+  function renderMiniCal() {
+    const title = document.getElementById('miniCalTitle');
+    const grid  = document.getElementById('miniCalGrid');
+    if (!title || !grid) return;
+    title.textContent = MINI_MONTHS[miniMonth] + ' ' + miniYear;
+
+    const firstDay    = new Date(miniYear, miniMonth, 1).getDay();
+    const daysInMonth = new Date(miniYear, miniMonth + 1, 0).getDate();
+    const daysInPrev  = new Date(miniYear, miniMonth, 0).getDate();
+
+    let html = MINI_DOWS.map(d => `<div class="mini-cal-dow">${d}</div>`).join('');
+
+    // Leading blanks from prev month
+    for (let i = 0; i < firstDay; i++) {
+      html += `<div class="mini-cal-day other-month">${daysInPrev - firstDay + 1 + i}</div>`;
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const key  = `${miniYear}-${miniMonth}-${d}`;
+      const data = miniApptData[key];
+      const isTod = miniYear===miniToday.y && miniMonth===miniToday.m && d===miniToday.d;
+      const isSel = miniYear===miniSelected.y && miniMonth===miniSelected.m && d===miniSelected.d;
+      let cls = 'mini-cal-day';
+      if (isTod) cls += ' today';
+      else if (isSel) cls += ' selected';
+      let dot = '';
+      if (data) {
+        const dotColor = data.conflict ? '#ef4444' : data.leave ? '#f59e0b' : 'var(--primary)';
+        dot = `<span class="mini-cal-dot" style="background:${dotColor};"></span>`;
+      }
+      html += `<div class="${cls}" onclick="miniCalSelect(${d})">${d}${dot}</div>`;
+    }
+    // Trailing blanks
+    const used = firstDay + daysInMonth;
+    const trailing = used % 7 === 0 ? 0 : 7 - (used % 7);
+    for (let i = 1; i <= trailing; i++) html += `<div class="mini-cal-day other-month">${i}</div>`;
+
+    grid.innerHTML = html;
+    updateMiniCalInfo();
+  }
+
+  function miniCalNav(dir) {
+    miniMonth += dir;
+    if (miniMonth > 11) { miniMonth = 0; miniYear++; }
+    if (miniMonth < 0)  { miniMonth = 11; miniYear--; }
+    renderMiniCal();
+  }
+
+  function miniCalSelect(d) {
+    miniSelected = { y: miniYear, m: miniMonth, d };
+    renderMiniCal();
+  }
+
+  function updateMiniCalInfo() {
+    const dateEl  = document.getElementById('miniCalSelDate');
+    const countEl = document.getElementById('miniCalSelCount');
+    if (!dateEl || !countEl) return;
+    const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const wd = new Date(miniSelected.y, miniSelected.m, miniSelected.d).getDay();
+    const key = `${miniSelected.y}-${miniSelected.m}-${miniSelected.d}`;
+    const data = miniApptData[key];
+    const MONS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    dateEl.textContent  = `${DAYS[wd]}, ${miniSelected.d} ${MONS[miniSelected.m]} ${miniSelected.y}`;
+    if (data) {
+      let info = `${data.count} appointment${data.count>1?'s':''}`;
+      if (data.conflict) info += ' · ⚠ conflict';
+      if (data.leave)    info += ' · 🏖 leave affected';
+      countEl.textContent = info;
+      countEl.style.color = data.conflict ? '#ef4444' : data.leave ? '#b45309' : 'var(--primary)';
+    } else {
+      countEl.textContent = 'No appointments';
+      countEl.style.color = 'var(--muted)';
+    }
+  }
+
+  // Wrap existing content in appt-main grid area
+  document.addEventListener('DOMContentLoaded', () => {
+    // Place person selectors + content cards into col 1 wrapper
+    const wrap = document.getElementById('apptMainWrapper');
+    if (wrap) {
+      const pageWrap = document.querySelector('.page-wrap');
+      // Move all direct children after view-toggle-row into a col-1 div
+      const mainDiv = document.createElement('div');
+      mainDiv.style.cssText = 'grid-column:1;min-width:0;';
+      // Collect nodes to move
+      const toMove = [];
+      let found = false;
+      for (const child of [...pageWrap.children]) {
+        if (child.id === 'apptMainWrapper') { found = true; continue; }
+        if (found) toMove.push(child);
+      }
+      toMove.forEach(n => mainDiv.appendChild(n));
+      pageWrap.appendChild(mainDiv);
+    }
+    renderMiniCal();
     pickSenior('lim');
-    // Open OT series expanded by default
     toggleSeries('series-ot');
   });
+
+  // Override old DOMContentLoaded (replace the one at bottom)
+
+
 </script>
 </div><!-- /main-wrapper -->
 </body>

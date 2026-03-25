@@ -145,11 +145,39 @@
     .end-option-field { display: flex; align-items: center; gap: 8px; flex: 1; }
     .end-option-field input[type=number] { border: 1.5px solid var(--purple-border); border-radius: 8px; padding: 6px 10px; font-family: 'Outfit', sans-serif; font-size: 13px; background: white; outline: none; width: 64px; }
     .end-option-field input[type=date] { border: 1.5px solid var(--purple-border); border-radius: 8px; padding: 6px 10px; font-family: 'Outfit', sans-serif; font-size: 13px; background: white; outline: none; }
-    .preview-dates { margin-top: 14px; padding: 12px 14px; background: white; border: 1px solid var(--purple-border); border-radius: 10px; }
-    .preview-dates h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #6d28d9; margin-bottom: 8px; }
-    .preview-date-list { display: flex; flex-wrap: wrap; gap: 6px; }
-    .preview-date-pill { padding: 4px 10px; background: var(--purple-bg); border-radius: 99px; font-size: 12px; font-weight: 600; color: var(--purple); }
-    .preview-date-pill.more { color: #94a3b8; background: #f1f5f9; }
+    .preview-dates { margin-top: 14px; padding: 14px; background: white; border: 1px solid var(--purple-border); border-radius: 10px; }
+    .preview-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 6px; }
+    .preview-hdr h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #6d28d9; margin: 0; }
+    .preview-ctrl-row { display: flex; align-items: center; gap: 6px; }
+    .preview-count { font-size: 11px; color: var(--purple); font-weight: 700; }
+    .preview-ctrl-btn { font-size: 11px; padding: 3px 9px; border: 1.5px solid var(--purple-border); border-radius: 6px; background: white; color: var(--purple); cursor: pointer; font-weight: 600; }
+    .preview-ctrl-btn:hover { background: var(--purple-bg); }
+    .ps-list { display: flex; flex-direction: column; gap: 5px; max-height: 280px; overflow-y: auto; }
+    .ps-item { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 8px; border: 1.5px solid transparent; transition: all 0.12s; }
+    .ps-item.ps-avail { background: #f5f3ff; border-color: #ddd6fe; cursor: pointer; }
+    .ps-item.ps-avail.ps-sel { background: var(--purple-bg); border-color: var(--purple); }
+    .ps-item.ps-avail:hover { border-color: var(--purple); }
+    .ps-item.ps-taken { background: #fef2f2; border-color: #fecaca; cursor: not-allowed; opacity: 0.8; }
+    .ps-item.ps-uncommit { background: #f8fafc; border-color: #e2e8f0; cursor: not-allowed; opacity: 0.55; }
+    .ps-num { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+    .ps-avail .ps-num { background: #c4b5fd; color: white; }
+    .ps-avail.ps-sel .ps-num { background: var(--purple); color: white; }
+    .ps-taken .ps-num { background: #fca5a5; color: white; }
+    .ps-uncommit .ps-num { background: #e2e8f0; color: #94a3b8; }
+    .ps-date { font-size: 12.5px; font-weight: 600; color: var(--text); flex: 1; }
+    .ps-taken .ps-date { text-decoration: line-through; color: #9ca3af; }
+    .ps-uncommit .ps-date { color: #9ca3af; }
+    .ps-badge { font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 99px; white-space: nowrap; }
+    .ps-badge.badge-avail { background: #ede9fe; color: #6d28d9; }
+    .ps-badge.badge-sel { background: var(--purple); color: white; }
+    .ps-badge.badge-taken { background: #fee2e2; color: #dc2626; }
+    .ps-badge.badge-uncommit { background: #f1f5f9; color: #94a3b8; }
+    .preview-legend { display: flex; gap: 12px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+    .preview-legend-item { display: flex; align-items: center; gap: 4px; font-size: 10.5px; color: var(--muted); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .legend-dot.avail { background: var(--purple); }
+    .legend-dot.taken { background: #f87171; }
+    .legend-dot.uncommit { background: #cbd5e1; }
     .month-pattern-opts { display: flex; flex-direction: column; gap: 8px; }
     .month-pattern-opt {
       display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
@@ -289,6 +317,7 @@
     <div class="nav-sidebar-role">Enterprise Admin ▾</div>
   </div>
   <nav class="nav-sidebar-nav">
+    <a href="coordinator-dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
     <a href="timeslot_scheduler_mockup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
     <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
     <a href="book-appointment.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
@@ -498,7 +527,7 @@
         <input type="checkbox" id="recurringCheck" onchange="toggleRecurring(this.checked)" />
         <div>
           <div class="recurring-toggle-label">🔄 Make this a recurring appointment</div>
-          <div class="recurring-toggle-hint">Set a repeating schedule — weekly, bi-weekly, or custom</div>
+          <div class="recurring-toggle-hint">Set a repeating schedule — weekly, monthly</div>
         </div>
       </label>
 
@@ -575,24 +604,32 @@
           <label>Ends</label>
           <div class="end-options">
             <label class="end-option">
-              <input type="radio" name="endType" value="never" checked> <span>Never (ongoing)</span>
+              <input type="radio" name="endType" value="never" checked onchange="updatePreview()"> <span>Never (ongoing)</span>
             </label>
             <label class="end-option">
-              <input type="radio" name="endType" value="on">
-              <div class="end-option-field">On date <input type="date" value="2026-06-30" onchange="updatePreview()"></div>
+              <input type="radio" name="endType" value="on" onchange="updatePreview()">
+              <div class="end-option-field">On date <input type="date" id="endDateInput" value="2026-06-30" onchange="updatePreview()"></div>
             </label>
           </div>
         </div>
 
-        <!-- Preview -->
+        <!-- Session Preview -->
         <div class="preview-dates">
-          <h5>Upcoming Sessions Preview</h5>
-          <div class="preview-date-list" id="previewDateList">
-            <span class="preview-date-pill">Tue 7 Apr</span>
-            <span class="preview-date-pill">Tue 14 Apr</span>
-            <span class="preview-date-pill">Tue 21 Apr</span>
-            <span class="preview-date-pill">Tue 28 Apr</span>
-            <span class="preview-date-pill more">+ ongoing</span>
+          <div class="preview-hdr">
+            <h5>📅 Upcoming Sessions</h5>
+            <div class="preview-ctrl-row">
+              <span class="preview-count" id="previewCount">—</span>
+              <button class="preview-ctrl-btn" onclick="selectAllPreview(true)">Select All</button>
+              <button class="preview-ctrl-btn" onclick="selectAllPreview(false)">Clear</button>
+            </div>
+          </div>
+          <div class="ps-list" id="previewDateList">
+            <div style="color:#9ca3af;font-size:13px;padding:8px 0;">Configure recurrence above to see sessions</div>
+          </div>
+          <div class="preview-legend">
+            <div class="preview-legend-item"><span class="legend-dot avail"></span> Available — click to deselect</div>
+            <div class="preview-legend-item"><span class="legend-dot taken"></span> Slot taken — won't be assigned</div>
+            <div class="preview-legend-item"><span class="legend-dot uncommit"></span> Shift not yet committed</div>
           </div>
         </div>
       </div>
@@ -639,15 +676,11 @@
 
       <!-- Recurring summary -->
       <div class="recurring-summary-card" id="recurringSummary" style="display:none;">
-        <h4>🔄 Recurring Schedule — 8 sessions total</h4>
-        <div class="session-list">
-          <div class="session-item"><div class="session-num">1</div><span class="s-date">Tue, 7 Apr 2026</span><span class="s-time">09:00</span><span class="s-status avail">Available ✓</span></div>
-          <div class="session-item"><div class="session-num">2</div><span class="s-date">Tue, 14 Apr 2026</span><span class="s-time">09:00</span><span class="s-status avail">Available ✓</span></div>
-          <div class="session-item"><div class="session-num">3</div><span class="s-date">Tue, 21 Apr 2026</span><span class="s-time">09:00</span><span class="s-status avail">Available ✓</span></div>
-          <div class="session-item"><div class="session-num">4</div><span class="s-date">Tue, 28 Apr 2026</span><span class="s-time">09:00</span><span class="s-status avail">Available ✓</span></div>
-          <div class="session-item"><div class="session-num">5</div><span class="s-date">Tue, 5 May 2026</span><span class="s-time">09:00</span><span class="s-status avail">Available ✓</span></div>
-          <div class="more-sessions">+ 3 more sessions through 26 May 2026</div>
+        <h4>🔄 Recurring Schedule — <span id="sumSessionCount">0</span> sessions selected</h4>
+        <div class="session-list" id="recurringSessionList">
+          <!-- dynamic: filled by updateConfirmStep() -->
         </div>
+        <div class="more-sessions" id="sumMoreSessions" style="display:none;"></div>
       </div>
     </div>
     <div class="card-footer">
@@ -705,9 +738,36 @@
     const names = {angela:'Dr Angela Lim', janice:'Nurse Janice Tan', wei:'Dr Wei Chen'};
     document.getElementById('confirmTherapist').textContent = names[selectedTherapist] || 'Not selected';
     document.getElementById('confirmTime').textContent = selectedTime + ' – ' + addMins(selectedTime, 30);
-    document.getElementById('confirmType').textContent = isRecurring ? 'Recurring (8 sessions, weekly)' : 'Single appointment';
+    const selCount = [...selectedPreview].filter(n => previewSessions.find(s => s.num === n && s.type === 'avail')).length;
+    document.getElementById('confirmType').textContent = isRecurring
+      ? `Recurring (${selCount} session${selCount!==1?'s':''} selected)`
+      : 'Single appointment';
     document.getElementById('recurringSummary').style.display = isRecurring ? '' : 'none';
     document.getElementById('confirmService').textContent = document.getElementById('serviceType').value;
+
+    if (isRecurring) {
+      const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const selectedSessions = previewSessions.filter(s => s.type === 'avail' && selectedPreview.has(s.num));
+      document.getElementById('sumSessionCount').textContent = selectedSessions.length;
+      const MAX_SHOW = 5;
+      const shown = selectedSessions.slice(0, MAX_SHOW);
+      const extra = selectedSessions.length - shown.length;
+      document.getElementById('recurringSessionList').innerHTML = shown.map((s, i) => {
+        const d = s.date;
+        return `<div class="session-item">
+          <div class="session-num">${i+1}</div>
+          <span class="s-date">${DAYS[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}</span>
+          <span class="s-time">${selectedTime}</span>
+          <span class="s-status avail">Available ✓</span>
+        </div>`;
+      }).join('');
+      const moreEl = document.getElementById('sumMoreSessions');
+      if (extra > 0) {
+        moreEl.style.display = '';
+        moreEl.textContent = `+ ${extra} more session${extra>1?'s':''} selected`;
+      } else { moreEl.style.display = 'none'; }
+    }
   }
 
   function addMins(t, m) {
@@ -768,56 +828,155 @@
     return d.getMonth() === month ? d : null;
   }
 
-  function updatePreview() {
-    const list = document.getElementById('previewDateList');
-    if (!list) return;
+  // ─────────────────────────────────────────────────────
+  // MOCK DATA: committed shifts & taken slots
+  // ─────────────────────────────────────────────────────
+  // Format: 'YYYY-M' (e.g. '2026-4' = April 2026)
+  const committedMonths = {
+    angela: new Set(['2026-4', '2026-5']),
+    janice: new Set(['2026-4', '2026-5']),
+    wei:    new Set(['2026-4', '2026-5']),
+  };
+  // Format: 'YYYY-M-D' — slots already booked for that therapist
+  const takenSlots = {
+    angela: new Set(['2026-4-14', '2026-5-5']),
+    janice: new Set(['2026-4-21', '2026-5-19']),
+    wei:    new Set(['2026-4-28']),
+  };
+
+  // ─────────────────────────────────────────────────────
+  // PREVIEW STATE
+  // ─────────────────────────────────────────────────────
+  let previewSessions = [];        // [{date, num, type:'avail'|'taken'|'uncommit'}]
+  let selectedPreview = new Set(); // session nums the user has selected
+
+  function isDateCommitted(date) {
+    const key = `${date.getFullYear()}-${date.getMonth()+1}`;
+    return (committedMonths[selectedTherapist] || new Set()).has(key);
+  }
+  function isDateTaken(date) {
+    const key = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
+    return (takenSlots[selectedTherapist] || new Set()).has(key);
+  }
+
+  function togglePreviewSess(num) {
+    if (selectedPreview.has(num)) selectedPreview.delete(num);
+    else selectedPreview.add(num);
+    renderPreviewList();
+  }
+
+  function selectAllPreview(val) {
+    if (val) previewSessions.filter(s => s.type === 'avail').forEach(s => selectedPreview.add(s.num));
+    else selectedPreview.clear();
+    renderPreviewList();
+  }
+
+  function renderPreviewList() {
+    const el = document.getElementById('previewDateList');
+    if (!el) return;
     const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    const start  = new Date(2026, 3, 7);
-    const freq   = document.getElementById('freqSelect').value;
-    const interval = Math.max(1, parseInt(document.getElementById('intervalInput')?.value || 1));
+
+    if (!previewSessions.length) {
+      el.innerHTML = '<div style="color:#9ca3af;font-size:13px;padding:8px 0;">No sessions found — check your recurrence settings</div>';
+      const c = document.getElementById('previewCount'); if (c) c.textContent = '—';
+      return;
+    }
+
+    const availSessions = previewSessions.filter(s => s.type === 'avail');
+    const selCount = [...selectedPreview].filter(n => availSessions.find(s => s.num === n)).length;
+    const c = document.getElementById('previewCount');
+    if (c) c.textContent = `${selCount} of ${availSessions.length} available selected`;
+
     const endType = document.querySelector('input[name="endType"]:checked')?.value || 'never';
-    let dates = [];
+
+    el.innerHTML = previewSessions.map(s => {
+      const d = s.date;
+      const dateStr = `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+      const isSel = s.type === 'avail' && selectedPreview.has(s.num);
+      let cls, badge, click = '';
+      if (s.type === 'avail') {
+        cls = `ps-item ps-avail${isSel ? ' ps-sel' : ''}`;
+        badge = isSel
+          ? `<span class="ps-badge badge-sel">✓ Selected</span>`
+          : `<span class="ps-badge badge-avail">Available</span>`;
+        click = `onclick="togglePreviewSess(${s.num})"`;
+      } else if (s.type === 'taken') {
+        cls = 'ps-item ps-taken';
+        badge = `<span class="ps-badge badge-taken">✗ Slot taken</span>`;
+      } else {
+        cls = 'ps-item ps-uncommit';
+        badge = `<span class="ps-badge badge-uncommit">🔒 Not committed</span>`;
+      }
+      return `<div class="${cls}" ${click}>
+        <div class="ps-num">${s.num}</div>
+        <span class="ps-date">${dateStr}</span>
+        ${badge}
+      </div>`;
+    }).join('') + (endType === 'never'
+      ? `<div style="text-align:center;font-size:11px;color:var(--muted);padding:6px 0;font-style:italic;">↓ More sessions continue (ongoing)</div>`
+      : '');
+  }
+
+  function updatePreview() {
+    const start    = new Date(2026, 3, 7); // 7 Apr 2026
+    const freq     = document.getElementById('freqSelect').value;
+    const interval = Math.max(1, parseInt(document.getElementById('intervalInput')?.value || 1));
+    const endType  = document.querySelector('input[name="endType"]:checked')?.value || 'never';
+    const endDateEl = document.getElementById('endDateInput');
+    const endDate  = (endType === 'on' && endDateEl?.value) ? new Date(endDateEl.value + 'T00:00:00') : null;
+    const MAX      = endDate ? 60 : 12; // max items when "never" — show first 12 as preview
+    let rawDates   = [];
 
     if (freq === 'weekly') {
-      const dayMap = {Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6,Sun:0};
-      const selected = [...document.querySelectorAll('.day-check.on')].map(el => dayMap[el.dataset.day]);
-      if (!selected.length) { list.innerHTML = '<span class="preview-date-pill" style="color:#9ca3af">Select at least one day</span>'; return; }
-      // Step by interval weeks, collect matching days within each week-block
+      const dayMap = {Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6, Sun:0};
+      const selDays = [...document.querySelectorAll('.day-check.on')].map(el => dayMap[el.dataset.day]);
+      if (!selDays.length) { previewSessions = []; renderPreviewList(); return; }
       let weekStart = new Date(start);
-      // Align to Monday of start week
       let guard = 0;
-      while (dates.length < 8 && guard++ < 500) {
-        for (let d = 0; d < 7 && dates.length < 8; d++) {
+      while (rawDates.length < MAX && guard++ < 600) {
+        for (let d = 0; d < 7 && rawDates.length < MAX; d++) {
           const cur = new Date(weekStart); cur.setDate(weekStart.getDate() + d);
-          if (cur >= start && selected.includes(cur.getDay())) dates.push(new Date(cur));
+          if (cur >= start && selDays.includes(cur.getDay()) && (!endDate || cur <= endDate))
+            rawDates.push(new Date(cur));
         }
+        if (endDate && weekStart > endDate) break;
         weekStart.setDate(weekStart.getDate() + 7 * interval);
       }
     } else {
       const pattern = document.querySelector('input[name="monthPattern"]:checked')?.value || 'dom';
       let cur = new Date(2026, 3, 1);
       let guard = 0;
-      while (dates.length < 8 && guard++ < 120) {
+      while (rawDates.length < MAX && guard++ < 120) {
         let t = null;
         if (pattern === 'dom') {
           const dom = parseInt(document.getElementById('dayOfMonthSel')?.value || 7);
-          const max = new Date(cur.getFullYear(), cur.getMonth() + 1, 0).getDate();
-          if (dom <= max) t = new Date(cur.getFullYear(), cur.getMonth(), dom);
+          const maxDay = new Date(cur.getFullYear(), cur.getMonth() + 1, 0).getDate();
+          if (dom <= maxDay) t = new Date(cur.getFullYear(), cur.getMonth(), dom);
         } else {
           const ord = parseInt(document.getElementById('weekOrdinalSel')?.value || 1);
           const wd  = parseInt(document.getElementById('weekDaySel')?.value || 2);
           t = getNthWeekday(cur.getFullYear(), cur.getMonth(), ord, wd);
         }
-        if (t && t >= start) dates.push(t);
+        if (t && t >= start && (!endDate || t <= endDate)) rawDates.push(t);
+        if (endDate && cur > endDate) break;
         cur.setMonth(cur.getMonth() + interval);
       }
     }
 
-    const suffix = endType === 'never' ? '+ ongoing' : '+ ends on date';
-    list.innerHTML = dates.map(d =>
-      `<span class="preview-date-pill">${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}</span>`
-    ).join('') + `<span class="preview-date-pill more">${suffix}</span>`;
+    // Build session objects with committed/taken classification
+    let num = 1;
+    previewSessions = rawDates.map(d => {
+      const committed = isDateCommitted(d);
+      const taken     = committed && isDateTaken(d);
+      const type      = !committed ? 'uncommit' : taken ? 'taken' : 'avail';
+      return { date: d, num: num++, type };
+    });
+
+    // Auto-select all available sessions (reset on each recalc)
+    selectedPreview.clear();
+    previewSessions.filter(s => s.type === 'avail').forEach(s => selectedPreview.add(s.num));
+    renderPreviewList();
   }
 
   // Init: populate day-of-month select 1–31
@@ -839,9 +998,15 @@
   function confirmBooking() {
     const recurring = document.getElementById('recurringCheck').checked;
     const ref = 'APT-' + (10800 + Math.floor(Math.random()*99));
-    document.getElementById('successRef').textContent = ref + ' · ' + (recurring ? '8 recurring sessions from Tue, 7 Apr 2026' : 'Tue, 7 Apr 2026 at ' + selectedTime);
+    const selCount = recurring
+      ? [...selectedPreview].filter(n => previewSessions.find(s => s.num === n && s.type === 'avail')).length
+      : 0;
+    const therapistName = {angela:'Dr Angela Lim', janice:'Nurse Janice Tan', wei:'Dr Wei Chen'}[selectedTherapist];
+    document.getElementById('successRef').textContent = ref + ' · ' + (recurring
+      ? `${selCount} recurring sessions from Tue, 7 Apr 2026`
+      : 'Tue, 7 Apr 2026 at ' + selectedTime);
     document.getElementById('successMsg').textContent = recurring
-      ? `Recurring appointment booked — 8 sessions for Mdm Lim Siew Lan with ${({angela:'Dr Angela Lim',janice:'Nurse Janice Tan',wei:'Dr Wei Chen'})[selectedTherapist]}.`
+      ? `Recurring appointment booked — ${selCount} sessions for Mdm Lim Siew Lan with ${therapistName}.`
       : `Single appointment booked for Mdm Lim Siew Lan.`;
     document.getElementById('successOverlay').classList.add('show');
   }

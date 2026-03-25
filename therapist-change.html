@@ -259,6 +259,7 @@
     <div class="nav-sidebar-role">Enterprise Admin ▾</div>
   </div>
   <nav class="nav-sidebar-nav">
+    <a href="coordinator-dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
     <a href="timeslot_scheduler_mockup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
     <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
     <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
@@ -310,6 +311,30 @@
       <span class="scope-pill" onclick="setScope(this,'this')">This session only (Mon, 6 Apr)</span>
       <span class="scope-pill on" onclick="setScope(this,'following')">This &amp; following (8 sessions)</span>
       <span class="scope-pill" onclick="setScope(this,'all')">All in series (12 sessions)</span>
+      <span class="scope-pill" onclick="setScope(this,'custom')">✎ Custom — select sessions</span>
+    </div>
+  </div>
+
+  <!-- CUSTOM SESSION PICKER (shown only when 'custom' scope selected) -->
+  <div id="customSessionPicker" style="display:none;">
+    <div style="background:white;border:1.5px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);">Select Sessions to Reassign</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px;">Tick the sessions you want to change. Unticked sessions stay with Dr Marcus Lee.</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="selectAllSessions(true)" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:white;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">Select All</button>
+          <button onclick="selectAllSessions(false)" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:white;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">Clear All</button>
+        </div>
+      </div>
+      <div id="customSessionList" style="display:flex;flex-direction:column;gap:6px;">
+        <!-- Sessions filled here -->
+      </div>
+      <div style="margin-top:12px;padding:10px 14px;background:#f0fdf9;border-radius:10px;font-size:12.5px;display:flex;align-items:center;gap:8px;">
+        <span>✅</span>
+        <span id="customSessionSummary" style="color:var(--primary);font-weight:600;">2 sessions selected for reassignment</span>
+      </div>
     </div>
   </div>
 
@@ -405,13 +430,9 @@
           </div>
         </div>
       </div>
-      <div class="panel-sessions">
+      <div class="panel-sessions" id="beforeSessionsList">
         <h4>Affected Sessions</h4>
-        <div class="session-mini before-session"><div class="session-mini-num" style="background:var(--amber-bg);color:#92400e;">5</div><span class="s-date">Mon, 6 Apr</span><span style="font-size:11px;color:#92400e;">⚠ On Leave</span></div>
-        <div class="session-mini before-session"><div class="session-mini-num" style="background:var(--amber-bg);color:#92400e;">6</div><span class="s-date">Mon, 13 Apr</span><span style="font-size:11px;color:#92400e;">⚠ On Leave</span></div>
-        <div class="session-mini before-session"><div class="session-mini-num" style="background:var(--amber-bg);color:#92400e;">7</div><span class="s-date">Mon, 20 Apr</span><span style="font-size:11px;color:#92400e;">Reassign</span></div>
-        <div class="session-mini before-session"><div class="session-mini-num" style="background:var(--amber-bg);color:#92400e;">8</div><span class="s-date">Mon, 27 Apr</span><span style="font-size:11px;color:#92400e;">Reassign</span></div>
-        <div style="font-size:11px;color:var(--muted);padding:4px 0;">+ 4 more sessions</div>
+        <!-- dynamic: rendered by renderComparison() -->
       </div>
     </div>
 
@@ -434,13 +455,9 @@
           </div>
         </div>
       </div>
-      <div class="panel-sessions">
+      <div class="panel-sessions" id="afterSessionsList">
         <h4>Sessions After Reassignment</h4>
-        <div class="session-mini after-session"><div class="session-mini-num" style="background:var(--green-bg);color:var(--green);">5</div><span class="s-date">Mon, 6 Apr</span><span style="font-size:11px;color:var(--green);">✓ Confirmed</span></div>
-        <div class="session-mini after-session"><div class="session-mini-num" style="background:var(--green-bg);color:var(--green);">6</div><span class="s-date">Mon, 13 Apr</span><span style="font-size:11px;color:var(--green);">✓ Confirmed</span></div>
-        <div class="session-mini after-session"><div class="session-mini-num" style="background:var(--green-bg);color:var(--green);">7</div><span class="s-date">Mon, 20 Apr</span><span style="font-size:11px;color:var(--green);">✓ Confirmed</span></div>
-        <div class="session-mini after-session"><div class="session-mini-num" style="background:var(--green-bg);color:var(--green);">8</div><span class="s-date">Mon, 27 Apr</span><span style="font-size:11px;color:var(--green);">✓ Confirmed</span></div>
-        <div style="font-size:11px;color:var(--muted);padding:4px 0;">+ 4 more sessions</div>
+        <!-- dynamic: rendered by renderComparison() -->
       </div>
     </div>
   </div>
@@ -548,6 +565,125 @@
 </div>
 
 <script>
+  const sessions = [
+    { num:1,  date:'Mon, 6 Apr 2026',  time:'09:00', conflict:true  },
+    { num:2,  date:'Mon, 13 Apr 2026', time:'09:00', conflict:true  },
+    { num:3,  date:'Mon, 20 Apr 2026', time:'09:00', conflict:false },
+    { num:4,  date:'Mon, 27 Apr 2026', time:'09:00', conflict:false },
+    { num:5,  date:'Mon, 4 May 2026',  time:'09:00', conflict:false },
+    { num:6,  date:'Mon, 11 May 2026', time:'09:00', conflict:false },
+    { num:7,  date:'Mon, 18 May 2026', time:'09:00', conflict:false },
+    { num:8,  date:'Mon, 25 May 2026', time:'09:00', conflict:false },
+    { num:9,  date:'Mon, 1 Jun 2026',  time:'09:00', conflict:false },
+    { num:10, date:'Mon, 8 Jun 2026',  time:'09:00', conflict:false },
+    { num:11, date:'Mon, 15 Jun 2026', time:'09:00', conflict:false },
+    { num:12, date:'Mon, 22 Jun 2026', time:'09:00', conflict:false },
+  ];
+  let selectedSessions = new Set([1, 2]); // default: conflict sessions pre-checked
+
+  function getSessionsForScope() {
+    if (currentScope === 'this')      return sessions.slice(0, 1);
+    if (currentScope === 'following') return sessions.slice(0, 8);
+    if (currentScope === 'all')       return sessions;
+    return sessions.filter(s => selectedSessions.has(s.num)); // custom
+  }
+
+  function renderComparison() {
+    const scopeSessions = getSessionsForScope();
+    const MAX_SHOW = 5;
+    const shown = scopeSessions.slice(0, MAX_SHOW);
+    const extra = scopeSessions.length - shown.length;
+    const moreHtml = extra > 0
+      ? `<div style="font-size:11px;color:var(--muted);padding:4px 0;">+ ${extra} more session${extra>1?'s':''}</div>`
+      : '';
+
+    // Before panel
+    const beforeEl = document.getElementById('beforeSessionsList');
+    if (beforeEl) {
+      beforeEl.innerHTML = '<h4>Affected Sessions</h4>' +
+        shown.map(s => {
+          const lbl = s.conflict
+            ? `<span style="font-size:11px;color:#92400e;">⚠ On Leave</span>`
+            : `<span style="font-size:11px;color:#92400e;">Reassign</span>`;
+          return `<div class="session-mini before-session">
+            <div class="session-mini-num" style="background:var(--amber-bg);color:#92400e;">${s.num}</div>
+            <span class="s-date">${s.date.replace(' 2026','')}</span>${lbl}
+          </div>`;
+        }).join('') + moreHtml;
+    }
+
+    // After panel
+    const afterEl = document.getElementById('afterSessionsList');
+    if (afterEl) {
+      afterEl.innerHTML = '<h4>Sessions After Reassignment</h4>' +
+        shown.map(s => {
+          const unavail = selectedT === 'janice' && s.num > 6;
+          const lbl = unavail
+            ? `<span style="font-size:11px;color:#d97706;">⚡ Check avail.</span>`
+            : `<span style="font-size:11px;color:var(--green);">✓ Confirmed</span>`;
+          const numStyle = unavail ? 'background:#fffbeb;color:#d97706;' : 'background:var(--green-bg);color:var(--green);';
+          const rowStyle = unavail ? ' style="border-color:#f59e0b;background:#fffbeb;"' : '';
+          return `<div class="session-mini after-session"${rowStyle}>
+            <div class="session-mini-num" style="${numStyle}">${s.num}</div>
+            <span class="s-date">${s.date.replace(' 2026','')}</span>${lbl}
+          </div>`;
+        }).join('') + moreHtml;
+    }
+  }
+
+  function renderSessionList() {
+    const el = document.getElementById('customSessionList');
+    if (!el) return;
+    el.innerHTML = sessions.map(s => {
+      const checked = selectedSessions.has(s.num);
+      const conflictTag = s.conflict
+        ? `<span style="padding:2px 8px;background:#fef2f2;color:#dc2626;border-radius:99px;font-size:10.5px;font-weight:700;">⚠ Leave conflict</span>`
+        : '';
+      return `
+        <label style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:10px;border:1.5px solid ${checked?'var(--primary)':'var(--border)'};background:${checked?'var(--primary-light)':'white'};cursor:pointer;transition:all 0.12s;" onclick="toggleSession(${s.num}, this)">
+          <input type="checkbox" ${checked?'checked':''} style="accent-color:var(--primary);width:15px;height:15px;cursor:pointer;" onchange="toggleSessionCb(${s.num}, this)" onclick="event.stopPropagation()">
+          <div style="width:24px;height:24px;border-radius:50%;background:${checked?'var(--primary)':'#e2e8f0'};color:${checked?'white':'var(--muted)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">${s.num}</div>
+          <div style="flex:1;min-width:0;">
+            <span style="font-size:13px;font-weight:600;color:var(--text);">${s.date}</span>
+            <span style="font-size:12px;color:var(--muted);margin-left:8px;">${s.time}</span>
+          </div>
+          ${conflictTag}
+        </label>`;
+    }).join('');
+    updateCustomSummary();
+  }
+
+  function toggleSession(num, label) {
+    if (selectedSessions.has(num)) selectedSessions.delete(num);
+    else selectedSessions.add(num);
+    renderSessionList();
+    renderComparison();
+  }
+
+  function toggleSessionCb(num, cb) {
+    if (cb.checked) selectedSessions.add(num);
+    else selectedSessions.delete(num);
+    renderSessionList();
+    renderComparison();
+  }
+
+  function selectAllSessions(val) {
+    if (val) sessions.forEach(s => selectedSessions.add(s.num));
+    else selectedSessions.clear();
+    renderSessionList();
+    renderComparison();
+  }
+
+  function updateCustomSummary() {
+    const el = document.getElementById('customSessionSummary');
+    if (!el) return;
+    const n = selectedSessions.size;
+    el.textContent = n === 0
+      ? 'No sessions selected — select at least one'
+      : `${n} session${n>1?'s':''} selected for reassignment`;
+    el.style.color = n === 0 ? '#dc2626' : 'var(--primary)';
+  }
+
   const therapistData = {
     angela: { name: 'Dr Angela Lim', role: 'Occupational Therapy · Consultation Room A', spec: 'Occupational Therapy', room: 'Consultation Room A', avail: '✓ Available all 8 sessions', bg: '#0d9488', initials: 'AL', sessions: '8 sessions — all confirmed' },
     janice: { name: 'Nurse Janice Tan', role: 'Nursing / Care · Vaccination Bay', spec: 'Nursing / Care', room: 'Vaccination Bay', avail: '⚡ 6 of 8 sessions available', bg: '#7c3aed', initials: 'JT', sessions: '6 sessions confirmed, 2 unresolved' },
@@ -558,15 +694,20 @@
   let currentScope = 'following';
 
   const scopeLabels = {
-    'this': 'This session only (Mon, 6 Apr)',
-    'following': 'This and following events',
-    'all': 'All events in series (12 sessions)'
+    'this':     'This session only (Mon, 6 Apr)',
+    'following':'This and following events',
+    'all':      'All events in series (12 sessions)',
+    'custom':   'Custom session selection'
   };
 
   function setScope(el, scope) {
     currentScope = scope;
     document.querySelectorAll('.scope-pill').forEach(p => p.classList.remove('on'));
     el.classList.add('on');
+    const picker = document.getElementById('customSessionPicker');
+    if (picker) picker.style.display = scope === 'custom' ? 'block' : 'none';
+    if (scope === 'custom') renderSessionList();
+    renderComparison();
     updateActionBar();
   }
 
@@ -586,12 +727,17 @@
     document.getElementById('afterRole').textContent = d.role;
     document.getElementById('afterAvailBadge').textContent = d.avail;
     document.getElementById('afterBadge').textContent = d.name;
+    renderComparison();
     updateActionBar();
   }
 
   function updateActionBar() {
     const d = therapistData[selectedT];
-    const sCount = currentScope === 'this' ? '1 session' : currentScope === 'following' ? '8 sessions' : '12 sessions';
+    let sCount;
+    if (currentScope === 'this')         sCount = '1 session';
+    else if (currentScope === 'following') sCount = '8 sessions';
+    else if (currentScope === 'all')       sCount = '12 sessions';
+    else                                   sCount = `${selectedSessions.size} selected session${selectedSessions.size!==1?'s':''}`;
     document.getElementById('actionBarTitle').textContent = `Reassign ${sCount} to ${d.name}`;
     document.getElementById('actionBarMeta').textContent = `${scopeLabels[currentScope]} · Recurring OT · Mdm Lim Siew Lan`;
   }
@@ -609,12 +755,16 @@
   function applyChange() {
     document.getElementById('confirmModal').classList.remove('show');
     const d = therapistData[selectedT];
-    const sCount = currentScope === 'this' ? '1 session' : currentScope === 'following' ? '8 sessions' : '12 sessions';
+    const sCount = currentScope === 'this' ? '1 session' : currentScope === 'following' ? '8 sessions' : currentScope === 'all' ? '12 sessions' : `${selectedSessions.size} sessions`;
     document.getElementById('successMsg').textContent = `${sCount} successfully reassigned to ${d.name}.`;
     document.getElementById('successTo').textContent = d.name;
     document.getElementById('successSessions').textContent = `${sCount} reassigned`;
     document.getElementById('successOverlay').classList.add('show');
   }
+
+  // Initialise comparison on page load
+  renderComparison();
+  updateActionBar();
 </script>
 </div><!-- /main-wrapper -->
 </body>
