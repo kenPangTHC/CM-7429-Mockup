@@ -150,6 +150,22 @@
     .preview-date-list { display: flex; flex-wrap: wrap; gap: 6px; }
     .preview-date-pill { padding: 4px 10px; background: var(--purple-bg); border-radius: 99px; font-size: 12px; font-weight: 600; color: var(--purple); }
     .preview-date-pill.more { color: #94a3b8; background: #f1f5f9; }
+    .month-pattern-opts { display: flex; flex-direction: column; gap: 8px; }
+    .month-pattern-opt {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      font-size: 13px; color: #374151; cursor: pointer;
+      padding: 9px 12px; background: white;
+      border: 1.5px solid var(--purple-border); border-radius: 10px;
+      transition: border-color 0.15s;
+    }
+    .month-pattern-opt:has(input:checked) { border-color: var(--purple); background: var(--purple-bg); }
+    .month-pattern-opt input[type=radio] { accent-color: var(--purple); width: 15px; height: 15px; flex-shrink: 0; cursor: pointer; }
+    .month-pattern-opt select {
+      border: 1.5px solid var(--purple-border); border-radius: 8px;
+      padding: 4px 8px; font-size: 13px; color: #374151;
+      background: white; cursor: pointer; font-family: 'Outfit', sans-serif;
+    }
+    .month-pattern-opt select:disabled { opacity: 0.35; cursor: not-allowed; }
 
     /* CONFIRM STEP */
     .confirm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -290,7 +306,7 @@
     </div>
     <div class="topbar-right">
       <span class="topbar-welcome">Welcome to CARES</span>
-      <select class="topbar-facility"><option>Sunrise Active Ageing Centre (Care) @ Tampines</option></select>
+      <select class="topbar-facility"><option>SCC @ Tampines</option></select>
       <button class="topbar-notif">🔔<span class="topbar-notif-badge">5</span></button>
       <a class="topbar-logout" href="#">↪ Log out</a>
     </div>
@@ -489,69 +505,94 @@
       <div class="recurring-options" id="recurringOptions">
         <h4>🔄 Recurring Schedule Setup</h4>
 
-        <!-- Row 1: Frequency + Every N -->
+        <!-- Frequency + Interval -->
         <div class="recurring-row">
           <div class="r-field r-field-sm">
             <label>Frequency</label>
-            <select onchange="updatePreview()">
-              <option>Weekly</option>
-              <option>Bi-weekly (every 2 weeks)</option>
-              <option>Monthly</option>
+            <select id="freqSelect" onchange="onFreqChange()">
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
             </select>
           </div>
           <div class="r-field r-field-xs">
             <label>Every</label>
             <div style="display:flex;align-items:center;gap:8px;">
-              <input type="number" value="1" min="1" max="12" style="width:64px;">
-              <span style="font-size:13px;color:#6d28d9;font-weight:600;">week(s)</span>
+              <input type="number" id="intervalInput" value="1" min="1" max="52" style="width:64px;" oninput="updatePreview()">
+              <span id="intervalUnit" style="font-size:13px;color:#6d28d9;font-weight:600;">week(s)</span>
             </div>
           </div>
         </div>
 
-        <!-- Row 2: Repeat on days (full width) -->
-        <div class="r-field" style="margin-bottom:14px;">
+        <!-- Weekly: Mon–Sun day selector -->
+        <div class="r-field" id="weeklySection" style="margin-bottom:14px;">
           <label>Repeat on days</label>
           <div class="day-selector">
-            <span class="day-check" onclick="toggleDay(this)">Mon</span>
-            <span class="day-check on" onclick="toggleDay(this)">Tue</span>
-            <span class="day-check" onclick="toggleDay(this)">Wed</span>
-            <span class="day-check" onclick="toggleDay(this)">Thu</span>
-            <span class="day-check" onclick="toggleDay(this)">Fri</span>
-            <span class="day-check" onclick="toggleDay(this)">Sat</span>
+            <span class="day-check" onclick="toggleDay(this)" data-day="Mon">Mon</span>
+            <span class="day-check on" onclick="toggleDay(this)" data-day="Tue">Tue</span>
+            <span class="day-check" onclick="toggleDay(this)" data-day="Wed">Wed</span>
+            <span class="day-check" onclick="toggleDay(this)" data-day="Thu">Thu</span>
+            <span class="day-check" onclick="toggleDay(this)" data-day="Fri">Fri</span>
+            <span class="day-check" onclick="toggleDay(this)" data-day="Sat">Sat</span>
+            <span class="day-check" onclick="toggleDay(this)" data-day="Sun">Sun</span>
           </div>
         </div>
 
-        <!-- Row 3: Ends -->
+        <!-- Monthly: pattern options -->
+        <div id="monthlySection" style="display:none; margin-bottom:14px;">
+          <label style="font-size:13px;font-weight:600;color:#4b5563;display:block;margin-bottom:8px;">Monthly pattern</label>
+          <div class="month-pattern-opts">
+            <label class="month-pattern-opt">
+              <input type="radio" name="monthPattern" value="dom" checked onchange="onMonthPatternChange()">
+              <span>Day</span>
+              <select id="dayOfMonthSel" onchange="updatePreview()"></select>
+              <span>of the month</span>
+            </label>
+            <label class="month-pattern-opt">
+              <input type="radio" name="monthPattern" value="dow" onchange="onMonthPatternChange()">
+              <select id="weekOrdinalSel" onchange="updatePreview()" disabled>
+                <option value="1">First</option>
+                <option value="2">Second</option>
+                <option value="3">Third</option>
+                <option value="4">Fourth</option>
+                <option value="-1">Last</option>
+              </select>
+              <select id="weekDaySel" onchange="updatePreview()" disabled>
+                <option value="1">Monday</option>
+                <option value="2">Tuesday</option>
+                <option value="3">Wednesday</option>
+                <option value="4">Thursday</option>
+                <option value="5">Friday</option>
+                <option value="6">Saturday</option>
+                <option value="0">Sunday</option>
+              </select>
+              <span>of the month</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Ends -->
         <div class="r-field" style="margin-bottom:14px;">
           <label>Ends</label>
           <div class="end-options">
             <label class="end-option">
-              <input type="radio" name="endType" value="never"> <span>Never (ongoing)</span>
-            </label>
-            <label class="end-option">
-              <input type="radio" name="endType" value="after" checked>
-              <div class="end-option-field">After <input type="number" value="8" min="1" max="52"> sessions</div>
+              <input type="radio" name="endType" value="never" checked> <span>Never (ongoing)</span>
             </label>
             <label class="end-option">
               <input type="radio" name="endType" value="on">
-              <div class="end-option-field">On date <input type="date" value="2026-06-30"></div>
+              <div class="end-option-field">On date <input type="date" value="2026-06-30" onchange="updatePreview()"></div>
             </label>
           </div>
         </div>
 
-        <!-- Row 4: Preview -->
+        <!-- Preview -->
         <div class="preview-dates">
           <h5>Upcoming Sessions Preview</h5>
-          <div class="preview-date-list">
+          <div class="preview-date-list" id="previewDateList">
             <span class="preview-date-pill">Tue 7 Apr</span>
             <span class="preview-date-pill">Tue 14 Apr</span>
             <span class="preview-date-pill">Tue 21 Apr</span>
             <span class="preview-date-pill">Tue 28 Apr</span>
-            <span class="preview-date-pill">Tue 5 May</span>
-            <span class="preview-date-pill">Tue 12 May</span>
-            <span class="preview-date-pill">Tue 19 May</span>
-            <span class="preview-date-pill">Tue 26 May</span>
-            <span class="preview-date-pill more">+ ends after 8 sessions</span>
+            <span class="preview-date-pill more">+ ongoing</span>
           </div>
         </div>
       </div>
@@ -696,7 +737,104 @@
 
   function toggleDay(el) {
     el.classList.toggle('on');
+    updatePreview();
   }
+
+  function onFreqChange() {
+    const freq = document.getElementById('freqSelect').value;
+    document.getElementById('weeklySection').style.display = freq === 'weekly' ? '' : 'none';
+    document.getElementById('monthlySection').style.display = freq === 'monthly' ? '' : 'none';
+    document.getElementById('intervalUnit').textContent = freq === 'weekly' ? 'week(s)' : 'month(s)';
+    updatePreview();
+  }
+
+  function onMonthPatternChange() {
+    const isDom = document.querySelector('input[name="monthPattern"]:checked').value === 'dom';
+    document.getElementById('dayOfMonthSel').disabled = !isDom;
+    document.getElementById('weekOrdinalSel').disabled = isDom;
+    document.getElementById('weekDaySel').disabled = isDom;
+    updatePreview();
+  }
+
+  function getNthWeekday(year, month, n, weekday) {
+    if (n === -1) {
+      let d = new Date(year, month + 1, 0);
+      while (d.getDay() !== weekday) d.setDate(d.getDate() - 1);
+      return d;
+    }
+    let d = new Date(year, month, 1);
+    while (d.getDay() !== weekday) d.setDate(d.getDate() + 1);
+    d.setDate(d.getDate() + (n - 1) * 7);
+    return d.getMonth() === month ? d : null;
+  }
+
+  function updatePreview() {
+    const list = document.getElementById('previewDateList');
+    if (!list) return;
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const start  = new Date(2026, 3, 7);
+    const freq   = document.getElementById('freqSelect').value;
+    const interval = Math.max(1, parseInt(document.getElementById('intervalInput')?.value || 1));
+    const endType = document.querySelector('input[name="endType"]:checked')?.value || 'never';
+    let dates = [];
+
+    if (freq === 'weekly') {
+      const dayMap = {Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6,Sun:0};
+      const selected = [...document.querySelectorAll('.day-check.on')].map(el => dayMap[el.dataset.day]);
+      if (!selected.length) { list.innerHTML = '<span class="preview-date-pill" style="color:#9ca3af">Select at least one day</span>'; return; }
+      // Step by interval weeks, collect matching days within each week-block
+      let weekStart = new Date(start);
+      // Align to Monday of start week
+      let guard = 0;
+      while (dates.length < 8 && guard++ < 500) {
+        for (let d = 0; d < 7 && dates.length < 8; d++) {
+          const cur = new Date(weekStart); cur.setDate(weekStart.getDate() + d);
+          if (cur >= start && selected.includes(cur.getDay())) dates.push(new Date(cur));
+        }
+        weekStart.setDate(weekStart.getDate() + 7 * interval);
+      }
+    } else {
+      const pattern = document.querySelector('input[name="monthPattern"]:checked')?.value || 'dom';
+      let cur = new Date(2026, 3, 1);
+      let guard = 0;
+      while (dates.length < 8 && guard++ < 120) {
+        let t = null;
+        if (pattern === 'dom') {
+          const dom = parseInt(document.getElementById('dayOfMonthSel')?.value || 7);
+          const max = new Date(cur.getFullYear(), cur.getMonth() + 1, 0).getDate();
+          if (dom <= max) t = new Date(cur.getFullYear(), cur.getMonth(), dom);
+        } else {
+          const ord = parseInt(document.getElementById('weekOrdinalSel')?.value || 1);
+          const wd  = parseInt(document.getElementById('weekDaySel')?.value || 2);
+          t = getNthWeekday(cur.getFullYear(), cur.getMonth(), ord, wd);
+        }
+        if (t && t >= start) dates.push(t);
+        cur.setMonth(cur.getMonth() + interval);
+      }
+    }
+
+    const suffix = endType === 'never' ? '+ ongoing' : '+ ends on date';
+    list.innerHTML = dates.map(d =>
+      `<span class="preview-date-pill">${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}</span>`
+    ).join('') + `<span class="preview-date-pill more">${suffix}</span>`;
+  }
+
+  // Init: populate day-of-month select 1–31
+  (function initDayOfMonth() {
+    const sel = document.getElementById('dayOfMonthSel');
+    if (!sel) return;
+    const ord = ['th','st','nd','rd'];
+    for (let i = 1; i <= 31; i++) {
+      const v = i % 100;
+      const sfx = (v >= 11 && v <= 13) ? 'th' : (ord[i % 10] || 'th');
+      const o = document.createElement('option');
+      o.value = i; o.textContent = i + sfx;
+      if (i === 7) o.selected = true;
+      sel.appendChild(o);
+    }
+    updatePreview();
+  })();
 
   function confirmBooking() {
     const recurring = document.getElementById('recurringCheck').checked;
