@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -130,10 +130,16 @@
     /* DAY CONFIG */
     .day-config { border: 1.5px solid var(--border); border-radius: 14px; padding: 0; overflow: hidden; }
     .day-config-header { background: var(--primary-light); padding: 12px 16px; font-size: 14px; font-weight: 700; color: var(--primary-dark); display: flex; align-items: center; gap: 8px; }
-    .day-row { display: grid; grid-template-columns: 40px 1fr 1fr 1fr auto; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .day-row { display: grid; grid-template-columns: 96px 1fr 1fr auto; gap: 12px; align-items: center; padding: 9px 16px; border-bottom: 1px solid var(--border); }
     .day-row:last-child { border-bottom: none; }
-    .day-label { font-size: 13px; font-weight: 700; color: var(--muted); }
+    .day-row.pm-row { border-bottom: 2px solid var(--border); background: #fafffe; }
+    .day-row.pm-row:last-child { border-bottom: none; }
     .day-row.inactive { opacity: 0.4; pointer-events: none; }
+    .day-row.inactive.pm-row { background: white; }
+    .day-label { font-size: 13px; font-weight: 700; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+    .period-tag { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; }
+    .period-tag.am { background: #e0f2fe; color: #0369a1; }
+    .period-tag.pm { background: #fef3c7; color: #d97706; }
     .day-row select, .day-row input[type="time"] { border: 1.5px solid var(--border); border-radius: 8px; padding: 7px 10px; font-family: 'Outfit', sans-serif; font-size: 13px; background: white; outline: none; width: 100%; }
     .day-row select:focus, .day-row input:focus { border-color: var(--primary); }
     .day-col-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
@@ -146,6 +152,9 @@
     .timeline-hour-labels span { text-align: left; }
     .timeline-rows { display: flex; flex-direction: column; gap: 8px; }
     .timeline-row { display: grid; grid-template-columns: 60px 1fr; align-items: center; gap: 12px; }
+    .timeline-row.tl-day-off .timeline-day-label { opacity: 0.35; }
+    .timeline-row.tl-day-off .timeline-bar > * { display: none; }
+    .timeline-row.tl-day-off .timeline-bar { background: repeating-linear-gradient(45deg,#f1f5f9,#f1f5f9 2px,#f8fafc 2px,#f8fafc 8px); border-radius: 8px; }
     .timeline-day-label { font-size: 12px; font-weight: 600; color: var(--muted); }
     .timeline-bar { position: relative; height: 28px; background: #f1f5f9; border-radius: 6px; overflow: hidden; }
     .timeline-shift { position: absolute; top: 0; height: 100%; background: var(--primary); border-radius: 6px; opacity: 0.9; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: white; }
@@ -204,7 +213,7 @@
     .editor-panel.locked .day-config { position: relative; }
     .editor-panel.locked .day-row input,
     .editor-panel.locked .day-row select { pointer-events: none; background: #f8fafc; color: #94a3b8; border-color: #e2e8f0; }
-    .editor-panel.locked .days-row .day-pill { pointer-events: none; opacity: 0.6; }
+    .editor-panel.locked .days-row .day-pill { pointer-events: none; opacity: 0.5; cursor: default; }
     .editor-panel.locked .duration-row select { pointer-events: none; background: #f8fafc; color: #94a3b8; }
     .lock-overlay-banner { background: linear-gradient(90deg,#f0fdf9,#e0f2f1); border: 1px solid var(--primary-light); border-radius: 10px; padding: 10px 14px; margin: 0 24px 16px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--primary-dark); font-weight: 600; }
     .lock-overlay-banner .lock-icon { font-size: 18px; flex-shrink: 0; }
@@ -437,20 +446,11 @@
           <label>Default End Time</label>
           <input type="time" value="18:00" />
         </div>
-        <div class="field">
-          <label>Lunch / Break Duration</label>
-          <select>
-            <option>No break</option>
-            <option>30 minutes</option>
-            <option selected>1 hour</option>
-            <option>1.5 hours</option>
-          </select>
-        </div>
       </div>
 
     </div>
     <div class="save-bar">
-      <button class="btn btn-primary">Save Global Settings</button>
+      <button class="btn btn-primary" onclick="saveGlobalSettings()">Save Global Settings</button>
     </div>
   </div>
 
@@ -510,7 +510,7 @@
       <div class="editor-panel" id="editorPanel">
         <!-- Dr Angela Lim - default shown -->
         <div id="editor-angela">
-          <div class="editor-panel locked" id="editorPanelAngela">
+          <div class="editor-panel editor-section locked" id="editorPanelAngela">
           <div class="editor-header">
             <div class="editor-therapist-info">
               <div class="t-avatar" style="background:#0d9488;color:white;width:46px;height:46px;font-size:16px;">AL</div>
@@ -541,30 +541,36 @@
           <div class="week-grid">
             <h3>Weekly Schedule Template</h3>
             <div class="days-row">
-              <span class="day-pill on">Mon</span>
-              <span class="day-pill on">Tue</span>
-              <span class="day-pill on">Wed</span>
-              <span class="day-pill on">Thu</span>
-              <span class="day-pill on">Fri</span>
-              <span class="day-pill off">Sat</span>
-              <span class="day-pill off">Sun</span>
+              <span class="day-pill on" data-day="mon">Mon</span>
+              <span class="day-pill on" data-day="tue">Tue</span>
+              <span class="day-pill on" data-day="wed">Wed</span>
+              <span class="day-pill on" data-day="thu">Thu</span>
+              <span class="day-pill on" data-day="fri">Fri</span>
+              <span class="day-pill off" data-day="sat">Sat</span>
+              <span class="day-pill off" data-day="sun">Sun</span>
             </div>
             <div class="day-config">
               <div class="day-config-header">📅 Per-day Configuration</div>
               <div class="day-row" style="background:#f8fffe;border-bottom:1px solid var(--border);padding:8px 16px;">
-                <div class="day-col-label">Day</div>
+                <div class="day-col-label">Day / Period</div>
                 <div class="day-col-label">Start Time</div>
                 <div class="day-col-label">End Time</div>
-                <div class="day-col-label">Duration</div>
                 <div class="day-col-label">Status</div>
               </div>
-              <div class="day-row"><div class="day-label">Mon</div><input type="time" value="08:30"><input type="time" value="14:30"><select><option selected>30 min</option><option>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row"><div class="day-label">Tue</div><input type="time" value="08:30"><input type="time" value="14:30"><select><option selected>30 min</option><option>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row"><div class="day-label">Wed</div><input type="time" value="08:30"><input type="time" value="14:30"><select><option selected>30 min</option><option>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row"><div class="day-label">Thu</div><input type="time" value="08:30"><input type="time" value="14:30"><select><option selected>30 min</option><option>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row"><div class="day-label">Fri</div><input type="time" value="08:30"><input type="time" value="13:30"><select><option selected>30 min</option><option>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row inactive"><div class="day-label">Sat</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option>30 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row inactive"><div class="day-label">Sun</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option>30 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row am-row" data-day="mon"><div class="day-label">Mon <span class="period-tag am">AM</span></div><input type="time" value="08:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="mon"><div class="day-label">Mon <span class="period-tag pm">PM</span></div><input type="time" value="13:00"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row" data-day="tue"><div class="day-label">Tue <span class="period-tag am">AM</span></div><input type="time" value="08:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="tue"><div class="day-label">Tue <span class="period-tag pm">PM</span></div><input type="time" value="13:00"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row" data-day="wed"><div class="day-label">Wed <span class="period-tag am">AM</span></div><input type="time" value="08:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="wed"><div class="day-label">Wed <span class="period-tag pm">PM</span></div><input type="time" value="13:00"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row" data-day="thu"><div class="day-label">Thu <span class="period-tag am">AM</span></div><input type="time" value="08:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="thu"><div class="day-label">Thu <span class="period-tag pm">PM</span></div><input type="time" value="13:00"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row" data-day="fri"><div class="day-label">Fri <span class="period-tag am">AM</span></div><input type="time" value="08:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="fri"><div class="day-label">Fri <span class="period-tag pm">PM</span></div><input type="time" value="13:00"><input type="time" value="16:30"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row inactive" data-day="sat"><div class="day-label">Sat <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row pm-row inactive" data-day="sat"><div class="day-label">Sat <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row am-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row pm-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
             </div>
           </div>
           <div class="timeline-section">
@@ -577,13 +583,13 @@
                 <span>6pm</span><span>7pm</span>
               </div>
               <div class="timeline-rows">
-                <div class="timeline-row"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.2%;width:50%;">08:30–14:30</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.2%;width:50%;">08:30–14:30</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.2%;width:50%;">08:30–14:30</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.2%;width:50%;">08:30–14:30</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.2%;width:41.7%;">08:30–13:30</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+                <div class="timeline-row" data-day="mon"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.5%;width:31.8%;">AM 08:30–12:00</div><div class="timeline-shift" style="left:45.5%;width:36.4%;">PM 13:00–17:00</div></div></div>
+                <div class="timeline-row" data-day="tue"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.5%;width:31.8%;">AM 08:30–12:00</div><div class="timeline-shift" style="left:45.5%;width:36.4%;">PM 13:00–17:00</div></div></div>
+                <div class="timeline-row" data-day="wed"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.5%;width:31.8%;">AM 08:30–12:00</div><div class="timeline-shift" style="left:45.5%;width:36.4%;">PM 13:00–17:00</div></div></div>
+                <div class="timeline-row" data-day="thu"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.5%;width:31.8%;">AM 08:30–12:00</div><div class="timeline-shift" style="left:45.5%;width:36.4%;">PM 13:00–17:00</div></div></div>
+                <div class="timeline-row" data-day="fri"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.5%;width:31.8%;">AM 08:30–12:00</div><div class="timeline-shift" style="left:45.5%;width:31.8%;">PM 13:00–16:30</div></div></div>
+                <div class="timeline-row" data-day="sat"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+                <div class="timeline-row" data-day="sun"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
               </div>
             </div>
           </div>
@@ -592,16 +598,16 @@
             <button class="add-leave-btn" onclick="showLeaveModal('angela')">＋ Add Leave Period</button>
           </div>
           <div class="editor-footer">
-            <button class="btn btn-ghost">View History</button>
+            <button class="btn btn-ghost" onclick="viewHistory(this)">View History</button>
             <span class="btn-locked-msg" style="display:flex;">🔒 Shifts locked · Committed for April 2026</span>
-            <button class="btn btn-primary btn-save-normal" style="display:none;">Save Schedule</button>
+            <button class="btn btn-primary btn-save-normal" style="display:none;" onclick="saveSchedule(this)">Save Schedule</button>
           </div>
           </div><!-- end .editor-panel.locked -->
         </div>
 
         <!-- Dr Marcus Lee -->
         <div id="editor-marcus" style="display:none;">
-          <div class="editor-panel locked">
+          <div class="editor-panel editor-section locked">
           <div class="editor-header">
             <div class="editor-therapist-info">
               <div class="t-avatar" style="background:#f59e0b;color:white;width:46px;height:46px;font-size:16px;">ML</div>
@@ -628,30 +634,36 @@
           <div class="week-grid">
             <h3>Weekly Schedule Template</h3>
             <div class="days-row">
-              <span class="day-pill on">Mon</span>
-              <span class="day-pill on">Tue</span>
-              <span class="day-pill on">Wed</span>
-              <span class="day-pill on">Thu</span>
-              <span class="day-pill off">Fri</span>
-              <span class="day-pill off">Sat</span>
-              <span class="day-pill off">Sun</span>
+              <span class="day-pill on" data-day="mon">Mon</span>
+              <span class="day-pill on" data-day="tue">Tue</span>
+              <span class="day-pill on" data-day="wed">Wed</span>
+              <span class="day-pill on" data-day="thu">Thu</span>
+              <span class="day-pill off" data-day="fri">Fri</span>
+              <span class="day-pill off" data-day="sat">Sat</span>
+              <span class="day-pill off" data-day="sun">Sun</span>
             </div>
             <div class="day-config">
               <div class="day-config-header">📅 Per-day Configuration</div>
               <div class="day-row" style="background:#f8fffe;border-bottom:1px solid var(--border);padding:8px 16px;">
-                <div class="day-col-label">Day</div>
+                <div class="day-col-label">Day / Period</div>
                 <div class="day-col-label">Start Time</div>
                 <div class="day-col-label">End Time</div>
-                <div class="day-col-label">Duration</div>
                 <div class="day-col-label">Status</div>
               </div>
-              <div class="day-row"><div class="day-label">Mon</div><input type="time" value="09:00"><input type="time" value="13:30"><select><option>30 min</option><option selected>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row"><div class="day-label">Tue</div><input type="time" value="09:00"><input type="time" value="13:30"><select><option>30 min</option><option selected>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row"><div class="day-label">Wed</div><input type="time" value="09:00"><input type="time" value="13:30"><select><option>30 min</option><option selected>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row"><div class="day-label">Thu</div><input type="time" value="09:00"><input type="time" value="13:30"><select><option>30 min</option><option selected>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row inactive"><div class="day-label">Fri</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option selected>60 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row inactive"><div class="day-label">Sat</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option selected>60 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row inactive"><div class="day-label">Sun</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option selected>60 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row am-row" data-day="mon"><div class="day-label">Mon <span class="period-tag am">AM</span></div><input type="time" value="09:00"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="mon"><div class="day-label">Mon <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:30"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row" data-day="tue"><div class="day-label">Tue <span class="period-tag am">AM</span></div><input type="time" value="09:00"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="tue"><div class="day-label">Tue <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:30"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row" data-day="wed"><div class="day-label">Wed <span class="period-tag am">AM</span></div><input type="time" value="09:00"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="wed"><div class="day-label">Wed <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:30"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row" data-day="thu"><div class="day-label">Thu <span class="period-tag am">AM</span></div><input type="time" value="09:00"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="thu"><div class="day-label">Thu <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:30"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row inactive" data-day="fri"><div class="day-label">Fri <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row pm-row inactive" data-day="fri"><div class="day-label">Fri <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row am-row inactive" data-day="sat"><div class="day-label">Sat <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row pm-row inactive" data-day="sat"><div class="day-label">Sat <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row am-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row pm-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
             </div>
           </div>
           <div class="timeline-section">
@@ -664,13 +676,13 @@
                 <span>6pm</span><span>7pm</span>
               </div>
               <div class="timeline-rows">
-                <div class="timeline-row"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift leave" style="left:8.3%;width:37.5%;">09:00–13:30 · LEAVE Apr 6 &amp; 13</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift leave" style="left:8.3%;width:37.5%;">09:00–13:30 · LEAVE Apr 7</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift leave" style="left:8.3%;width:37.5%;">09:00–13:30 · LEAVE Apr 8</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift leave" style="left:8.3%;width:37.5%;">09:00–13:30 · LEAVE Apr 9</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+                <div class="timeline-row" data-day="mon"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift leave" style="left:9.1%;width:27.3%;">AM 09:00–12:00 · LEAVE Apr 6 &amp; 13</div><div class="timeline-shift leave" style="left:50%;width:36.4%;">PM 13:30–17:30 · LEAVE Apr 6 &amp; 13</div></div></div>
+                <div class="timeline-row" data-day="tue"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift leave" style="left:9.1%;width:27.3%;">AM 09:00–12:00 · LEAVE Apr 7</div><div class="timeline-shift leave" style="left:50%;width:36.4%;">PM 13:30–17:30 · LEAVE Apr 7</div></div></div>
+                <div class="timeline-row" data-day="wed"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift leave" style="left:9.1%;width:27.3%;">AM 09:00–12:00 · LEAVE Apr 8</div><div class="timeline-shift leave" style="left:50%;width:36.4%;">PM 13:30–17:30 · LEAVE Apr 8</div></div></div>
+                <div class="timeline-row" data-day="thu"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift leave" style="left:9.1%;width:27.3%;">AM 09:00–12:00 · LEAVE Apr 9</div><div class="timeline-shift leave" style="left:50%;width:36.4%;">PM 13:30–17:30 · LEAVE Apr 9</div></div></div>
+                <div class="timeline-row" data-day="fri"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+                <div class="timeline-row" data-day="sat"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+                <div class="timeline-row" data-day="sun"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
               </div>
             </div>
             <!-- April calendar leave indicator -->
@@ -762,16 +774,16 @@
             <button class="add-leave-btn" onclick="showLeaveModal('marcus')">＋ Add Leave Period</button>
           </div>
           <div class="editor-footer">
-            <button class="btn btn-ghost">View History</button>
+            <button class="btn btn-ghost" onclick="viewHistory(this)">View History</button>
             <span class="btn-locked-msg" style="display:flex;">🔒 Shifts locked · Committed for April 2026</span>
-            <button class="btn btn-primary btn-save-normal" style="display:none;">Save Schedule</button>
+            <button class="btn btn-primary btn-save-normal" style="display:none;" onclick="saveSchedule(this)">Save Schedule</button>
           </div>
           </div><!-- end .editor-panel.locked -->
         </div>
 
         <!-- Nurse Janice Tan -->
         <div id="editor-janice" style="display:none;">
-          <div class="editor-panel locked">
+          <div class="editor-panel editor-section locked">
           <div class="editor-header">
             <div class="editor-therapist-info">
               <div class="t-avatar" style="background:#7c3aed;color:white;width:46px;height:46px;font-size:16px;">JT</div>
@@ -791,26 +803,36 @@
           <div class="week-grid">
             <h3>Weekly Schedule Template</h3>
             <div class="days-row">
-              <span class="day-pill on">Mon</span>
-              <span class="day-pill on">Tue</span>
-              <span class="day-pill on">Wed</span>
-              <span class="day-pill on">Thu</span>
-              <span class="day-pill on">Fri</span>
-              <span class="day-pill on">Sat</span>
-              <span class="day-pill off">Sun</span>
+              <span class="day-pill on" data-day="mon">Mon</span>
+              <span class="day-pill on" data-day="tue">Tue</span>
+              <span class="day-pill on" data-day="wed">Wed</span>
+              <span class="day-pill on" data-day="thu">Thu</span>
+              <span class="day-pill on" data-day="fri">Fri</span>
+              <span class="day-pill on" data-day="sat">Sat</span>
+              <span class="day-pill off" data-day="sun">Sun</span>
             </div>
             <div class="day-config">
               <div class="day-config-header">📅 Per-day Configuration</div>
               <div class="day-row" style="background:#f8fffe;border-bottom:1px solid var(--border);padding:8px 16px;">
-                <div class="day-col-label">Day</div><div class="day-col-label">Start</div><div class="day-col-label">End</div><div class="day-col-label">Duration</div><div class="day-col-label">Status</div>
+                <div class="day-col-label">Day / Period</div>
+                <div class="day-col-label">Start Time</div>
+                <div class="day-col-label">End Time</div>
+                <div class="day-col-label">Status</div>
               </div>
-              <div class="day-row"><div class="day-label">Mon</div><input type="time" value="09:30"><input type="time" value="14:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row"><div class="day-label">Tue</div><input type="time" value="09:30"><input type="time" value="14:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row"><div class="day-label">Wed</div><input type="time" value="09:30"><input type="time" value="14:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row"><div class="day-label">Thu</div><input type="time" value="09:30"><input type="time" value="14:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row"><div class="day-label">Fri</div><input type="time" value="09:30"><input type="time" value="14:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row"><div class="day-label">Sat</div><input type="time" value="09:00"><input type="time" value="13:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row inactive"><div class="day-label">Sun</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option>30 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row am-row" data-day="mon"><div class="day-label">Mon <span class="period-tag am">AM</span></div><input type="time" value="09:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="mon"><div class="day-label">Mon <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row" data-day="tue"><div class="day-label">Tue <span class="period-tag am">AM</span></div><input type="time" value="09:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="tue"><div class="day-label">Tue <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row" data-day="wed"><div class="day-label">Wed <span class="period-tag am">AM</span></div><input type="time" value="09:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="wed"><div class="day-label">Wed <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row" data-day="thu"><div class="day-label">Thu <span class="period-tag am">AM</span></div><input type="time" value="09:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="thu"><div class="day-label">Thu <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row" data-day="fri"><div class="day-label">Fri <span class="period-tag am">AM</span></div><input type="time" value="09:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="fri"><div class="day-label">Fri <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row" data-day="sat"><div class="day-label">Sat <span class="period-tag am">AM</span></div><input type="time" value="09:00"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row inactive" data-day="sat"><div class="day-label">Sat <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row am-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row pm-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
             </div>
           </div>
           <div class="timeline-section">
@@ -818,13 +840,13 @@
             <div class="timeline-container">
               <div class="timeline-hour-labels"><span></span><span>8am</span><span>9am</span><span>10am</span><span>11am</span><span>12pm</span><span>1pm</span><span>2pm</span><span>3pm</span><span>4pm</span><span>5pm</span><span>6pm</span><span>7pm</span></div>
               <div class="timeline-rows">
-                <div class="timeline-row"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift" style="left:12.5%;width:37.5%;">09:30–14:00</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift" style="left:12.5%;width:37.5%;">09:30–14:00</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift" style="left:12.5%;width:37.5%;">09:30–14:00</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift" style="left:12.5%;width:37.5%;">09:30–14:00</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-shift" style="left:12.5%;width:37.5%;">09:30–14:00</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-shift" style="left:8.3%;width:41.7%;">09:00–13:00</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+                <div class="timeline-row" data-day="mon"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift" style="left:13.6%;width:22.7%;">AM 09:30–12:00</div><div class="timeline-shift" style="left:50%;width:31.8%;">PM 13:30–17:00</div></div></div>
+                <div class="timeline-row" data-day="tue"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift" style="left:13.6%;width:22.7%;">AM 09:30–12:00</div><div class="timeline-shift" style="left:50%;width:31.8%;">PM 13:30–17:00</div></div></div>
+                <div class="timeline-row" data-day="wed"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift" style="left:13.6%;width:22.7%;">AM 09:30–12:00</div><div class="timeline-shift" style="left:50%;width:31.8%;">PM 13:30–17:00</div></div></div>
+                <div class="timeline-row" data-day="thu"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift" style="left:13.6%;width:22.7%;">AM 09:30–12:00</div><div class="timeline-shift" style="left:50%;width:31.8%;">PM 13:30–17:00</div></div></div>
+                <div class="timeline-row" data-day="fri"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-shift" style="left:13.6%;width:22.7%;">AM 09:30–12:00</div><div class="timeline-shift" style="left:50%;width:31.8%;">PM 13:30–17:00</div></div></div>
+                <div class="timeline-row" data-day="sat"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-shift" style="left:9.1%;width:27.3%;">AM 09:00–12:00</div></div></div>
+                <div class="timeline-row" data-day="sun"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
               </div>
             </div>
           </div>
@@ -833,16 +855,16 @@
             <button class="add-leave-btn" onclick="showLeaveModal('janice')">＋ Add Leave Period</button>
           </div>
           <div class="editor-footer">
-            <button class="btn btn-ghost">View History</button>
+            <button class="btn btn-ghost" onclick="viewHistory(this)">View History</button>
             <span class="btn-locked-msg" style="display:flex;">🔒 Shifts locked · Committed for April 2026</span>
-            <button class="btn btn-primary btn-save-normal" style="display:none;">Save Schedule</button>
+            <button class="btn btn-primary btn-save-normal" style="display:none;" onclick="saveSchedule(this)">Save Schedule</button>
           </div>
           </div><!-- end .editor-panel.locked -->
         </div>
 
         <!-- Dr Wei Chen -->
         <div id="editor-wei" style="display:none;">
-          <div class="editor-panel locked">
+          <div class="editor-panel editor-section locked">
           <div class="editor-header">
             <div class="editor-therapist-info">
               <div class="t-avatar" style="background:#2563eb;color:white;width:46px;height:46px;font-size:16px;">WC</div>
@@ -862,26 +884,36 @@
           <div class="week-grid">
             <h3>Weekly Schedule Template</h3>
             <div class="days-row">
-              <span class="day-pill on">Mon</span>
-              <span class="day-pill on">Tue</span>
-              <span class="day-pill on">Wed</span>
-              <span class="day-pill on">Thu</span>
-              <span class="day-pill off">Fri</span>
-              <span class="day-pill on">Sat</span>
-              <span class="day-pill off">Sun</span>
+              <span class="day-pill on" data-day="mon">Mon</span>
+              <span class="day-pill on" data-day="tue">Tue</span>
+              <span class="day-pill on" data-day="wed">Wed</span>
+              <span class="day-pill on" data-day="thu">Thu</span>
+              <span class="day-pill off" data-day="fri">Fri</span>
+              <span class="day-pill on" data-day="sat">Sat</span>
+              <span class="day-pill off" data-day="sun">Sun</span>
             </div>
             <div class="day-config">
               <div class="day-config-header">📅 Per-day Configuration</div>
               <div class="day-row" style="background:#f8fffe;border-bottom:1px solid var(--border);padding:8px 16px;">
-                <div class="day-col-label">Day</div><div class="day-col-label">Start</div><div class="day-col-label">End</div><div class="day-col-label">Duration</div><div class="day-col-label">Status</div>
+                <div class="day-col-label">Day / Period</div>
+                <div class="day-col-label">Start Time</div>
+                <div class="day-col-label">End Time</div>
+                <div class="day-col-label">Status</div>
               </div>
-              <div class="day-row"><div class="day-label">Mon</div><input type="time" value="10:00"><input type="time" value="18:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row"><div class="day-label">Tue</div><input type="time" value="10:00"><input type="time" value="18:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row"><div class="day-label">Wed</div><input type="time" value="10:00"><input type="time" value="18:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row"><div class="day-label">Thu</div><input type="time" value="10:00"><input type="time" value="18:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row inactive"><div class="day-label">Fri</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option>30 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row"><div class="day-label">Sat</div><input type="time" value="09:00"><input type="time" value="14:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row inactive"><div class="day-label">Sun</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option>30 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row am-row" data-day="mon"><div class="day-label">Mon <span class="period-tag am">AM</span></div><input type="time" value="10:00"><input type="time" value="13:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="mon"><div class="day-label">Mon <span class="period-tag pm">PM</span></div><input type="time" value="14:00"><input type="time" value="18:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row" data-day="tue"><div class="day-label">Tue <span class="period-tag am">AM</span></div><input type="time" value="10:00"><input type="time" value="13:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="tue"><div class="day-label">Tue <span class="period-tag pm">PM</span></div><input type="time" value="14:00"><input type="time" value="18:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row" data-day="wed"><div class="day-label">Wed <span class="period-tag am">AM</span></div><input type="time" value="10:00"><input type="time" value="13:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="wed"><div class="day-label">Wed <span class="period-tag pm">PM</span></div><input type="time" value="14:00"><input type="time" value="18:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row" data-day="thu"><div class="day-label">Thu <span class="period-tag am">AM</span></div><input type="time" value="10:00"><input type="time" value="13:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row" data-day="thu"><div class="day-label">Thu <span class="period-tag pm">PM</span></div><input type="time" value="14:00"><input type="time" value="18:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row am-row inactive" data-day="fri"><div class="day-label">Fri <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row pm-row inactive" data-day="fri"><div class="day-label">Fri <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row am-row" data-day="sat"><div class="day-label">Sat <span class="period-tag am">AM</span></div><input type="time" value="09:00"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row pm-row inactive" data-day="sat"><div class="day-label">Sat <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row am-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row pm-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
             </div>
           </div>
           <div class="timeline-section">
@@ -889,13 +921,13 @@
             <div class="timeline-container">
               <div class="timeline-hour-labels"><span></span><span>8am</span><span>9am</span><span>10am</span><span>11am</span><span>12pm</span><span>1pm</span><span>2pm</span><span>3pm</span><span>4pm</span><span>5pm</span><span>6pm</span><span>7pm</span></div>
               <div class="timeline-rows">
-                <div class="timeline-row"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift" style="left:16.7%;width:66.6%;">10:00–18:00</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift" style="left:16.7%;width:66.6%;">10:00–18:00</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift" style="left:16.7%;width:66.6%;">10:00–18:00</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift" style="left:16.7%;width:66.6%;">10:00–18:00</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-shift" style="left:8.3%;width:41.7%;">09:00–14:00</div></div></div>
-                <div class="timeline-row"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+                <div class="timeline-row" data-day="mon"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift" style="left:18.2%;width:27.3%;">AM 10:00–13:00</div><div class="timeline-shift" style="left:54.5%;width:36.4%;">PM 14:00–18:00</div></div></div>
+                <div class="timeline-row" data-day="tue"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift" style="left:18.2%;width:27.3%;">AM 10:00–13:00</div><div class="timeline-shift" style="left:54.5%;width:36.4%;">PM 14:00–18:00</div></div></div>
+                <div class="timeline-row" data-day="wed"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift" style="left:18.2%;width:27.3%;">AM 10:00–13:00</div><div class="timeline-shift" style="left:54.5%;width:36.4%;">PM 14:00–18:00</div></div></div>
+                <div class="timeline-row" data-day="thu"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift" style="left:18.2%;width:27.3%;">AM 10:00–13:00</div><div class="timeline-shift" style="left:54.5%;width:36.4%;">PM 14:00–18:00</div></div></div>
+                <div class="timeline-row" data-day="fri"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+                <div class="timeline-row" data-day="sat"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-shift" style="left:9.1%;width:27.3%;">AM 09:00–12:00</div></div></div>
+                <div class="timeline-row" data-day="sun"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
               </div>
             </div>
           </div>
@@ -904,9 +936,9 @@
             <button class="add-leave-btn" onclick="showLeaveModal('wei')">＋ Add Leave Period</button>
           </div>
           <div class="editor-footer">
-            <button class="btn btn-ghost">View History</button>
+            <button class="btn btn-ghost" onclick="viewHistory(this)">View History</button>
             <span class="btn-locked-msg" style="display:flex;">🔒 Shifts locked · Committed for April 2026</span>
-            <button class="btn btn-primary btn-save-normal" style="display:none;">Save Schedule</button>
+            <button class="btn btn-primary btn-save-normal" style="display:none;" onclick="saveSchedule(this)">Save Schedule</button>
           </div>
           </div><!-- end .editor-panel.locked -->
         </div>
@@ -916,6 +948,38 @@
 </div>
 
 <script>
+  // ——————————————————————————————————
+  // Day pill toggle — wired at DOMContentLoaded with pre-captured scope
+  // ——————————————————————————————————
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.day-pill').forEach(function(pill) {
+      var scope  = pill.parentElement.parentElement.parentElement; // days-row→week-grid→editor-panel
+      var day    = pill.getAttribute('data-day');
+      var dRows  = scope.querySelectorAll('.day-row[data-day="' + day + '"]');
+      var tlRows = scope.querySelectorAll('.timeline-row[data-day="' + day + '"]');
+
+      pill.addEventListener('click', function() {
+        if (scope.classList.contains('locked')) return;
+        var isOn = pill.classList.contains('on');
+        pill.classList.remove(isOn ? 'on' : 'off');
+        pill.classList.add(isOn ? 'off' : 'on');
+        dRows.forEach(function(row) {
+          var b = row.querySelector('.badge');
+          if (isOn) {
+            row.classList.add('inactive');
+            if (b) { b.textContent = 'Off'; b.className = 'badge'; b.style.cssText = 'background:#f1f5f9;color:#94a3b8;font-size:11px;'; }
+          } else {
+            row.classList.remove('inactive');
+            if (b) { b.textContent = 'Active'; b.className = 'badge badge-active'; b.style.cssText = 'font-size:11px;'; }
+          }
+        });
+        tlRows.forEach(function(row) {
+          row.classList[isOn ? 'add' : 'remove']('tl-day-off');
+        });
+      });
+    });
+  });
+
   // ——————————————————————————————————
   // Month state map
   // ——————————————————————————————————
@@ -966,6 +1030,12 @@
       if (isLocked) panel.classList.add('locked');
       else panel.classList.remove('locked');
     });
+    // Force inline pointer-events on every pill so CSS cascade cannot interfere
+    document.querySelectorAll('.days-row .day-pill').forEach(pill => {
+      pill.style.pointerEvents = isLocked ? 'none' : 'auto';
+      pill.style.cursor        = isLocked ? 'default' : 'pointer';
+      pill.style.opacity       = isLocked ? '0.5' : '';
+    });
     document.querySelectorAll('.btn-locked-msg').forEach(el => el.style.display = isLocked ? 'flex' : 'none');
     document.querySelectorAll('.btn-save-normal').forEach(el => el.style.display = isLocked ? 'none' : '');
     document.querySelectorAll('.lock-overlay-banner').forEach(el => {
@@ -1006,6 +1076,8 @@
         document.getElementById('confirmCommitBtn').disabled = (input.value !== 'COMMIT');
       });
     }
+    // Initialize lock state for the default month so inline styles are set correctly
+    updateEditorLockState(currentMonth);
   });
   function confirmCommit() {
     closeCommitModal();
@@ -1045,16 +1117,118 @@
   }
 
   // ——————————————————————————————————
-  // Day pill toggle (only in unlocked editors)
+  // Save Schedule
   // ——————————————————————————————————
-  document.querySelectorAll('.day-pill').forEach(pill => {
-    pill.addEventListener('click', () => {
-      const panel = pill.closest('.editor-panel');
-      if (panel && panel.classList.contains('locked')) return;
-      if (pill.classList.contains('on')) { pill.classList.replace('on','off'); }
-      else { pill.classList.replace('off','on'); }
+  function saveSchedule(btn) {
+    var scope = btn.closest('.editor-section');
+    if (!scope) return;
+
+    var nameEl = scope.querySelector('.editor-title');
+    var therapistName = nameEl ? nameEl.textContent.trim() : 'Therapist';
+
+    var monthTabEl = document.querySelector('.month-tab.active .month-tab-label');
+    var month = monthTabEl ? monthTabEl.textContent.trim() : 'Current Month';
+
+    var dayNames = { mon:'Monday', tue:'Tuesday', wed:'Wednesday', thu:'Thursday', fri:'Friday', sat:'Saturday', sun:'Sunday' };
+
+    // Collect active days with AM/PM times
+    var rows = [];
+    scope.querySelectorAll('.day-pill.on').forEach(function(pill) {
+      var d = pill.getAttribute('data-day');
+      var amRow = scope.querySelector('.am-row[data-day="'+d+'"]');
+      var pmRow = scope.querySelector('.pm-row[data-day="'+d+'"]');
+      var entry = { name: dayNames[d] || d, am: null, pm: null };
+      if (amRow) {
+        var inp = amRow.querySelectorAll('input[type="time"]');
+        if (inp.length >= 2) entry.am = fmtTime(inp[0].value) + ' – ' + fmtTime(inp[1].value);
+      }
+      if (pmRow) {
+        var inp2 = pmRow.querySelectorAll('input[type="time"]');
+        if (inp2.length >= 2) entry.pm = fmtTime(inp2[0].value) + ' – ' + fmtTime(inp2[1].value);
+      }
+      rows.push(entry);
     });
-  });
+
+    var offDays = [];
+    scope.querySelectorAll('.day-pill.off').forEach(function(p) {
+      offDays.push(dayNames[p.getAttribute('data-day')] || p.getAttribute('data-day'));
+    });
+
+    // Build row HTML
+    var rowsHtml = rows.map(function(d) {
+      var tags = '';
+      if (d.am) tags += '<span style="color:#0d9488;font-size:11.5px;font-weight:600;background:#f0fdf9;padding:3px 9px;border-radius:20px;border:1px solid #a7f3d0;">AM ' + d.am + '</span>';
+      if (d.pm) tags += '<span style="color:#0369a1;font-size:11.5px;font-weight:600;background:#f0f9ff;padding:3px 9px;border-radius:20px;border:1px solid #bae6fd;">PM ' + d.pm + '</span>';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 4px;border-bottom:1px solid #f1f5f9;">'
+        + '<span style="font-weight:600;font-size:13.5px;color:#0f172a;">' + d.name + '</span>'
+        + '<div style="display:flex;gap:6px;">' + tags + '</div></div>';
+    }).join('');
+
+    document.getElementById('saveModalTherapist').textContent = therapistName;
+    document.getElementById('saveModalMonth').textContent = month;
+    document.getElementById('saveModalRows').innerHTML = rowsHtml || '<div style="color:#94a3b8;font-size:13px;padding:8px 4px;">No working days configured.</div>';
+
+    var offWrap = document.getElementById('saveModalOffWrap');
+    var offEl   = document.getElementById('saveModalOff');
+    if (offDays.length) {
+      offEl.textContent = 'Days off: ' + offDays.join(', ');
+      offWrap.style.display = '';
+    } else {
+      offWrap.style.display = 'none';
+    }
+
+    document.getElementById('saveScheduleModal').classList.add('open');
+  }
+
+  function closeSaveModal() {
+    document.getElementById('saveScheduleModal').classList.remove('open');
+  }
+
+  function fmtTime(val) {
+    if (!val) return '–';
+    var p = val.split(':');
+    var h = parseInt(p[0]), m = p[1];
+    var ampm = h >= 12 ? 'pm' : 'am';
+    h = h % 12 || 12;
+    return h + ':' + m + ' ' + ampm;
+  }
+
+  // ——————————————————————————————————
+  // View History
+  // ——————————————————————————————————
+  var mockHistory = [
+    { ts: 'Today, 2:14 pm',   user: 'You',           action: 'Updated Wednesday AM start time → 08:30' },
+    { ts: 'Today, 11:50 am',  user: 'You',           action: 'Toggled Saturday — set to Off' },
+    { ts: 'Mar 20, 9:07 am',  user: 'Admin (Sarah)', action: 'Set May 2026 global working hours' },
+    { ts: 'Mar 18, 4:31 pm',  user: 'You',           action: 'Saved draft for May 2026' },
+    { ts: 'Feb 28, 10:02 am', user: 'Admin (Sarah)', action: 'Committed April 2026 shifts' },
+  ];
+
+  function viewHistory(btn) {
+    var scope = btn.closest('.editor-section');
+    var nameEl = scope ? scope.querySelector('.editor-title') : null;
+    document.getElementById('historyTherapist').textContent = nameEl ? nameEl.textContent.trim() : 'Therapist';
+
+    document.getElementById('historyList').innerHTML = mockHistory.map(function(e, i) {
+      return '<div style="display:flex;gap:14px;padding:14px 20px;border-bottom:1px solid #f1f5f9;' + (i===0 ? 'background:#f8fffe;' : '') + '">'
+        + '<div style="width:8px;height:8px;border-radius:50%;background:' + (i===0?'#0d9488':'#cbd5e1') + ';margin-top:5px;flex-shrink:0;"></div>'
+        + '<div><div style="font-size:13.5px;font-weight:500;color:#0f172a;">' + e.action + '</div>'
+        + '<div style="font-size:12px;color:#94a3b8;margin-top:2px;">' + e.ts + ' · ' + e.user + '</div></div></div>';
+    }).join('');
+
+    document.getElementById('historyModal').classList.add('open');
+  }
+
+  function closeHistoryModal() {
+    document.getElementById('historyModal').classList.remove('open');
+  }
+
+  // ——————————————————————————————————
+  // Save Global Settings
+  // ——————————————————————————————————
+  function saveGlobalSettings() {
+    showToast('✅ Global settings saved');
+  }
 
   // Toast helper
   function showToast(msg) {
@@ -1191,6 +1365,61 @@
     </div>
   </div>
 </div>
+
+<!-- ============================== SAVE SCHEDULE MODAL ============================== -->
+<div class="modal-overlay" id="saveScheduleModal" onclick="if(event.target===this)closeSaveModal()">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#f0fdf9,#e0f2f1);">
+      <div class="modal-title" style="display:flex;align-items:center;gap:10px;">
+        <span id="saveModalCheck" style="font-size:26px;animation:popIn .35s ease;">✅</span>
+        <div>
+          <div style="font-size:16px;font-weight:700;color:#0f172a;">Schedule Saved</div>
+          <div style="font-size:12px;font-weight:400;color:var(--muted);margin-top:1px;" id="saveModalTherapist"></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeSaveModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#f0fdf9;border:1.5px solid #a7f3d0;border-radius:10px;margin-bottom:18px;">
+        <span style="font-size:14px;">📅</span>
+        <span style="font-size:13px;font-weight:600;color:#0d9488;">Draft saved for <span id="saveModalMonth"></span> — not yet committed</span>
+      </div>
+
+      <div style="font-weight:600;font-size:13px;color:#374151;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Working Days & Hours</div>
+      <div id="saveModalRows" style="display:flex;flex-direction:column;gap:2px;margin-bottom:16px;"></div>
+
+      <div id="saveModalOffWrap" style="margin-bottom:18px;display:none;">
+        <span style="font-size:12.5px;color:#94a3b8;" id="saveModalOff"></span>
+      </div>
+
+      <div style="background:#fefce8;border:1px solid #fde047;border-radius:9px;padding:11px 14px;font-size:13px;color:#78350f;">
+        💡 <strong>Draft only.</strong> Use <em>Commit Shifts</em> to lock this schedule and enable appointment booking.
+      </div>
+    </div>
+    <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border);">
+      <button class="btn btn-ghost" onclick="closeSaveModal()">Close</button>
+      <button class="btn btn-primary" onclick="closeSaveModal();openCommitModal()">Commit Shifts →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== HISTORY DRAWER ============================== -->
+<div class="modal-overlay" id="historyModal" onclick="if(event.target===this)closeHistoryModal()">
+  <div class="modal-box" style="max-width:500px;">
+    <div class="modal-header">
+      <div class="modal-title">🕐 Schedule Change History — <span id="historyTherapist"></span></div>
+      <button class="modal-close" onclick="closeHistoryModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:0;">
+      <div id="historyList" style="display:flex;flex-direction:column;"></div>
+    </div>
+    <div class="modal-footer" style="display:flex;justify-content:flex-end;padding:14px 24px;border-top:1px solid var(--border);">
+      <button class="btn btn-ghost" onclick="closeHistoryModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== GLOBAL SETTINGS SAVED TOAST ============================== -->
 
 </div><!-- /main-wrapper -->
 </body>
