@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shift Setup · CARES Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --primary-light: #ccfbf1;
+      --bg: #f0fdf9;
+      --card: #ffffff;
+      --border: #d1fae5;
+      --text: #0f1c1b;
+      --muted: #64748b;
+      --nav-bg: #1a2e2c;
+      --amber: #f59e0b;
+      --amber-bg: #fffbeb;
+      --amber-border: #fde68a;
+      --red: #ef4444;
+      --red-bg: #fef2f2;
+      --red-border: #fecaca;
+      --purple: #7c3aed;
+      --blue: #2563eb;
+      --shadow: 0 4px 20px rgba(13,148,136,0.1);
+      --shadow-sm: 0 2px 8px rgba(13,148,136,0.07);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); }
+
+    /* NAV */
+    .topnav { background: var(--nav-bg); position: sticky; top: 0; z-index: 100; }
+    .nav-inner { max-width: 1500px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; height: 56px; gap: 6px; }
+    .nav-brand { display: flex; align-items: center; gap: 8px; color: white; text-decoration: none; font-weight: 700; font-size: 16px; flex-shrink: 0; margin-right: 16px; }
+    .nav-brand-icon { width: 30px; height: 30px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .nav-links { display: flex; gap: 2px; flex: 1; overflow-x: auto; }
+    .nav-link { color: #94a3b8; text-decoration: none; padding: 7px 13px; border-radius: 8px; font-size: 13.5px; font-weight: 500; transition: all 0.15s; white-space: nowrap; }
+    .nav-link:hover { color: white; background: rgba(255,255,255,0.08); }
+    .nav-link.active { color: white; background: var(--primary); }
+    .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: 12px; }
+    .role-badge { background: rgba(255,255,255,0.1); color: #94a3b8; padding: 4px 10px; border-radius: 20px; font-size: 12px; }
+    .avatar { width: 32px; height: 32px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+
+    /* PAGE */
+    .page { max-width: 1500px; margin: 0 auto; padding: 28px 20px 60px; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 28px; font-weight: 700; }
+    .page-header p { color: var(--muted); margin-top: 4px; font-size: 15px; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 28px; }
+    .tab-btn { background: none; border: none; padding: 10px 20px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-btn:hover:not(.active) { color: var(--text); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* GLOBAL SETTINGS */
+    .global-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+    .setting-group { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); }
+    .setting-group h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .setting-group h3 .icon { width: 28px; height: 28px; border-radius: 8px; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 6px; }
+    .field select, .field input { width: 100%; border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 12px; font-family: 'Outfit', sans-serif; font-size: 14px; background: white; outline: none; color: var(--text); }
+    .field select:focus, .field input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; }
+    .toggle-row span { font-size: 14px; }
+    .toggle { position: relative; width: 42px; height: 24px; }
+    .toggle input { display: none; }
+    .toggle-slider { position: absolute; inset: 0; background: #cbd5e1; border-radius: 99px; cursor: pointer; transition: 0.2s; }
+    .toggle-slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+    .toggle input:checked + .toggle-slider { background: var(--primary); }
+    .toggle input:checked + .toggle-slider:before { transform: translateX(18px); }
+    .save-bar { display: flex; justify-content: flex-end; margin-top: 24px; }
+    .btn { border: none; border-radius: 12px; padding: 11px 22px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 8px 20px rgba(13,148,136,0.3); }
+    .btn-secondary { background: var(--primary-light); color: var(--primary-dark); }
+    .btn-secondary:hover { background: #99f6e4; }
+    .btn-ghost { background: #f1f5f9; color: var(--muted); }
+    .btn-ghost:hover { background: #e2e8f0; color: var(--text); }
+    .btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+
+    /* THERAPIST LAYOUT */
+    .therapist-layout { display: grid; grid-template-columns: 260px 1fr; gap: 24px; align-items: start; }
+    .therapist-sidebar { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm); }
+    .sidebar-header { padding: 16px 18px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; background: #f8fffe; }
+    .therapist-item { display: flex; align-items: center; gap: 12px; padding: 14px 18px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    .therapist-item:last-child { border-bottom: none; }
+    .therapist-item:hover { background: #f0fdf9; }
+    .therapist-item.active { background: var(--primary-light); }
+    .t-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+    .t-name { font-size: 14px; font-weight: 600; }
+    .t-role { font-size: 12px; color: var(--muted); }
+    .t-status { margin-left: auto; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .status-dot.active { background: #22c55e; }
+    .status-dot.leave { background: var(--amber); }
+
+    /* EDITOR PANEL */
+    .editor-panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-sm); overflow: hidden; }
+    .editor-header { padding: 20px 24px; border-bottom: 1px solid var(--border); background: #f8fffe; display: flex; justify-content: space-between; align-items: center; }
+    .editor-therapist-info { display: flex; align-items: center; gap: 14px; }
+    .editor-title { font-size: 19px; font-weight: 700; }
+    .editor-subtitle { color: var(--muted); font-size: 14px; margin-top: 2px; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+    .badge-active { background: #dcfce7; color: #15803d; }
+    .badge-leave { background: var(--amber-bg); color: #92400e; border: 1px solid var(--amber-border); }
+    .badge-purple { background: #ede9fe; color: #6d28d9; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    /* DURATION SETTINGS */
+    .duration-row { display: flex; align-items: center; gap: 12px; padding: 16px 24px; border-bottom: 1px solid var(--border); background: #f8fffe; }
+    .duration-row label { font-size: 14px; font-weight: 600; }
+    .duration-row select { border: 1.5px solid var(--border); border-radius: 10px; padding: 8px 12px; font-family: 'Outfit', sans-serif; font-size: 14px; background: white; outline: none; }
+    .duration-row .override-note { font-size: 12px; color: var(--muted); margin-left: auto; }
+
+    /* WEEKLY SCHEDULE */
+    .week-grid { padding: 20px 24px; }
+    .week-grid h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+    .days-row { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .day-pill { padding: 7px 14px; border-radius: 99px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--muted); transition: all 0.15s; user-select: none; }
+    .day-pill.on { background: var(--primary); color: white; border-color: var(--primary); }
+    .day-pill.off { background: #f1f5f9; color: #cbd5e1; border-color: #e2e8f0; text-decoration: line-through; }
+
+    /* DAY CONFIG */
+    .day-config { border: 1.5px solid var(--border); border-radius: 14px; padding: 0; overflow: hidden; }
+    .day-config-header { background: var(--primary-light); padding: 12px 16px; font-size: 14px; font-weight: 700; color: var(--primary-dark); display: flex; align-items: center; gap: 8px; }
+    .day-row { display: grid; grid-template-columns: 40px 1fr 1fr 1fr auto; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .day-row:last-child { border-bottom: none; }
+    .day-label { font-size: 13px; font-weight: 700; color: var(--muted); }
+    .day-row.inactive { opacity: 0.4; pointer-events: none; }
+    .day-row select, .day-row input[type="time"] { border: 1.5px solid var(--border); border-radius: 8px; padding: 7px 10px; font-family: 'Outfit', sans-serif; font-size: 13px; background: white; outline: none; width: 100%; }
+    .day-row select:focus, .day-row input:focus { border-color: var(--primary); }
+    .day-col-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+
+    /* TIMELINE VIZ */
+    .timeline-section { padding: 20px 24px; border-top: 1px solid var(--border); }
+    .timeline-section h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+    .timeline-container { position: relative; }
+    .timeline-hour-labels { display: grid; grid-template-columns: 60px repeat(12, 1fr); font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+    .timeline-hour-labels span { text-align: left; }
+    .timeline-rows { display: flex; flex-direction: column; gap: 8px; }
+    .timeline-row { display: grid; grid-template-columns: 60px 1fr; align-items: center; gap: 12px; }
+    .timeline-day-label { font-size: 12px; font-weight: 600; color: var(--muted); }
+    .timeline-bar { position: relative; height: 28px; background: #f1f5f9; border-radius: 6px; overflow: hidden; }
+    .timeline-shift { position: absolute; top: 0; height: 100%; background: var(--primary); border-radius: 6px; opacity: 0.9; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: white; }
+    .timeline-shift.leave { background: linear-gradient(135deg, #fbbf24 25%, #f59e0b 25%, #f59e0b 50%, #fbbf24 50%, #fbbf24 75%, #f59e0b 75%); background-size: 8px 8px; color: #92400e; }
+    .timeline-off { position: absolute; top: 0; height: 100%; background: #e2e8f0; border-radius: 6px; }
+    .editor-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 12px; background: #f8fffe; }
+
+    /* LEAVE SECTION */
+    .leave-section { padding: 20px 24px; border-top: 1px solid var(--border); }
+    .leave-section h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+    .leave-card { background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .leave-info { display: flex; align-items: center; gap: 10px; }
+    .leave-icon { font-size: 20px; }
+    .leave-title { font-size: 14px; font-weight: 600; }
+    .leave-dates { font-size: 12px; color: #92400e; }
+    .leave-actions { display: flex; gap: 8px; }
+    .add-leave-btn { display: flex; align-items: center; gap: 6px; padding: 10px 16px; border: 1.5px dashed #a7f3d0; background: transparent; border-radius: 10px; color: var(--primary); font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .add-leave-btn:hover { background: var(--primary-light); }
+
+    /* MONTHLY COMMIT SYSTEM */
+    .month-nav { display: flex; align-items: center; gap: 0; background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-sm); margin-bottom: 20px; }
+    .month-nav-arrow { padding: 12px 16px; background: none; border: none; font-size: 18px; color: var(--muted); cursor: pointer; transition: background 0.1s; }
+    .month-nav-arrow:hover { background: #f0fdf9; color: var(--text); }
+    .month-tabs { display: flex; flex: 1; }
+    .month-tab { flex: 1; padding: 12px 6px; text-align: center; cursor: pointer; border-left: 1px solid var(--border); transition: background 0.1s; }
+    .month-tab:first-child { border-left: none; }
+    .month-tab:hover { background: #f0fdf9; }
+    .month-tab.active { background: var(--primary-light); }
+    .month-tab-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .month-tab.active .month-tab-name { color: var(--primary-dark); }
+    .month-tab-status { font-size: 11px; font-weight: 600; margin-top: 3px; }
+    .month-tab-status.draft { color: var(--muted); }
+    .month-tab-status.committed { color: var(--green,#16a34a); }
+    .month-tab-status.conflict { color: #92400e; }
+    .month-tab-status.future { color: #94a3b8; }
+
+    /* COMMIT STATUS BANNER */
+    .commit-banner { border-radius: 14px; padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .commit-banner.draft { background: #fffbeb; border: 1.5px solid #fde68a; }
+    .commit-banner.committed { background: #f0fdf9; border: 1.5px solid var(--primary-light); }
+    .commit-banner.conflict { background: #fff7ed; border: 1.5px solid #fed7aa; }
+    .commit-banner-icon { font-size: 22px; flex-shrink: 0; }
+    .commit-banner-text { flex: 1; }
+    .commit-banner-title { font-size: 14px; font-weight: 700; }
+    .commit-banner-desc { font-size: 13px; margin-top: 2px; }
+    .draft .commit-banner-title { color: #92400e; }
+    .draft .commit-banner-desc { color: #b45309; }
+    .committed .commit-banner-title { color: var(--primary-dark); }
+    .committed .commit-banner-desc { color: var(--muted); }
+    .conflict .commit-banner-title { color: #c2410c; }
+    .conflict .commit-banner-desc { color: #9a3412; }
+    .commit-banner-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* LOCKED EDITOR STATE */
+    .editor-panel.locked .week-grid { position: relative; }
+    .editor-panel.locked .day-config { position: relative; }
+    .editor-panel.locked .day-row input,
+    .editor-panel.locked .day-row select { pointer-events: none; background: #f8fafc; color: #94a3b8; border-color: #e2e8f0; }
+    .editor-panel.locked .days-row .day-pill { pointer-events: none; opacity: 0.6; }
+    .editor-panel.locked .duration-row select { pointer-events: none; background: #f8fafc; color: #94a3b8; }
+    .lock-overlay-banner { background: linear-gradient(90deg,#f0fdf9,#e0f2f1); border: 1px solid var(--primary-light); border-radius: 10px; padding: 10px 14px; margin: 0 24px 16px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--primary-dark); font-weight: 600; }
+    .lock-overlay-banner .lock-icon { font-size: 18px; flex-shrink: 0; }
+    .lock-overlay-banner .lock-desc { font-weight: 400; color: var(--muted); margin-left: 4px; }
+    .editor-panel.locked .editor-footer .btn-save-normal { display: none; }
+    .editor-panel.locked .editor-footer .btn-locked-msg { display: flex; align-items: center; gap: 6px; padding: 10px 16px; background: #f1f5f9; border-radius: 10px; font-size: 13px; color: #94a3b8; font-weight: 600; }
+    .btn-locked-msg { display: none; }
+
+    /* LEAVE CONFLICT WARNING */
+    .leave-conflict { background: #fff7ed; border: 1.5px solid #fed7aa; border-radius: 12px; padding: 14px 16px; margin-top: 10px; }
+    .leave-conflict-header { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: #c2410c; margin-bottom: 8px; }
+    .leave-conflict-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+    .leave-conflict-item { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 10px; background: white; border-radius: 8px; border: 1px solid #fed7aa; }
+    .leave-conflict-item .ci-date { font-weight: 700; flex: 1; }
+    .leave-conflict-item .ci-count { font-size: 12px; color: #9a3412; }
+    .leave-conflict-actions { display: flex; gap: 8px; }
+
+    /* COMMIT CONFIRMATION MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,28,27,0.65); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.show, .modal-overlay.open { display: flex; }
+    .modal { background: white; border-radius: 22px; max-width: 480px; width: 100%; box-shadow: 0 24px 60px rgba(0,0,0,0.2); animation: popIn 0.22s cubic-bezier(0.34,1.56,0.64,1); overflow: hidden; }
+    .modal-box { background: white; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,.2); width: 100%; overflow: hidden; animation: popIn 0.22s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes popIn { from { transform: scale(0.9) translateY(8px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+    .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 16px; font-weight: 700; color: #0f172a; }
+    .modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--muted); padding: 4px 8px; border-radius: 6px; line-height: 1; }
+    .modal-close:hover { background: #f1f5f9; }
+    .modal-header h3 { font-size: 18px; font-weight: 800; }
+    .modal-header p { font-size: 14px; color: var(--muted); margin-top: 4px; }
+    .modal-body { padding: 18px 24px; max-height: 65vh; overflow-y: auto; }
+    .commit-checklist { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .commit-check-item { display: flex; align-items: center; gap: 10px; font-size: 14px; padding: 10px 12px; border-radius: 10px; background: #f8fffe; border: 1px solid var(--border); }
+    .commit-check-item .ci-icon { font-size: 16px; flex-shrink: 0; }
+    .commit-warning-box { background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: 10px; padding: 12px 14px; font-size: 13px; color: #92400e; }
+    .modal-footer { padding: 14px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; background: #f8fffe; }
+    #confirmCommitBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* MONTH STATUS IN SIDEBAR */
+    .t-commit-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 99px; }
+    .t-commit-badge.committed { background: #dcfce7; color: #15803d; }
+    .t-commit-badge.draft { background: #fef3c7; color: #92400e; }
+
+    /* GREEN COLOR VAR */
+    :root { --green: #16a34a; --green-bg: #dcfce7; }
+    .badge-locked { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="timeslot_scheduler_mockup.html">
+      <div class="nav-brand-icon">🏥</div>
+      CARES Scheduler
+    </a>
+    <div class="nav-links">
+      <a href="timeslot_scheduler_mockup.html" class="nav-link">📅 Schedule</a>
+      <a href="shift-setup.html" class="nav-link active">⚙️ Shifts</a>
+      <a href="book-appointment.html" class="nav-link">➕ Book</a>
+      <a href="appointments.html" class="nav-link">📋 Appointments</a>
+      <a href="recurring-edit.html" class="nav-link">🔄 Recurring</a>
+      <a href="therapist-change.html" class="nav-link">🔀 Change Therapist</a>
+    </div>
+    <div class="nav-right">
+      <span class="role-badge">Admin</span>
+      <div class="avatar">AL</div>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>Shift &amp; Schedule Setup</h1>
+    <p>Configure working hours and session durations per therapist. Shifts must be <strong>committed monthly</strong> before appointments can be booked against them.</p>
+  </div>
+
+  <!-- MONTH NAVIGATOR -->
+  <div class="month-nav">
+    <button class="month-nav-arrow" onclick="prevMonth()">‹</button>
+    <div class="month-tabs">
+      <div class="month-tab" onclick="selectMonth(this,'mar')" id="month-mar">
+        <div class="month-tab-name">March 2026</div>
+        <div class="month-tab-status committed">🔒 All Committed</div>
+      </div>
+      <div class="month-tab active" onclick="selectMonth(this,'apr')" id="month-apr">
+        <div class="month-tab-name">April 2026</div>
+        <div class="month-tab-status conflict">⚠ 1 Conflict</div>
+      </div>
+      <div class="month-tab" onclick="selectMonth(this,'may')" id="month-may">
+        <div class="month-tab-name">May 2026</div>
+        <div class="month-tab-status draft">📝 3 Draft</div>
+      </div>
+      <div class="month-tab" onclick="selectMonth(this,'jun')" id="month-jun">
+        <div class="month-tab-name">June 2026</div>
+        <div class="month-tab-status future">Not set</div>
+      </div>
+    </div>
+    <button class="month-nav-arrow" onclick="nextMonth()">›</button>
+  </div>
+
+  <!-- COMMIT STATUS BANNER (dynamic) -->
+  <div class="commit-banner conflict" id="commitBanner">
+    <span class="commit-banner-icon">⚠️</span>
+    <div class="commit-banner-text">
+      <div class="commit-banner-title" id="bannerTitle">April 2026 — Shifts Committed · 1 Leave Conflict</div>
+      <div class="commit-banner-desc" id="bannerDesc">Shift slots are locked for editing. Dr Marcus Lee has appointments conflicting with leave Apr 6–13. Use Change Therapist to reassign.</div>
+    </div>
+    <div class="commit-banner-actions">
+      <button class="btn btn-ghost" style="padding:8px 14px;font-size:13px;" onclick="window.location='therapist-change.html'">🔀 Reassign Appointments</button>
+      <button class="btn btn-primary" id="commitMonthBtn" style="padding:8px 16px;font-size:13px;display:none;" onclick="openCommitModal()">🔒 Commit May 2026 Shifts</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('therapists')">Therapist Schedules</button>
+    <button class="tab-btn" onclick="switchTab('global')">Global Settings</button>
+  </div>
+
+  <!-- GLOBAL SETTINGS TAB -->
+  <div class="tab-panel" id="tab-global">
+    <div class="global-grid">
+      <div class="setting-group">
+        <h3><span class="icon">⏱️</span> Default Session Duration</h3>
+        <div class="field">
+          <label>Base Duration</label>
+          <select>
+            <option>15 minutes</option>
+            <option selected>30 minutes</option>
+            <option>45 minutes</option>
+            <option>60 minutes</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Allow Therapist Override</label>
+          <div class="toggle-row">
+            <span>Therapists can set their own duration</span>
+            <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Allow Admin Override</label>
+          <div class="toggle-row">
+            <span>Admin can override per-therapist</span>
+            <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <h3><span class="icon">🕐</span> Global Working Hours</h3>
+        <div class="field">
+          <label>Default Start Time</label>
+          <input type="time" value="08:00" />
+        </div>
+        <div class="field">
+          <label>Default End Time</label>
+          <input type="time" value="18:00" />
+        </div>
+        <div class="field">
+          <label>Lunch / Break Duration</label>
+          <select>
+            <option>No break</option>
+            <option>30 minutes</option>
+            <option selected>1 hour</option>
+            <option>1.5 hours</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <h3><span class="icon">📋</span> Booking Rules</h3>
+        <div class="field">
+          <label>Min. Advance Booking</label>
+          <select>
+            <option>Same day</option>
+            <option selected>1 day prior</option>
+            <option>2 days prior</option>
+            <option>1 week prior</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Max. Advance Booking</label>
+          <select>
+            <option>2 weeks</option>
+            <option selected>1 month</option>
+            <option>3 months</option>
+            <option>6 months</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Allow Recurring Appointments</label>
+          <div class="toggle-row">
+            <span>Enable recurring schedule</span>
+            <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <h3><span class="icon">🔔</span> Notifications</h3>
+        <div class="field">
+          <label>Reminder Before Session</label>
+          <select>
+            <option>15 minutes</option>
+            <option selected>30 minutes</option>
+            <option>1 hour</option>
+            <option>1 day</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Notify on Schedule Change</label>
+          <div class="toggle-row">
+            <span>Send alert to therapist</span>
+            <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Notify Senior on Change</label>
+          <div class="toggle-row">
+            <span>Send alert to senior</span>
+            <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="save-bar">
+      <button class="btn btn-primary">Save Global Settings</button>
+    </div>
+  </div>
+
+  <!-- THERAPIST SCHEDULES TAB -->
+  <div class="tab-panel active" id="tab-therapists">
+    <div class="therapist-layout">
+      <!-- SIDEBAR -->
+      <div class="therapist-sidebar">
+        <div class="sidebar-header">Therapists — April 2026</div>
+        <div class="therapist-item active" onclick="selectTherapist(this,'angela')">
+          <div class="t-avatar" style="background:#0d9488;color:white;">AL</div>
+          <div>
+            <div class="t-name">Dr Angela Lim</div>
+            <div class="t-role">Occupational Therapy</div>
+          </div>
+          <div class="t-status" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+            <div class="status-dot active"></div>
+            <span class="t-commit-badge committed">🔒 Committed</span>
+          </div>
+        </div>
+        <div class="therapist-item" onclick="selectTherapist(this,'marcus')">
+          <div class="t-avatar" style="background:#f59e0b;color:white;">ML</div>
+          <div>
+            <div class="t-name">Dr Marcus Lee</div>
+            <div class="t-role">Physiotherapy</div>
+          </div>
+          <div class="t-status" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+            <div class="status-dot leave"></div>
+            <span class="t-commit-badge committed">🔒 Committed</span>
+          </div>
+        </div>
+        <div class="therapist-item" onclick="selectTherapist(this,'janice')">
+          <div class="t-avatar" style="background:#7c3aed;color:white;">JT</div>
+          <div>
+            <div class="t-name">Nurse Janice Tan</div>
+            <div class="t-role">Nursing / Vaccination</div>
+          </div>
+          <div class="t-status" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+            <div class="status-dot active"></div>
+            <span class="t-commit-badge committed">🔒 Committed</span>
+          </div>
+        </div>
+        <div class="therapist-item" onclick="selectTherapist(this,'wei')">
+          <div class="t-avatar" style="background:#2563eb;color:white;">WC</div>
+          <div>
+            <div class="t-name">Dr Wei Chen</div>
+            <div class="t-role">Speech Therapy</div>
+          </div>
+          <div class="t-status" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+            <div class="status-dot active"></div>
+            <span class="t-commit-badge committed">🔒 Committed</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- EDITOR -->
+      <div class="editor-panel" id="editorPanel">
+        <!-- Dr Angela Lim - default shown -->
+        <div id="editor-angela">
+          <div class="editor-panel locked" id="editorPanelAngela">
+          <div class="editor-header">
+            <div class="editor-therapist-info">
+              <div class="t-avatar" style="background:#0d9488;color:white;width:46px;height:46px;font-size:16px;">AL</div>
+              <div>
+                <div class="editor-title">Dr Angela Lim</div>
+                <div class="editor-subtitle">Occupational Therapy · Staff ID: T-0041</div>
+              </div>
+            </div>
+            <span class="badge badge-locked">🔒 April 2026 Committed</span>
+          </div>
+
+          <!-- LOCKED BANNER -->
+          <div class="lock-overlay-banner">
+            <span class="lock-icon">🔒</span>
+            April 2026 shifts are committed and locked for editing.
+            <span class="lock-desc">Only leave periods can be added. To change shift slots, commit a new month first.</span>
+          </div>
+
+          <div class="duration-row">
+            <label>Session Duration:</label>
+            <select disabled>
+              <option selected>30 minutes</option>
+              <option>45 minutes</option>
+              <option>60 minutes</option>
+            </select>
+            <span class="override-note">Locked — set before commit</span>
+          </div>
+          <div class="week-grid">
+            <h3>Weekly Schedule Template</h3>
+            <div class="days-row">
+              <span class="day-pill on">Mon</span>
+              <span class="day-pill on">Tue</span>
+              <span class="day-pill on">Wed</span>
+              <span class="day-pill on">Thu</span>
+              <span class="day-pill on">Fri</span>
+              <span class="day-pill off">Sat</span>
+              <span class="day-pill off">Sun</span>
+            </div>
+            <div class="day-config">
+              <div class="day-config-header">📅 Per-day Configuration</div>
+              <div class="day-row" style="background:#f8fffe;border-bottom:1px solid var(--border);padding:8px 16px;">
+                <div class="day-col-label">Day</div>
+                <div class="day-col-label">Start Time</div>
+                <div class="day-col-label">End Time</div>
+                <div class="day-col-label">Duration</div>
+                <div class="day-col-label">Status</div>
+              </div>
+              <div class="day-row"><div class="day-label">Mon</div><input type="time" value="08:30"><input type="time" value="14:30"><select><option selected>30 min</option><option>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row"><div class="day-label">Tue</div><input type="time" value="08:30"><input type="time" value="14:30"><select><option selected>30 min</option><option>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row"><div class="day-label">Wed</div><input type="time" value="08:30"><input type="time" value="14:30"><select><option selected>30 min</option><option>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row"><div class="day-label">Thu</div><input type="time" value="08:30"><input type="time" value="14:30"><select><option selected>30 min</option><option>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row"><div class="day-label">Fri</div><input type="time" value="08:30"><input type="time" value="13:30"><select><option selected>30 min</option><option>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row inactive"><div class="day-label">Sat</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option>30 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row inactive"><div class="day-label">Sun</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option>30 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+            </div>
+          </div>
+          <div class="timeline-section">
+            <h3>Weekly Shift Overview</h3>
+            <div class="timeline-container">
+              <div class="timeline-hour-labels">
+                <span></span>
+                <span>8am</span><span>9am</span><span>10am</span><span>11am</span><span>12pm</span>
+                <span>1pm</span><span>2pm</span><span>3pm</span><span>4pm</span><span>5pm</span>
+                <span>6pm</span><span>7pm</span>
+              </div>
+              <div class="timeline-rows">
+                <div class="timeline-row"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.2%;width:50%;">08:30–14:30</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.2%;width:50%;">08:30–14:30</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.2%;width:50%;">08:30–14:30</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.2%;width:50%;">08:30–14:30</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.2%;width:41.7%;">08:30–13:30</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="leave-section">
+            <h3>Leave / Unavailability <span style="font-size:12px;color:var(--primary);font-weight:500;">(Still editable when committed)</span></h3>
+            <button class="add-leave-btn" onclick="showLeaveModal('angela')">＋ Add Leave Period</button>
+          </div>
+          <div class="editor-footer">
+            <button class="btn btn-ghost">View History</button>
+            <span class="btn-locked-msg" style="display:flex;">🔒 Shifts locked · Committed for April 2026</span>
+            <button class="btn btn-primary btn-save-normal" style="display:none;">Save Schedule</button>
+          </div>
+          </div><!-- end .editor-panel.locked -->
+        </div>
+
+        <!-- Dr Marcus Lee -->
+        <div id="editor-marcus" style="display:none;">
+          <div class="editor-panel locked">
+          <div class="editor-header">
+            <div class="editor-therapist-info">
+              <div class="t-avatar" style="background:#f59e0b;color:white;width:46px;height:46px;font-size:16px;">ML</div>
+              <div>
+                <div class="editor-title">Dr Marcus Lee</div>
+                <div class="editor-subtitle">Physiotherapy · Staff ID: T-0039</div>
+              </div>
+            </div>
+            <span class="badge badge-locked">🔒 April 2026 Committed</span>
+          </div>
+
+          <!-- LOCKED BANNER -->
+          <div class="lock-overlay-banner">
+            <span class="lock-icon">🔒</span>
+            April 2026 shifts are committed and locked for editing.
+            <span class="lock-desc">Only leave periods can be added. Shift times cannot be changed.</span>
+          </div>
+
+          <div class="duration-row">
+            <label>Session Duration:</label>
+            <select disabled><option>30 minutes</option><option selected>60 minutes</option></select>
+            <span class="override-note">Locked — set before commit</span>
+          </div>
+          <div class="week-grid">
+            <h3>Weekly Schedule Template</h3>
+            <div class="days-row">
+              <span class="day-pill on">Mon</span>
+              <span class="day-pill on">Tue</span>
+              <span class="day-pill on">Wed</span>
+              <span class="day-pill on">Thu</span>
+              <span class="day-pill off">Fri</span>
+              <span class="day-pill off">Sat</span>
+              <span class="day-pill off">Sun</span>
+            </div>
+            <div class="day-config">
+              <div class="day-config-header">📅 Per-day Configuration</div>
+              <div class="day-row" style="background:#f8fffe;border-bottom:1px solid var(--border);padding:8px 16px;">
+                <div class="day-col-label">Day</div>
+                <div class="day-col-label">Start Time</div>
+                <div class="day-col-label">End Time</div>
+                <div class="day-col-label">Duration</div>
+                <div class="day-col-label">Status</div>
+              </div>
+              <div class="day-row"><div class="day-label">Mon</div><input type="time" value="09:00"><input type="time" value="13:30"><select><option>30 min</option><option selected>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row"><div class="day-label">Tue</div><input type="time" value="09:00"><input type="time" value="13:30"><select><option>30 min</option><option selected>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row"><div class="day-label">Wed</div><input type="time" value="09:00"><input type="time" value="13:30"><select><option>30 min</option><option selected>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row"><div class="day-label">Thu</div><input type="time" value="09:00"><input type="time" value="13:30"><select><option>30 min</option><option selected>60 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row inactive"><div class="day-label">Fri</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option selected>60 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row inactive"><div class="day-label">Sat</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option selected>60 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row inactive"><div class="day-label">Sun</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option selected>60 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+            </div>
+          </div>
+          <div class="timeline-section">
+            <h3>Weekly Shift Overview <span style="font-size:12px;color:var(--amber);font-weight:500;">(Apr 6–13 marked as leave)</span></h3>
+            <div class="timeline-container">
+              <div class="timeline-hour-labels">
+                <span></span>
+                <span>8am</span><span>9am</span><span>10am</span><span>11am</span><span>12pm</span>
+                <span>1pm</span><span>2pm</span><span>3pm</span><span>4pm</span><span>5pm</span>
+                <span>6pm</span><span>7pm</span>
+              </div>
+              <div class="timeline-rows">
+                <div class="timeline-row"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift leave" style="left:8.3%;width:37.5%;">09:00–13:30 (LEAVE)</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift" style="left:8.3%;width:37.5%;">09:00–13:30</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift leave" style="left:8.3%;width:37.5%;">09:00–13:30 (LEAVE)</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift leave" style="left:8.3%;width:37.5%;">09:00–13:30 (LEAVE)</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="leave-section">
+            <h3>Leave / Unavailability <span style="font-size:12px;color:var(--primary);font-weight:500;">(Still editable when committed)</span></h3>
+            <div class="leave-card">
+              <div class="leave-info">
+                <span class="leave-icon">🏖️</span>
+                <div>
+                  <div class="leave-title">Annual Leave</div>
+                  <div class="leave-dates">Mon 6 Apr – Mon 13 Apr 2026 · 6 working days</div>
+                </div>
+              </div>
+              <div class="leave-actions">
+                <button class="btn btn-ghost" style="padding:6px 12px;font-size:13px;" onclick="window.location='therapist-change.html'">Reassign Appointments</button>
+                <button class="btn btn-danger" style="padding:6px 12px;font-size:13px;">Delete</button>
+              </div>
+            </div>
+
+            <!-- LEAVE CONFLICT WARNING -->
+            <div class="leave-conflict">
+              <div class="leave-conflict-header">⚠️ Appointment conflicts detected</div>
+              <div class="leave-conflict-list">
+                <div class="leave-conflict-item">
+                  <span class="ci-date">Mon, 6 Apr 2026</span>
+                  <span class="ci-count">2 appointments affected</span>
+                </div>
+                <div class="leave-conflict-item">
+                  <span class="ci-date">Mon, 13 Apr 2026</span>
+                  <span class="ci-count">2 appointments affected</span>
+                </div>
+              </div>
+              <div style="font-size:13px;color:#9a3412;margin-bottom:10px;">These appointments need to be reassigned to another therapist. Shift slots cannot be changed — use <strong>Change Therapist</strong> to resolve the conflict.</div>
+              <div class="leave-conflict-actions">
+                <button class="btn btn-ghost" style="padding:8px 14px;font-size:13px;">View Affected Sessions</button>
+                <button class="btn" style="background:#fff7ed;color:#c2410c;border:1.5px solid #fed7aa;padding:8px 14px;font-size:13px;" onclick="window.location='therapist-change.html'">🔀 Reassign Now →</button>
+              </div>
+            </div>
+
+            <button class="add-leave-btn" onclick="showLeaveModal('marcus')">＋ Add Leave Period</button>
+          </div>
+          <div class="editor-footer">
+            <button class="btn btn-ghost">View History</button>
+            <span class="btn-locked-msg" style="display:flex;">🔒 Shifts locked · Committed for April 2026</span>
+            <button class="btn btn-primary btn-save-normal" style="display:none;">Save Schedule</button>
+          </div>
+          </div><!-- end .editor-panel.locked -->
+        </div>
+
+        <!-- Nurse Janice Tan -->
+        <div id="editor-janice" style="display:none;">
+          <div class="editor-panel locked">
+          <div class="editor-header">
+            <div class="editor-therapist-info">
+              <div class="t-avatar" style="background:#7c3aed;color:white;width:46px;height:46px;font-size:16px;">JT</div>
+              <div>
+                <div class="editor-title">Nurse Janice Tan</div>
+                <div class="editor-subtitle">Nursing / Vaccination · Staff ID: N-0012</div>
+              </div>
+            </div>
+            <span class="badge badge-locked">🔒 April 2026 Committed</span>
+          </div>
+          <div class="lock-overlay-banner"><span class="lock-icon">🔒</span>April 2026 shifts are committed and locked. <span class="lock-desc">Only leave periods can be added.</span></div>
+          <div class="duration-row">
+            <label>Session Duration:</label>
+            <select disabled><option selected>30 minutes</option><option>60 minutes</option></select>
+            <span class="override-note">Locked — set before commit</span>
+          </div>
+          <div class="week-grid">
+            <h3>Weekly Schedule Template</h3>
+            <div class="days-row">
+              <span class="day-pill on">Mon</span>
+              <span class="day-pill on">Tue</span>
+              <span class="day-pill on">Wed</span>
+              <span class="day-pill on">Thu</span>
+              <span class="day-pill on">Fri</span>
+              <span class="day-pill on">Sat</span>
+              <span class="day-pill off">Sun</span>
+            </div>
+            <div class="day-config">
+              <div class="day-config-header">📅 Per-day Configuration</div>
+              <div class="day-row" style="background:#f8fffe;border-bottom:1px solid var(--border);padding:8px 16px;">
+                <div class="day-col-label">Day</div><div class="day-col-label">Start</div><div class="day-col-label">End</div><div class="day-col-label">Duration</div><div class="day-col-label">Status</div>
+              </div>
+              <div class="day-row"><div class="day-label">Mon</div><input type="time" value="09:30"><input type="time" value="14:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row"><div class="day-label">Tue</div><input type="time" value="09:30"><input type="time" value="14:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row"><div class="day-label">Wed</div><input type="time" value="09:30"><input type="time" value="14:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row"><div class="day-label">Thu</div><input type="time" value="09:30"><input type="time" value="14:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row"><div class="day-label">Fri</div><input type="time" value="09:30"><input type="time" value="14:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row"><div class="day-label">Sat</div><input type="time" value="09:00"><input type="time" value="13:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row inactive"><div class="day-label">Sun</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option>30 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+            </div>
+          </div>
+          <div class="timeline-section">
+            <h3>Weekly Shift Overview</h3>
+            <div class="timeline-container">
+              <div class="timeline-hour-labels"><span></span><span>8am</span><span>9am</span><span>10am</span><span>11am</span><span>12pm</span><span>1pm</span><span>2pm</span><span>3pm</span><span>4pm</span><span>5pm</span><span>6pm</span><span>7pm</span></div>
+              <div class="timeline-rows">
+                <div class="timeline-row"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift" style="left:12.5%;width:37.5%;">09:30–14:00</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift" style="left:12.5%;width:37.5%;">09:30–14:00</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift" style="left:12.5%;width:37.5%;">09:30–14:00</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift" style="left:12.5%;width:37.5%;">09:30–14:00</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-shift" style="left:12.5%;width:37.5%;">09:30–14:00</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-shift" style="left:8.3%;width:41.7%;">09:00–13:00</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="leave-section">
+            <h3>Leave / Unavailability <span style="font-size:12px;color:var(--primary);font-weight:500;">(Still editable when committed)</span></h3>
+            <button class="add-leave-btn" onclick="showLeaveModal('janice')">＋ Add Leave Period</button>
+          </div>
+          <div class="editor-footer">
+            <button class="btn btn-ghost">View History</button>
+            <span class="btn-locked-msg" style="display:flex;">🔒 Shifts locked · Committed for April 2026</span>
+            <button class="btn btn-primary btn-save-normal" style="display:none;">Save Schedule</button>
+          </div>
+          </div><!-- end .editor-panel.locked -->
+        </div>
+
+        <!-- Dr Wei Chen -->
+        <div id="editor-wei" style="display:none;">
+          <div class="editor-panel locked">
+          <div class="editor-header">
+            <div class="editor-therapist-info">
+              <div class="t-avatar" style="background:#2563eb;color:white;width:46px;height:46px;font-size:16px;">WC</div>
+              <div>
+                <div class="editor-title">Dr Wei Chen</div>
+                <div class="editor-subtitle">Speech Therapy · Staff ID: T-0047</div>
+              </div>
+            </div>
+            <span class="badge badge-locked">🔒 April 2026 Committed</span>
+          </div>
+          <div class="lock-overlay-banner"><span class="lock-icon">🔒</span>April 2026 shifts are committed and locked. <span class="lock-desc">Only leave periods can be added.</span></div>
+          <div class="duration-row">
+            <label>Session Duration:</label>
+            <select disabled><option selected>30 minutes</option><option>45 minutes</option><option>60 minutes</option></select>
+            <span class="override-note">Locked — set before commit</span>
+          </div>
+          <div class="week-grid">
+            <h3>Weekly Schedule Template</h3>
+            <div class="days-row">
+              <span class="day-pill on">Mon</span>
+              <span class="day-pill on">Tue</span>
+              <span class="day-pill on">Wed</span>
+              <span class="day-pill on">Thu</span>
+              <span class="day-pill off">Fri</span>
+              <span class="day-pill on">Sat</span>
+              <span class="day-pill off">Sun</span>
+            </div>
+            <div class="day-config">
+              <div class="day-config-header">📅 Per-day Configuration</div>
+              <div class="day-row" style="background:#f8fffe;border-bottom:1px solid var(--border);padding:8px 16px;">
+                <div class="day-col-label">Day</div><div class="day-col-label">Start</div><div class="day-col-label">End</div><div class="day-col-label">Duration</div><div class="day-col-label">Status</div>
+              </div>
+              <div class="day-row"><div class="day-label">Mon</div><input type="time" value="10:00"><input type="time" value="18:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row"><div class="day-label">Tue</div><input type="time" value="10:00"><input type="time" value="18:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row"><div class="day-label">Wed</div><input type="time" value="10:00"><input type="time" value="18:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row"><div class="day-label">Thu</div><input type="time" value="10:00"><input type="time" value="18:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row inactive"><div class="day-label">Fri</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option>30 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+              <div class="day-row"><div class="day-label">Sat</div><input type="time" value="09:00"><input type="time" value="14:00"><select><option selected>30 min</option></select><span class="badge badge-active" style="font-size:11px;">Active</span></div>
+              <div class="day-row inactive"><div class="day-label">Sun</div><input type="time" value="--:--"><input type="time" value="--:--"><select><option>30 min</option></select><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
+            </div>
+          </div>
+          <div class="timeline-section">
+            <h3>Weekly Shift Overview</h3>
+            <div class="timeline-container">
+              <div class="timeline-hour-labels"><span></span><span>8am</span><span>9am</span><span>10am</span><span>11am</span><span>12pm</span><span>1pm</span><span>2pm</span><span>3pm</span><span>4pm</span><span>5pm</span><span>6pm</span><span>7pm</span></div>
+              <div class="timeline-rows">
+                <div class="timeline-row"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift" style="left:16.7%;width:66.6%;">10:00–18:00</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift" style="left:16.7%;width:66.6%;">10:00–18:00</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift" style="left:16.7%;width:66.6%;">10:00–18:00</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift" style="left:16.7%;width:66.6%;">10:00–18:00</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-shift" style="left:8.3%;width:41.7%;">09:00–14:00</div></div></div>
+                <div class="timeline-row"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="leave-section">
+            <h3>Leave / Unavailability <span style="font-size:12px;color:var(--primary);font-weight:500;">(Still editable when committed)</span></h3>
+            <button class="add-leave-btn" onclick="showLeaveModal('wei')">＋ Add Leave Period</button>
+          </div>
+          <div class="editor-footer">
+            <button class="btn btn-ghost">View History</button>
+            <span class="btn-locked-msg" style="display:flex;">🔒 Shifts locked · Committed for April 2026</span>
+            <button class="btn btn-primary btn-save-normal" style="display:none;">Save Schedule</button>
+          </div>
+          </div><!-- end .editor-panel.locked -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ——————————————————————————————————
+  // Month state map
+  // ——————————————————————————————————
+  const monthStates = {
+    mar: { label: 'March 2026',  state: 'committed', desc: 'All shifts committed. No conflicts.' },
+    apr: { label: 'April 2026',  state: 'conflict',  desc: 'Shifts committed · 1 leave conflict. Dr Marcus Lee has appointments conflicting with leave Apr 6–13.' },
+    may: { label: 'May 2026',    state: 'draft',     desc: '3 therapists have draft shifts. Commit to lock in shifts and allow appointment booking.' },
+    jun: { label: 'June 2026',   state: 'future',    desc: 'Shifts not yet configured for this month.' }
+  };
+  let currentMonth = 'apr';
+
+  function selectMonth(el, id) {
+    currentMonth = id;
+    document.querySelectorAll('.month-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    updateBanner(id);
+    updateEditorLockState(id);
+  }
+
+  function updateBanner(id) {
+    const m = monthStates[id];
+    const banner = document.getElementById('commitBanner');
+    const title  = document.getElementById('bannerTitle');
+    const desc   = document.getElementById('bannerDesc');
+    const commitBtn = document.getElementById('commitMonthBtn');
+    banner.className = 'commit-banner ' + m.state;
+    const icons = { committed:'🔒', conflict:'⚠️', draft:'📝', future:'📅' };
+    banner.querySelector('.commit-banner-icon').textContent = icons[m.state];
+    if (m.state === 'committed') {
+      title.textContent = m.label + ' — All Shifts Committed';
+    } else if (m.state === 'conflict') {
+      title.textContent = m.label + ' — Shifts Committed · 1 Leave Conflict';
+    } else if (m.state === 'draft') {
+      title.textContent = m.label + ' — Shifts In Draft';
+    } else {
+      title.textContent = m.label + ' — Not Configured';
+    }
+    desc.textContent = m.desc;
+    if (commitBtn) {
+      commitBtn.style.display = (m.state === 'draft') ? '' : 'none';
+    }
+  }
+
+  function updateEditorLockState(id) {
+    const m = monthStates[id];
+    const isLocked = (m.state === 'committed' || m.state === 'conflict');
+    document.querySelectorAll('.editor-panel').forEach(panel => {
+      if (isLocked) panel.classList.add('locked');
+      else panel.classList.remove('locked');
+    });
+    document.querySelectorAll('.btn-locked-msg').forEach(el => el.style.display = isLocked ? 'flex' : 'none');
+    document.querySelectorAll('.btn-save-normal').forEach(el => el.style.display = isLocked ? 'none' : '');
+    document.querySelectorAll('.lock-overlay-banner').forEach(el => {
+      el.style.display = isLocked ? '' : 'none';
+      if (isLocked) el.querySelector('.lock-icon').nextSibling.textContent = m.label + ' shifts are committed and locked. ';
+    });
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (tab==='therapists'?i===0:i===1)));
+    document.getElementById('tab-therapists').classList.toggle('active', tab==='therapists');
+    document.getElementById('tab-global').classList.toggle('active', tab==='global');
+  }
+
+  function selectTherapist(el, id) {
+    document.querySelectorAll('.therapist-item').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    ['angela','marcus','janice','wei'].forEach(t => {
+      document.getElementById('editor-'+t).style.display = (t===id) ? '' : 'none';
+    });
+  }
+
+  // ——————————————————————————————————
+  // Commit modal
+  // ——————————————————————————————————
+  function openCommitModal() {
+    document.getElementById('commitModal').classList.add('open');
+  }
+  function closeCommitModal() {
+    document.getElementById('commitModal').classList.remove('open');
+    document.getElementById('commitInput').value = '';
+    document.getElementById('confirmCommitBtn').disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('commitInput');
+    if (input) {
+      input.addEventListener('input', () => {
+        document.getElementById('confirmCommitBtn').disabled = (input.value !== 'COMMIT');
+      });
+    }
+  });
+  function confirmCommit() {
+    closeCommitModal();
+    monthStates['may'].state = 'committed';
+    monthStates['may'].desc  = 'All shifts committed. No conflicts.';
+    document.querySelector('#month-may .month-tab-status').className = 'month-tab-status committed';
+    document.querySelector('#month-may .month-tab-status').textContent = '🔒 All Committed';
+    updateBanner('may');
+    updateEditorLockState('may');
+    showToast('✅ May 2026 shifts committed successfully');
+  }
+
+  // ——————————————————————————————————
+  // Leave modal
+  // ——————————————————————————————————
+  function showLeaveModal(therapistId) {
+    document.getElementById('leaveModal').classList.add('open');
+    document.getElementById('leaveModalTherapist').textContent = {
+      angela: 'Ms Angela Lim', marcus: 'Dr Marcus Lee', janice: 'Nurse Janice Tan', wei: 'Dr Wei Chen'
+    }[therapistId] || therapistId;
+    document.getElementById('leaveConflictResult').style.display = 'none';
+    document.getElementById('leaveForm').style.display = '';
+  }
+  function closeLeaveModal() {
+    document.getElementById('leaveModal').classList.remove('open');
+  }
+  function checkLeaveConflict() {
+    const start = document.getElementById('leaveStart').value;
+    const end   = document.getElementById('leaveEnd').value;
+    if (!start || !end) { alert('Please enter both start and end dates.'); return; }
+    document.getElementById('leaveForm').style.display = 'none';
+    document.getElementById('leaveConflictResult').style.display = '';
+  }
+  function saveLeaveNoConflict() {
+    closeLeaveModal();
+    showToast('✅ Leave period added successfully');
+  }
+
+  // ——————————————————————————————————
+  // Day pill toggle (only in unlocked editors)
+  // ——————————————————————————————————
+  document.querySelectorAll('.day-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const panel = pill.closest('.editor-panel');
+      if (panel && panel.classList.contains('locked')) return;
+      if (pill.classList.contains('on')) { pill.classList.replace('on','off'); }
+      else { pill.classList.replace('off','on'); }
+    });
+  });
+
+  // Toast helper
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1a2e2c;color:#fff;padding:14px 28px;border-radius:10px;font-size:14px;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+</script>
+<!-- ============================== COMMIT MODAL ============================== -->
+<div class="modal-overlay" id="commitModal" onclick="if(event.target===this)closeCommitModal()">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title">🔒 Commit Shifts for May 2026</div>
+      <button class="modal-close" onclick="closeCommitModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#fefce8;border:1.5px solid #fde047;border-radius:10px;padding:14px 16px;margin-bottom:18px;">
+        <div style="font-weight:600;color:#854d0e;margin-bottom:6px;">⚠️ Once committed, you cannot undo this action</div>
+        <ul style="margin:0;padding-left:18px;color:#78350f;font-size:13.5px;line-height:1.7;">
+          <li>Shift times and working days will be <strong>locked for May 2026</strong></li>
+          <li>Appointment booking against these shifts will be <strong>enabled</strong></li>
+          <li>You can still add leave periods after committing</li>
+          <li>To resolve leave conflicts, use <strong>Change Therapist</strong></li>
+        </ul>
+      </div>
+      <div style="margin-bottom:10px;font-weight:600;color:#0f172a;font-size:14px;">Therapists being committed:</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f0fdf9;border-radius:8px;border:1px solid var(--border);">
+          <span style="font-size:14px;font-weight:500;">Ms Angela Lim</span>
+          <span style="font-size:12px;color:var(--primary);background:#ccfbf1;padding:3px 10px;border-radius:20px;">Mon–Fri, 08:00–17:00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f0fdf9;border-radius:8px;border:1px solid var(--border);">
+          <span style="font-size:14px;font-weight:500;">Dr Marcus Lee</span>
+          <span style="font-size:12px;color:var(--primary);background:#ccfbf1;padding:3px 10px;border-radius:20px;">Mon–Fri, 09:00–17:00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f0fdf9;border-radius:8px;border:1px solid var(--border);">
+          <span style="font-size:14px;font-weight:500;">Nurse Janice Tan</span>
+          <span style="font-size:12px;color:var(--primary);background:#ccfbf1;padding:3px 10px;border-radius:20px;">Mon–Sat, 09:30–14:00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f0fdf9;border-radius:8px;border:1px solid var(--border);">
+          <span style="font-size:14px;font-weight:500;">Dr Wei Chen</span>
+          <span style="font-size:12px;color:var(--primary);background:#ccfbf1;padding:3px 10px;border-radius:20px;">Mon–Thu + Sat, 10:00–18:00</span>
+        </div>
+      </div>
+      <div style="font-size:13.5px;color:#64748b;margin-bottom:8px;">Type <strong>COMMIT</strong> to confirm and lock these shifts:</div>
+      <input type="text" id="commitInput" placeholder="Type COMMIT" style="width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;box-sizing:border-box;">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeCommitModal()">Cancel</button>
+      <button class="btn btn-primary" id="confirmCommitBtn" disabled onclick="confirmCommit()" style="opacity:1;">🔒 Commit Shifts</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== LEAVE MODAL ============================== -->
+<div class="modal-overlay" id="leaveModal" onclick="if(event.target===this)closeLeaveModal()">
+  <div class="modal-box" style="max-width:440px;">
+    <div class="modal-header">
+      <div class="modal-title">Add Leave Period — <span id="leaveModalTherapist">Therapist</span></div>
+      <button class="modal-close" onclick="closeLeaveModal()">✕</button>
+    </div>
+    <div id="leaveForm">
+      <div class="modal-body">
+        <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:13.5px;color:#1e40af;">
+          ℹ️ Adding leave to a committed month will check for appointment conflicts. If conflicts are found, you will be prompted to reassign those appointments.
+        </div>
+        <div class="field" style="margin-bottom:14px;">
+          <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:5px;">Leave Type</label>
+          <select style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;">
+            <option selected>Annual Leave</option>
+            <option>Medical Leave (MC)</option>
+            <option>Emergency Leave</option>
+            <option>Off-in-lieu</option>
+            <option>No Pay Leave</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div class="field">
+            <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:5px;">Start Date</label>
+            <input type="date" id="leaveStart" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+          </div>
+          <div class="field">
+            <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:5px;">End Date</label>
+            <input type="date" id="leaveEnd" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+          </div>
+        </div>
+        <div class="field">
+          <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:5px;">Notes (optional)</label>
+          <textarea style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;min-height:72px;box-sizing:border-box;" placeholder="e.g., Hospitalization, family emergency..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeLeaveModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="checkLeaveConflict()">Check Conflicts →</button>
+      </div>
+    </div>
+
+    <!-- CONFLICT RESULT PANEL (shown after checking) -->
+    <div id="leaveConflictResult" style="display:none;">
+      <div class="modal-body">
+        <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+          <div style="font-weight:600;color:#c2410c;margin-bottom:8px;">⚠️ 4 appointments conflict with this leave</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;justify-content:space-between;font-size:13.5px;padding:6px 10px;background:#fff;border-radius:7px;border:1px solid #fed7aa;">
+              <span style="color:#0f172a;">Mon, 5 May 2026 · 10:00–10:30</span>
+              <span style="color:#9a3412;font-weight:500;">Mdm Lim Siew Lan</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13.5px;padding:6px 10px;background:#fff;border-radius:7px;border:1px solid #fed7aa;">
+              <span style="color:#0f172a;">Mon, 5 May 2026 · 11:00–11:30</span>
+              <span style="color:#9a3412;font-weight:500;">Mr Tan Boon Kiat</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13.5px;padding:6px 10px;background:#fff;border-radius:7px;border:1px solid #fed7aa;">
+              <span style="color:#0f172a;">Mon, 12 May 2026 · 10:00–10:30</span>
+              <span style="color:#9a3412;font-weight:500;">Mdm Lim Siew Lan</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13.5px;padding:6px 10px;background:#fff;border-radius:7px;border:1px solid #fed7aa;">
+              <span style="color:#0f172a;">Mon, 12 May 2026 · 11:00–11:30</span>
+              <span style="color:#9a3412;font-weight:500;">Mr Tan Boon Kiat</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:13.5px;color:#475569;">
+          You can still save this leave, but the conflicting appointments must be reassigned to another therapist. Shift slots cannot be changed once committed.
+        </div>
+      </div>
+      <div class="modal-footer" style="gap:8px;">
+        <button class="btn btn-ghost" onclick="closeLeaveModal()">Cancel</button>
+        <button class="btn btn-ghost" onclick="saveLeaveNoConflict()">Save Leave (Resolve Later)</button>
+        <button class="btn btn-primary" onclick="closeLeaveModal();window.location='therapist-change.html'">Save &amp; Reassign Now →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

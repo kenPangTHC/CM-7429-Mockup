@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Appointment · CARES Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --primary-light: #ccfbf1;
+      --bg: #f0fdf9;
+      --card: #ffffff;
+      --border: #d1fae5;
+      --text: #0f1c1b;
+      --muted: #64748b;
+      --nav-bg: #1a2e2c;
+      --amber: #f59e0b;
+      --amber-bg: #fffbeb;
+      --amber-border: #fde68a;
+      --red: #ef4444;
+      --red-bg: #fef2f2;
+      --red-border: #fecaca;
+      --purple: #7c3aed;
+      --purple-bg: #ede9fe;
+      --purple-border: #ddd6fe;
+      --blue: #2563eb;
+      --blue-bg: #dbeafe;
+      --green: #16a34a;
+      --green-bg: #dcfce7;
+      --shadow: 0 4px 20px rgba(13,148,136,0.1);
+      --shadow-sm: 0 2px 8px rgba(13,148,136,0.07);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); }
+
+    /* NAV */
+    .topnav { background: var(--nav-bg); position: sticky; top: 0; z-index: 100; }
+    .nav-inner { max-width: 1500px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; height: 56px; gap: 6px; }
+    .nav-brand { display: flex; align-items: center; gap: 8px; color: white; text-decoration: none; font-weight: 700; font-size: 16px; flex-shrink: 0; margin-right: 16px; }
+    .nav-brand-icon { width: 30px; height: 30px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .nav-links { display: flex; gap: 2px; flex: 1; overflow-x: auto; }
+    .nav-link { color: #94a3b8; text-decoration: none; padding: 7px 13px; border-radius: 8px; font-size: 13.5px; font-weight: 500; transition: all 0.15s; white-space: nowrap; }
+    .nav-link:hover { color: white; background: rgba(255,255,255,0.08); }
+    .nav-link.active { color: white; background: var(--primary); }
+    .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: 12px; }
+    .role-badge { background: rgba(255,255,255,0.1); color: #94a3b8; padding: 4px 10px; border-radius: 20px; font-size: 12px; }
+    .avatar { width: 32px; height: 32px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+
+    /* PAGE */
+    .page { max-width: 960px; margin: 0 auto; padding: 32px 20px 80px; }
+    .page-header { text-align: center; margin-bottom: 36px; }
+    .page-header h1 { font-size: 30px; font-weight: 800; }
+    .page-header p { color: var(--muted); margin-top: 6px; font-size: 15px; }
+
+    /* STEP INDICATOR */
+    .steps { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 40px; }
+    .step { display: flex; align-items: center; gap: 10px; }
+    .step-num { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; transition: all 0.3s; }
+    .step-num.done { background: var(--primary); color: white; }
+    .step-num.active { background: var(--primary); color: white; box-shadow: 0 0 0 4px var(--primary-light); }
+    .step-num.pending { background: #e2e8f0; color: #94a3b8; }
+    .step-label { font-size: 13px; font-weight: 600; }
+    .step-label.active { color: var(--primary); }
+    .step-label.pending { color: #94a3b8; }
+    .step-label.done { color: var(--primary); }
+    .step-connector { width: 80px; height: 2px; background: var(--border); margin: 0 8px; flex-shrink: 0; }
+    .step-connector.done { background: var(--primary); }
+
+    /* CARD */
+    .form-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .card-header { padding: 22px 28px; border-bottom: 1px solid var(--border); background: #f8fffe; }
+    .card-header h2 { font-size: 20px; font-weight: 700; }
+    .card-header p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+    .card-body { padding: 28px; }
+    .card-footer { padding: 18px 28px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #f8fffe; }
+
+    /* FORM ELEMENTS */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-grid.full { grid-template-columns: 1fr; }
+    .field { }
+    .field label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 7px; }
+    .field input, .field select, .field textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; font-family: 'Outfit', sans-serif; font-size: 14px; background: white; outline: none; color: var(--text); transition: border-color 0.15s; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+    .field .hint { font-size: 12px; color: var(--muted); margin-top: 5px; }
+
+    /* SEARCH RESULT */
+    .search-result { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1.5px solid var(--primary); background: var(--primary-light); border-radius: 12px; margin-top: 8px; }
+    .search-result .sr-avatar { width: 36px; height: 36px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+    .search-result .sr-info { flex: 1; }
+    .search-result .sr-name { font-size: 14px; font-weight: 700; }
+    .search-result .sr-meta { font-size: 12px; color: var(--muted); }
+    .search-result .sr-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 2px 6px; border-radius: 6px; }
+    .search-result .sr-remove:hover { background: rgba(0,0,0,0.05); }
+
+    /* DURATION BADGE */
+    .duration-info { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--primary-light); border-radius: 10px; font-size: 13px; color: var(--primary-dark); font-weight: 600; margin-top: 8px; }
+
+    /* THERAPIST SLOT SELECTION */
+    .slot-step { display: none; }
+    .slot-step.active { display: block; }
+
+    .therapist-slots { display: flex; flex-direction: column; gap: 16px; }
+    .therapist-slot-card { border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; transition: border-color 0.15s; }
+    .therapist-slot-card.selected { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+    .therapist-slot-header { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: #f8fffe; cursor: pointer; }
+    .therapist-slot-header:hover { background: var(--primary-light); }
+    .t-avatar-sm { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+    .therapist-slot-info { flex: 1; }
+    .therapist-slot-name { font-size: 15px; font-weight: 700; }
+    .therapist-slot-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .slot-count-badge { padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; background: var(--green-bg); color: var(--green); }
+    .slot-count-badge.none { background: var(--red-bg); color: var(--red); }
+    .slots-container { padding: 14px 18px; border-top: 1px solid var(--border); }
+    .slots-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .time-slot { padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--border); background: white; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; color: var(--text); }
+    .time-slot:hover { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+    .time-slot.selected { background: var(--primary); color: white; border-color: var(--primary); }
+    .time-slot.booked { background: #f1f5f9; color: #94a3b8; border-color: #e2e8f0; cursor: not-allowed; text-decoration: line-through; }
+
+    /* RECURRING SECTION */
+    .recurring-toggle { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: var(--purple-bg); border: 1.5px solid var(--purple-border); border-radius: 14px; cursor: pointer; margin-top: 20px; }
+    .recurring-toggle input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--purple); cursor: pointer; }
+    .recurring-toggle-label { font-size: 14px; font-weight: 600; color: var(--purple); flex: 1; }
+    .recurring-toggle-hint { font-size: 12px; color: #6d28d9; }
+    .recurring-options { background: #f5f3ff; border: 1.5px solid var(--purple-border); border-radius: 14px; padding: 20px; margin-top: 12px; display: none; }
+    .recurring-options.visible { display: block; }
+    .recurring-options h4 { font-size: 14px; font-weight: 700; color: var(--purple); margin-bottom: 16px; }
+    .recurring-row { display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-end; flex-wrap: wrap; }
+    .r-field { display: flex; flex-direction: column; }
+    .r-field-sm { flex: 0 0 180px; }
+    .r-field-xs { flex: 0 0 130px; }
+    .r-field label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #6d28d9; margin-bottom: 6px; }
+    .r-field select, .r-field input[type=number], .r-field input[type=date] { border: 1.5px solid var(--purple-border); border-radius: 10px; padding: 9px 12px; font-family: 'Outfit', sans-serif; font-size: 14px; background: white; outline: none; box-sizing: border-box; }
+    .r-field select { width: 100%; }
+    .r-field select:focus, .r-field input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-bg); }
+    .day-selector { display: flex; gap: 6px; flex-wrap: wrap; }
+    .day-check { padding: 7px 14px; border-radius: 99px; border: 1.5px solid var(--purple-border); background: white; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; color: #6d28d9; user-select: none; }
+    .day-check.on { background: var(--purple); color: white; border-color: var(--purple); }
+    .day-check:hover:not(.on) { background: var(--purple-bg); }
+    .end-options { display: flex; flex-direction: column; gap: 10px; }
+    .end-option { display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; color: #374151; }
+    .end-option input[type=radio] { accent-color: var(--purple); width: 16px; height: 16px; flex-shrink: 0; }
+    .end-option-field { display: flex; align-items: center; gap: 8px; flex: 1; }
+    .end-option-field input[type=number] { border: 1.5px solid var(--purple-border); border-radius: 8px; padding: 6px 10px; font-family: 'Outfit', sans-serif; font-size: 13px; background: white; outline: none; width: 64px; }
+    .end-option-field input[type=date] { border: 1.5px solid var(--purple-border); border-radius: 8px; padding: 6px 10px; font-family: 'Outfit', sans-serif; font-size: 13px; background: white; outline: none; }
+    .preview-dates { margin-top: 14px; padding: 12px 14px; background: white; border: 1px solid var(--purple-border); border-radius: 10px; }
+    .preview-dates h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #6d28d9; margin-bottom: 8px; }
+    .preview-date-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .preview-date-pill { padding: 4px 10px; background: var(--purple-bg); border-radius: 99px; font-size: 12px; font-weight: 600; color: var(--purple); }
+    .preview-date-pill.more { color: #94a3b8; background: #f1f5f9; }
+
+    /* CONFIRM STEP */
+    .confirm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .confirm-block { background: #f8fffe; border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+    .confirm-block h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 10px; }
+    .confirm-row { display: flex; gap: 8px; margin-bottom: 6px; font-size: 14px; }
+    .confirm-row strong { color: var(--muted); min-width: 90px; flex-shrink: 0; font-weight: 600; }
+    .confirm-row span { color: var(--text); }
+    .recurring-summary-card { background: var(--purple-bg); border: 1.5px solid var(--purple-border); border-radius: 14px; padding: 16px 18px; margin-top: 20px; }
+    .recurring-summary-card h4 { font-size: 14px; font-weight: 700; color: var(--purple); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .session-list { display: flex; flex-direction: column; gap: 6px; }
+    .session-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: white; border-radius: 10px; border: 1px solid var(--purple-border); font-size: 13px; }
+    .session-num { width: 24px; height: 24px; background: var(--purple); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .session-item .s-date { font-weight: 700; flex: 1; }
+    .session-item .s-time { color: var(--muted); }
+    .session-item .s-status { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
+    .session-item .s-status.avail { background: var(--green-bg); color: var(--green); }
+    .session-item .s-status.warn { background: var(--amber-bg); color: #92400e; }
+    .more-sessions { text-align: center; font-size: 13px; color: var(--muted); padding: 8px; }
+
+    /* SUCCESS STATE */
+    .success-overlay { display: none; position: fixed; inset: 0; background: rgba(15,28,27,0.6); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; }
+    .success-overlay.show { display: flex; }
+    .success-card { background: white; border-radius: 24px; padding: 48px 40px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.2); animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .success-icon { width: 72px; height: 72px; background: var(--green-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 20px; }
+    .success-card h2 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+    .success-card p { color: var(--muted); font-size: 15px; margin-bottom: 24px; }
+    .success-ref { background: #f8fffe; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; font-size: 14px; font-weight: 600; color: var(--primary-dark); margin-bottom: 24px; }
+    .btn { border: none; border-radius: 12px; padding: 11px 22px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 8px 20px rgba(13,148,136,0.3); }
+    .btn-secondary { background: var(--primary-light); color: var(--primary-dark); }
+    .btn-secondary:hover { background: #99f6e4; }
+    .btn-ghost { background: #f1f5f9; color: var(--muted); }
+    .btn-ghost:hover { background: #e2e8f0; color: var(--text); }
+    .btn-lg { padding: 13px 28px; font-size: 15px; }
+
+    @media (max-width: 680px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .confirm-grid { grid-template-columns: 1fr; }
+      .recurring-row { flex-direction: column; }
+      .r-field-sm, .r-field-xs { flex: 1 1 100%; }
+      .steps { gap: 0; }
+      .step-connector { width: 40px; }
+      .step-label { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="timeslot_scheduler_mockup.html">
+      <div class="nav-brand-icon">🏥</div>
+      CARES Scheduler
+    </a>
+    <div class="nav-links">
+      <a href="timeslot_scheduler_mockup.html" class="nav-link">📅 Schedule</a>
+      <a href="shift-setup.html" class="nav-link">⚙️ Shifts</a>
+      <a href="book-appointment.html" class="nav-link active">➕ Book</a>
+      <a href="appointments.html" class="nav-link">📋 Appointments</a>
+      <a href="recurring-edit.html" class="nav-link">🔄 Recurring</a>
+      <a href="therapist-change.html" class="nav-link">🔀 Change Therapist</a>
+    </div>
+    <div class="nav-right">
+      <span class="role-badge">Admin</span>
+      <div class="avatar">AL</div>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>Book New Appointment</h1>
+    <p>Schedule a session for a senior based on therapist shift availability.</p>
+  </div>
+
+  <!-- STEP INDICATOR -->
+  <div class="steps">
+    <div class="step">
+      <div class="step-num active" id="snum1">1</div>
+      <span class="step-label active" id="slbl1">Patient &amp; Service</span>
+    </div>
+    <div class="step-connector" id="sc1"></div>
+    <div class="step">
+      <div class="step-num pending" id="snum2">2</div>
+      <span class="step-label pending" id="slbl2">Therapist &amp; Time</span>
+    </div>
+    <div class="step-connector" id="sc2"></div>
+    <div class="step">
+      <div class="step-num pending" id="snum3">3</div>
+      <span class="step-label pending" id="slbl3">Review &amp; Confirm</span>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="form-card slot-step active" id="step1">
+    <div class="card-header">
+      <h2>Step 1 — Patient &amp; Service</h2>
+      <p>Search for the senior and select the service type and preferred date.</p>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="field">
+          <label>Senior / Patient Name</label>
+          <input type="text" placeholder="Search by name or NRIC…" id="patientSearch" oninput="showPatient(this.value)" value="Mdm Lim Siew Lan" />
+          <div class="search-result" id="patientResult">
+            <div class="sr-avatar">LS</div>
+            <div class="sr-info">
+              <div class="sr-name">Mdm Lim Siew Lan</div>
+              <div class="sr-meta">DOB: 12 Mar 1948 · NRIC: S4812034D · Block C, Room 12</div>
+            </div>
+            <button class="sr-remove" onclick="clearPatient()">✕</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Service Type</label>
+          <select id="serviceType" onchange="updateDuration()">
+            <option>Occupational Therapy (OT)</option>
+            <option>Physiotherapy (PT)</option>
+            <option>Speech Therapy (ST)</option>
+            <option>Nursing / Wound Care</option>
+            <option>Activity Session</option>
+          </select>
+          <div class="duration-info" id="durationInfo">
+            ⏱ Session duration: <strong>30 minutes</strong> &nbsp;·&nbsp; Based on therapist default
+          </div>
+        </div>
+        <div class="field">
+          <label>Preferred Date</label>
+          <input type="date" value="2026-04-07" id="prefDate" />
+          <div class="hint">Only dates with available therapist shifts will show slots in step 2.</div>
+        </div>
+        <div class="field">
+          <label>Priority / Notes</label>
+          <select>
+            <option>Normal</option>
+            <option>Urgent</option>
+            <option>Follow-up</option>
+            <option>Post-discharge</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1/-1;">
+          <label>Remarks (optional)</label>
+          <textarea rows="2" placeholder="Any special requirements, mobility notes, equipment needs…" style="resize:vertical;"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <span style="font-size:13px;color:var(--muted);">All fields required except remarks</span>
+      <button class="btn btn-primary" onclick="goStep(2)">Next: Select Time →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="form-card slot-step" id="step2">
+    <div class="card-header">
+      <h2>Step 2 — Therapist &amp; Time Slot</h2>
+      <p>Select an available therapist and time slot for <strong>Tue, 7 Apr 2026</strong>. Only therapists with committed shifts on this day are shown.</p>
+    </div>
+    <div class="card-body">
+      <div class="therapist-slots" id="therapistSlots">
+
+        <!-- Dr Angela Lim -->
+        <div class="therapist-slot-card" id="card-angela">
+          <div class="therapist-slot-header" onclick="toggleCard('angela')">
+            <div class="t-avatar-sm" style="background:#0d9488;color:white;">AL</div>
+            <div class="therapist-slot-info">
+              <div class="therapist-slot-name">Dr Angela Lim</div>
+              <div class="therapist-slot-meta">Occupational Therapy · Shift: 08:30–14:30 · 30 min sessions</div>
+            </div>
+            <span class="slot-count-badge">8 slots available</span>
+          </div>
+          <div class="slots-container" id="slots-angela">
+            <div class="slots-grid">
+              <div class="time-slot booked">08:30</div>
+              <div class="time-slot" onclick="selectSlot('angela','09:00')">09:00</div>
+              <div class="time-slot booked">09:30</div>
+              <div class="time-slot" onclick="selectSlot('angela','10:00')">10:00</div>
+              <div class="time-slot" onclick="selectSlot('angela','10:30')">10:30</div>
+              <div class="time-slot" onclick="selectSlot('angela','11:00')">11:00</div>
+              <div class="time-slot" onclick="selectSlot('angela','11:30')">11:30</div>
+              <div class="time-slot booked">13:00</div>
+              <div class="time-slot" onclick="selectSlot('angela','13:30')">13:30</div>
+              <div class="time-slot" onclick="selectSlot('angela','14:00')">14:00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dr Marcus Lee - On Leave -->
+        <div class="therapist-slot-card" style="opacity:0.6;pointer-events:none;">
+          <div class="therapist-slot-header">
+            <div class="t-avatar-sm" style="background:#f59e0b;color:white;">ML</div>
+            <div class="therapist-slot-info">
+              <div class="therapist-slot-name">Dr Marcus Lee <span style="font-size:12px;color:#92400e;background:var(--amber-bg);padding:2px 8px;border-radius:99px;margin-left:6px;">🏖 On Leave</span></div>
+              <div class="therapist-slot-meta">Physiotherapy · No shift committed on this date</div>
+            </div>
+            <span class="slot-count-badge none">Unavailable</span>
+          </div>
+        </div>
+
+        <!-- Nurse Janice Tan -->
+        <div class="therapist-slot-card" id="card-janice">
+          <div class="therapist-slot-header" onclick="toggleCard('janice')">
+            <div class="t-avatar-sm" style="background:#7c3aed;color:white;">JT</div>
+            <div class="therapist-slot-info">
+              <div class="therapist-slot-name">Nurse Janice Tan</div>
+              <div class="therapist-slot-meta">Nursing / Vaccination · Shift: 09:30–14:00 · 30 min sessions</div>
+            </div>
+            <span class="slot-count-badge">6 slots available</span>
+          </div>
+          <div class="slots-container" id="slots-janice" style="display:none;">
+            <div class="slots-grid">
+              <div class="time-slot" onclick="selectSlot('janice','09:30')">09:30</div>
+              <div class="time-slot booked">10:00</div>
+              <div class="time-slot booked">10:30</div>
+              <div class="time-slot" onclick="selectSlot('janice','11:00')">11:00</div>
+              <div class="time-slot booked">11:30</div>
+              <div class="time-slot" onclick="selectSlot('janice','13:30')">13:30</div>
+              <div class="time-slot" onclick="selectSlot('janice','14:00')">14:00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dr Wei Chen -->
+        <div class="therapist-slot-card" id="card-wei">
+          <div class="therapist-slot-header" onclick="toggleCard('wei')">
+            <div class="t-avatar-sm" style="background:#2563eb;color:white;">WC</div>
+            <div class="therapist-slot-info">
+              <div class="therapist-slot-name">Dr Wei Chen</div>
+              <div class="therapist-slot-meta">Speech Therapy · Shift: 10:00–18:00 · 30 min sessions</div>
+            </div>
+            <span class="slot-count-badge">12 slots available</span>
+          </div>
+          <div class="slots-container" id="slots-wei" style="display:none;">
+            <div class="slots-grid">
+              <div class="time-slot" onclick="selectSlot('wei','10:00')">10:00</div>
+              <div class="time-slot" onclick="selectSlot('wei','10:30')">10:30</div>
+              <div class="time-slot" onclick="selectSlot('wei','11:00')">11:00</div>
+              <div class="time-slot booked">11:30</div>
+              <div class="time-slot" onclick="selectSlot('wei','13:00')">13:00</div>
+              <div class="time-slot" onclick="selectSlot('wei','13:30')">13:30</div>
+              <div class="time-slot" onclick="selectSlot('wei','14:00')">14:00</div>
+              <div class="time-slot" onclick="selectSlot('wei','14:30')">14:30</div>
+              <div class="time-slot" onclick="selectSlot('wei','15:00')">15:00</div>
+              <div class="time-slot" onclick="selectSlot('wei','15:30')">15:30</div>
+              <div class="time-slot" onclick="selectSlot('wei','16:00')">16:00</div>
+              <div class="time-slot" onclick="selectSlot('wei','16:30')">16:30</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECURRING TOGGLE -->
+      <label class="recurring-toggle" for="recurringCheck">
+        <input type="checkbox" id="recurringCheck" onchange="toggleRecurring(this.checked)" />
+        <div>
+          <div class="recurring-toggle-label">🔄 Make this a recurring appointment</div>
+          <div class="recurring-toggle-hint">Set a repeating schedule — weekly, bi-weekly, or custom</div>
+        </div>
+      </label>
+
+      <div class="recurring-options" id="recurringOptions">
+        <h4>🔄 Recurring Schedule Setup</h4>
+
+        <!-- Row 1: Frequency + Every N -->
+        <div class="recurring-row">
+          <div class="r-field r-field-sm">
+            <label>Frequency</label>
+            <select onchange="updatePreview()">
+              <option>Weekly</option>
+              <option>Bi-weekly (every 2 weeks)</option>
+              <option>Monthly</option>
+            </select>
+          </div>
+          <div class="r-field r-field-xs">
+            <label>Every</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="number" value="1" min="1" max="12" style="width:64px;">
+              <span style="font-size:13px;color:#6d28d9;font-weight:600;">week(s)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: Repeat on days (full width) -->
+        <div class="r-field" style="margin-bottom:14px;">
+          <label>Repeat on days</label>
+          <div class="day-selector">
+            <span class="day-check" onclick="toggleDay(this)">Mon</span>
+            <span class="day-check on" onclick="toggleDay(this)">Tue</span>
+            <span class="day-check" onclick="toggleDay(this)">Wed</span>
+            <span class="day-check" onclick="toggleDay(this)">Thu</span>
+            <span class="day-check" onclick="toggleDay(this)">Fri</span>
+            <span class="day-check" onclick="toggleDay(this)">Sat</span>
+          </div>
+        </div>
+
+        <!-- Row 3: Ends -->
+        <div class="r-field" style="margin-bottom:14px;">
+          <label>Ends</label>
+          <div class="end-options">
+            <label class="end-option">
+              <input type="radio" name="endType" value="never"> <span>Never (ongoing)</span>
+            </label>
+            <label class="end-option">
+              <input type="radio" name="endType" value="after" checked>
+              <div class="end-option-field">After <input type="number" value="8" min="1" max="52"> sessions</div>
+            </label>
+            <label class="end-option">
+              <input type="radio" name="endType" value="on">
+              <div class="end-option-field">On date <input type="date" value="2026-06-30"></div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Row 4: Preview -->
+        <div class="preview-dates">
+          <h5>Upcoming Sessions Preview</h5>
+          <div class="preview-date-list">
+            <span class="preview-date-pill">Tue 7 Apr</span>
+            <span class="preview-date-pill">Tue 14 Apr</span>
+            <span class="preview-date-pill">Tue 21 Apr</span>
+            <span class="preview-date-pill">Tue 28 Apr</span>
+            <span class="preview-date-pill">Tue 5 May</span>
+            <span class="preview-date-pill">Tue 12 May</span>
+            <span class="preview-date-pill">Tue 19 May</span>
+            <span class="preview-date-pill">Tue 26 May</span>
+            <span class="preview-date-pill more">+ ends after 8 sessions</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+      <button class="btn btn-primary" onclick="goStep(3)" id="nextStep3Btn">Next: Review →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="form-card slot-step" id="step3">
+    <div class="card-header">
+      <h2>Step 3 — Review &amp; Confirm</h2>
+      <p>Review the appointment details before confirming the booking.</p>
+    </div>
+    <div class="card-body">
+      <div class="confirm-grid">
+        <div class="confirm-block">
+          <h4>Patient</h4>
+          <div class="confirm-row"><strong>Name</strong><span>Mdm Lim Siew Lan</span></div>
+          <div class="confirm-row"><strong>NRIC</strong><span>S4812034D</span></div>
+          <div class="confirm-row"><strong>Room</strong><span>Block C, Room 12</span></div>
+        </div>
+        <div class="confirm-block">
+          <h4>Service</h4>
+          <div class="confirm-row"><strong>Type</strong><span id="confirmService">Occupational Therapy (OT)</span></div>
+          <div class="confirm-row"><strong>Duration</strong><span>30 minutes</span></div>
+          <div class="confirm-row"><strong>Priority</strong><span>Normal</span></div>
+        </div>
+        <div class="confirm-block">
+          <h4>Therapist</h4>
+          <div class="confirm-row"><strong>Assigned to</strong><span id="confirmTherapist">Dr Angela Lim</span></div>
+          <div class="confirm-row"><strong>Specialty</strong><span>Occupational Therapy</span></div>
+          <div class="confirm-row"><strong>Room</strong><span>Consultation Room A</span></div>
+        </div>
+        <div class="confirm-block">
+          <h4>Schedule</h4>
+          <div class="confirm-row"><strong>Date</strong><span id="confirmDate">Tue, 7 Apr 2026</span></div>
+          <div class="confirm-row"><strong>Time</strong><span id="confirmTime">09:00 – 09:30</span></div>
+          <div class="confirm-row"><strong>Type</strong><span id="confirmType">Single appointment</span></div>
+        </div>
+      </div>
+
+      <!-- Recurring summary -->
+      <div class="recurring-summary-card" id="recurringSummary" style="display:none;">
+        <h4>🔄 Recurring Schedule — 8 sessions total</h4>
+        <div class="session-list">
+          <div class="session-item"><div class="session-num">1</div><span class="s-date">Tue, 7 Apr 2026</span><span class="s-time">09:00</span><span class="s-status avail">Available ✓</span></div>
+          <div class="session-item"><div class="session-num">2</div><span class="s-date">Tue, 14 Apr 2026</span><span class="s-time">09:00</span><span class="s-status avail">Available ✓</span></div>
+          <div class="session-item"><div class="session-num">3</div><span class="s-date">Tue, 21 Apr 2026</span><span class="s-time">09:00</span><span class="s-status avail">Available ✓</span></div>
+          <div class="session-item"><div class="session-num">4</div><span class="s-date">Tue, 28 Apr 2026</span><span class="s-time">09:00</span><span class="s-status avail">Available ✓</span></div>
+          <div class="session-item"><div class="session-num">5</div><span class="s-date">Tue, 5 May 2026</span><span class="s-time">09:00</span><span class="s-status avail">Available ✓</span></div>
+          <div class="more-sessions">+ 3 more sessions through 26 May 2026</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+      <button class="btn btn-primary btn-lg" onclick="confirmBooking()">✓ Confirm Booking</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="success-icon">✅</div>
+    <h2>Booking Confirmed!</h2>
+    <p id="successMsg">Appointment has been scheduled successfully.</p>
+    <div class="success-ref" id="successRef">Ref: APT-10801 · Tue, 7 Apr 2026 at 09:00</div>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <button class="btn btn-ghost" onclick="window.location='book-appointment.html'">Book Another</button>
+      <button class="btn btn-primary" onclick="window.location='timeslot_scheduler_mockup.html'">View Schedule</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let selectedTherapist = 'angela';
+  let selectedTime = '09:00';
+  let isRecurring = false;
+
+  function goStep(n) {
+    [1,2,3].forEach(i => {
+      document.getElementById('step'+i).classList.toggle('active', i===n);
+      const numEl = document.getElementById('snum'+i);
+      const lblEl = document.getElementById('slbl'+i);
+      if (i < n) {
+        numEl.className = 'step-num done';
+        numEl.textContent = '✓';
+        lblEl.className = 'step-label done';
+      } else if (i === n) {
+        numEl.className = 'step-num active';
+        numEl.textContent = i;
+        lblEl.className = 'step-label active';
+      } else {
+        numEl.className = 'step-num pending';
+        numEl.textContent = i;
+        lblEl.className = 'step-label pending';
+      }
+      if (i < n) document.getElementById('sc'+i) && (document.getElementById('sc'+i).classList.add('done'));
+    });
+    window.scrollTo({top:0, behavior:'smooth'});
+
+    if (n === 3) updateConfirmStep();
+  }
+
+  function updateConfirmStep() {
+    const names = {angela:'Dr Angela Lim', janice:'Nurse Janice Tan', wei:'Dr Wei Chen'};
+    document.getElementById('confirmTherapist').textContent = names[selectedTherapist] || 'Not selected';
+    document.getElementById('confirmTime').textContent = selectedTime + ' – ' + addMins(selectedTime, 30);
+    document.getElementById('confirmType').textContent = isRecurring ? 'Recurring (8 sessions, weekly)' : 'Single appointment';
+    document.getElementById('recurringSummary').style.display = isRecurring ? '' : 'none';
+    document.getElementById('confirmService').textContent = document.getElementById('serviceType').value;
+  }
+
+  function addMins(t, m) {
+    const [h,min] = t.split(':').map(Number);
+    const tot = h*60+min+m;
+    return `${String(Math.floor(tot/60)).padStart(2,'0')}:${String(tot%60).padStart(2,'0')}`;
+  }
+
+  function selectSlot(therapist, time) {
+    document.querySelectorAll('.time-slot.selected').forEach(x => x.classList.remove('selected'));
+    document.querySelectorAll('.therapist-slot-card.selected').forEach(x => x.classList.remove('selected'));
+    event.target.classList.add('selected');
+    document.getElementById('card-'+therapist).classList.add('selected');
+    selectedTherapist = therapist;
+    selectedTime = time;
+  }
+
+  function toggleCard(id) {
+    const slots = document.getElementById('slots-'+id);
+    slots.style.display = slots.style.display === 'none' ? '' : 'none';
+  }
+
+  function toggleRecurring(on) {
+    isRecurring = on;
+    document.getElementById('recurringOptions').classList.toggle('visible', on);
+  }
+
+  function toggleDay(el) {
+    el.classList.toggle('on');
+  }
+
+  function confirmBooking() {
+    const recurring = document.getElementById('recurringCheck').checked;
+    const ref = 'APT-' + (10800 + Math.floor(Math.random()*99));
+    document.getElementById('successRef').textContent = ref + ' · ' + (recurring ? '8 recurring sessions from Tue, 7 Apr 2026' : 'Tue, 7 Apr 2026 at ' + selectedTime);
+    document.getElementById('successMsg').textContent = recurring
+      ? `Recurring appointment booked — 8 sessions for Mdm Lim Siew Lan with ${({angela:'Dr Angela Lim',janice:'Nurse Janice Tan',wei:'Dr Wei Chen'})[selectedTherapist]}.`
+      : `Single appointment booked for Mdm Lim Siew Lan.`;
+    document.getElementById('successOverlay').classList.add('show');
+  }
+</script>
+</body>
+</html>

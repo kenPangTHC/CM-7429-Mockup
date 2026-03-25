@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Appointments · CARES Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --primary-light: #ccfbf1;
+      --bg: #f0fdf9;
+      --card: #ffffff;
+      --border: #d1fae5;
+      --text: #0f1c1b;
+      --muted: #64748b;
+      --nav-bg: #1a2e2c;
+      --amber: #f59e0b;
+      --amber-bg: #fffbeb;
+      --amber-border: #fde68a;
+      --red: #ef4444;
+      --red-bg: #fef2f2;
+      --red-border: #fecaca;
+      --purple: #7c3aed;
+      --purple-bg: #ede9fe;
+      --purple-border: #ddd6fe;
+      --blue: #2563eb;
+      --blue-bg: #dbeafe;
+      --green: #16a34a;
+      --green-bg: #dcfce7;
+      --green-border: #bbf7d0;
+      --shadow: 0 4px 20px rgba(13,148,136,0.1);
+      --shadow-sm: 0 2px 8px rgba(13,148,136,0.07);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); }
+
+    /* NAV */
+    .topnav { background: var(--nav-bg); position: sticky; top: 0; z-index: 100; }
+    .nav-inner { max-width: 1500px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; height: 56px; gap: 6px; }
+    .nav-brand { display: flex; align-items: center; gap: 8px; color: white; text-decoration: none; font-weight: 700; font-size: 16px; flex-shrink: 0; margin-right: 16px; }
+    .nav-brand-icon { width: 30px; height: 30px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .nav-links { display: flex; gap: 2px; flex: 1; overflow-x: auto; }
+    .nav-link { color: #94a3b8; text-decoration: none; padding: 7px 13px; border-radius: 8px; font-size: 13.5px; font-weight: 500; transition: all 0.15s; white-space: nowrap; }
+    .nav-link:hover { color: white; background: rgba(255,255,255,0.08); }
+    .nav-link.active { color: white; background: var(--primary); }
+    .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: 12px; }
+    .role-badge { background: rgba(255,255,255,0.1); color: #94a3b8; padding: 4px 10px; border-radius: 20px; font-size: 12px; }
+    .avatar { width: 32px; height: 32px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+
+    /* PAGE LAYOUT */
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+
+    /* PAGE HEADER */
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 26px; font-weight: 800; color: var(--text); }
+    .page-header p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+    /* VIEW TOGGLE (Senior / Therapist) */
+    .view-toggle-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+    .view-toggle { display: flex; background: white; border: 1.5px solid var(--border); border-radius: 12px; padding: 4px; gap: 4px; }
+    .view-btn { padding: 8px 20px; border-radius: 9px; border: none; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; color: var(--muted); background: transparent; }
+    .view-btn.active { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(13,148,136,0.25); }
+    .view-btn:not(.active):hover { background: var(--bg); color: var(--text); }
+
+    /* PERSON SELECTOR */
+    /* ——— SEARCHABLE SENIOR COMBOBOX ——— */
+    .search-select-wrap { position: relative; margin-bottom: 20px; max-width: 480px; }
+    .search-select-input-row {
+      display: flex; align-items: center; gap: 0;
+      background: white; border: 2px solid var(--border); border-radius: 14px;
+      box-shadow: var(--shadow-sm); transition: border-color 0.15s, box-shadow 0.15s;
+      overflow: hidden;
+    }
+    .search-select-input-row:focus-within {
+      border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light);
+    }
+    .search-select-avatar {
+      width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 12px; font-weight: 700; color: white;
+      flex-shrink: 0; margin-left: 10px;
+    }
+    .search-select-input {
+      flex: 1; border: none; outline: none; padding: 11px 12px; font-family: 'Outfit', sans-serif;
+      font-size: 14px; background: transparent; color: var(--text); min-width: 0;
+    }
+    .search-select-input::placeholder { color: #94a3b8; }
+    .search-select-clear {
+      width: 32px; height: 32px; border-radius: 50%; border: none; background: #f1f5f9;
+      color: var(--muted); cursor: pointer; font-size: 15px; margin-right: 8px;
+      display: none; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: background 0.12s;
+    }
+    .search-select-clear:hover { background: #e2e8f0; color: var(--text); }
+    .search-select-clear.visible { display: flex; }
+    .search-select-caret {
+      padding: 0 12px 0 4px; color: var(--muted); font-size: 12px; pointer-events: none;
+    }
+    /* Dropdown */
+    .search-select-dropdown {
+      display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+      background: white; border: 1.5px solid var(--border); border-radius: 14px;
+      box-shadow: 0 12px 36px rgba(13,148,136,0.14); z-index: 50; overflow: hidden;
+      max-height: 320px; overflow-y: auto;
+    }
+    .search-select-dropdown.open { display: block; }
+    .ss-option {
+      display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+      cursor: pointer; transition: background 0.1s; border-bottom: 1px solid #f0fdf9;
+    }
+    .ss-option:last-child { border-bottom: none; }
+    .ss-option:hover, .ss-option.focused { background: var(--bg); }
+    .ss-option.selected { background: var(--primary-light); }
+    .ss-avatar {
+      width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
+    }
+    .ss-option-text { flex: 1; min-width: 0; }
+    .ss-option-name { font-size: 14px; font-weight: 600; color: var(--text); }
+    .ss-option-meta { font-size: 12px; color: var(--muted); margin-top: 1px; }
+    .ss-option-check { color: var(--primary); font-size: 16px; flex-shrink: 0; }
+    .ss-no-results { padding: 18px 16px; text-align: center; color: var(--muted); font-size: 14px; }
+    .ss-section-header {
+      padding: 8px 14px 5px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--muted); background: #f8fffe;
+      border-bottom: 1px solid var(--border); position: sticky; top: 0;
+    }
+    /* Selected badge shown below the input */
+    .selected-senior-badge {
+      display: none; align-items: center; gap: 8px; margin-top: 8px; padding: 7px 12px;
+      background: var(--primary-light); border: 1.5px solid var(--primary);
+      border-radius: 99px; width: fit-content; font-size: 13.5px; font-weight: 600;
+      color: var(--primary-dark);
+    }
+    .selected-senior-badge.visible { display: flex; }
+    .ssb-avatar { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; flex-shrink: 0; }
+
+    .person-selector { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+    .person-chip { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: white; border: 1.5px solid var(--border); border-radius: 99px; cursor: pointer; transition: all 0.15s; font-size: 13.5px; font-weight: 500; color: var(--muted); }
+    .person-chip.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); font-weight: 600; }
+    .person-chip:not(.active):hover { border-color: var(--primary); color: var(--primary); }
+    .person-chip .p-avatar { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; }
+
+    /* FILTERS */
+    .filter-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 14px 16px; background: white; border: 1.5px solid var(--border); border-radius: 14px; margin-bottom: 20px; }
+    .filter-bar label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-right: 4px; }
+    .filter-bar select, .filter-bar input[type=date] { border: 1.5px solid var(--border); border-radius: 9px; padding: 7px 12px; font-family: 'Outfit', sans-serif; font-size: 13.5px; background: white; outline: none; color: var(--text); }
+    .filter-bar select:focus, .filter-bar input:focus { border-color: var(--primary); }
+    .filter-divider { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
+    .filter-group { display: flex; align-items: center; gap: 7px; }
+    .clear-filters { font-size: 13px; color: var(--muted); cursor: pointer; padding: 6px 10px; border-radius: 8px; border: none; background: transparent; font-family: 'Outfit', sans-serif; }
+    .clear-filters:hover { background: var(--bg); color: var(--text); }
+
+    /* STATS ROW */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: white; border: 1.5px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+    .stat-card .stat-num { font-size: 28px; font-weight: 800; line-height: 1; }
+    .stat-card .stat-label { font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-card.s-upcoming .stat-num { color: var(--primary); }
+    .stat-card.s-recurring .stat-num { color: var(--purple); }
+    .stat-card.s-completed .stat-num { color: var(--green); }
+    .stat-card.s-conflict .stat-num { color: var(--amber); }
+
+    /* SECTION HEADING */
+    .section-heading { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 10px; margin-top: 24px; display: flex; align-items: center; gap: 8px; }
+    .section-heading:first-child { margin-top: 0; }
+    .section-heading-line { flex: 1; height: 1px; background: var(--border); }
+
+    /* APPOINTMENT CARDS */
+    .appt-list { display: flex; flex-direction: column; gap: 12px; }
+
+    /* — Recurring Series Card — */
+    .series-card { background: white; border: 1.5px solid var(--purple-border); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm); }
+    .series-header { display: flex; align-items: center; gap: 14px; padding: 16px 20px; cursor: pointer; transition: background 0.12s; }
+    .series-header:hover { background: #f9f8ff; }
+    .series-icon { width: 44px; height: 44px; background: var(--purple-bg); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .series-info { flex: 1; min-width: 0; }
+    .series-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; display: flex; align-items: center; gap: 8px; }
+    .series-meta { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .series-meta-dot { color: #d1d5db; }
+    .series-badges { display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+    .series-expand-btn { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--purple-border); background: white; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: all 0.15s; flex-shrink: 0; color: var(--purple); }
+    .series-expand-btn:hover { background: var(--purple-bg); }
+    .series-expand-btn.open { transform: rotate(180deg); }
+    .series-sessions { border-top: 1.5px solid var(--purple-border); background: #faf9ff; display: none; }
+    .series-sessions.open { display: block; }
+    .sessions-table { width: 100%; border-collapse: collapse; }
+    .sessions-table th { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 10px 20px; background: #f3f0ff; border-bottom: 1px solid var(--purple-border); text-align: left; }
+    .sessions-table td { padding: 11px 20px; font-size: 13.5px; border-bottom: 1px solid #ede9fe; }
+    .sessions-table tr:last-child td { border-bottom: none; }
+    .sessions-table tr:hover td { background: #f5f3ff; }
+    .sess-num { width: 26px; height: 26px; background: var(--purple); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+    .sess-num.done { background: var(--green); }
+    .sess-num.cancelled { background: #e2e8f0; color: #94a3b8; }
+    .sess-actions { display: flex; gap: 6px; }
+    .series-footer { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: #f5f3ff; border-top: 1.5px solid var(--purple-border); flex-wrap: wrap; gap: 8px; }
+    .series-footer-info { font-size: 13px; color: var(--purple); font-weight: 500; }
+    .series-footer-actions { display: flex; gap: 8px; }
+
+    /* — Single Appointment Card — */
+    .appt-card { background: white; border: 1.5px solid var(--border); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm); transition: box-shadow 0.15s; }
+    .appt-card:hover { box-shadow: var(--shadow); }
+    .appt-card.has-conflict { border-color: var(--amber-border); background: #fffdf5; }
+    .appt-date-block { flex-shrink: 0; width: 52px; text-align: center; }
+    .appt-date-block .a-day { font-size: 22px; font-weight: 800; line-height: 1; color: var(--primary-dark); }
+    .appt-date-block .a-month { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 2px; }
+    .appt-vdivider { width: 1px; height: 40px; background: var(--border); flex-shrink: 0; }
+    .appt-info { flex: 1; min-width: 0; }
+    .appt-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .appt-meta { font-size: 13px; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
+    .appt-meta-icon { margin-right: 3px; }
+    .appt-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+    .appt-actions { display: flex; gap: 6px; }
+
+    /* BADGES */
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 99px; font-size: 11.5px; font-weight: 600; }
+    .badge-upcoming { background: var(--primary-light); color: var(--primary-dark); }
+    .badge-completed { background: var(--green-bg); color: var(--green); }
+    .badge-cancelled { background: #f1f5f9; color: #94a3b8; }
+    .badge-conflict { background: var(--amber-bg); color: #92400e; border: 1px solid var(--amber-border); }
+    .badge-recurring { background: var(--purple-bg); color: var(--purple); }
+    .badge-single { background: #f0fdf4; color: #15803d; }
+
+    /* BUTTONS */
+    .btn { border: none; border-radius: 9px; padding: 7px 14px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-ghost { background: #f1f5f9; color: var(--muted); }
+    .btn-ghost:hover { background: #e2e8f0; color: var(--text); }
+    .btn-amber { background: var(--amber-bg); color: #92400e; border: 1px solid var(--amber-border); }
+    .btn-amber:hover { background: #fde68a; }
+    .btn-red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+    .btn-red:hover { background: #fecaca; }
+    .btn-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-border); }
+    .btn-purple:hover { background: #ddd6fe; }
+    .btn-new { background: var(--primary); color: white; padding: 9px 18px; font-size: 14px; border-radius: 11px; }
+    .btn-new:hover { background: var(--primary-dark); box-shadow: 0 4px 14px rgba(13,148,136,0.3); }
+
+    /* CONFLICT INLINE WARNING */
+    .conflict-notice { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: 9px; font-size: 12.5px; color: #92400e; margin-top: 6px; }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 60px 20px; background: white; border: 1.5px dashed var(--border); border-radius: 16px; }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+    .empty-state h3 { font-size: 18px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
+    .empty-state p { font-size: 14px; color: var(--muted); }
+
+    /* CANCEL MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,28,27,0.65); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: white; border-radius: 16px; box-shadow: 0 24px 60px rgba(0,0,0,.22); width: 100%; max-width: 420px; overflow: hidden; animation: popIn 0.22s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes popIn { from { transform: scale(0.9) translateY(10px); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-header { padding: 20px 22px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 16px; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--muted); padding: 4px 8px; border-radius: 6px; }
+    .modal-close:hover { background: #f1f5f9; }
+    .modal-body { padding: 18px 22px; }
+    .modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; background: #f8fffe; }
+    .scope-option { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 11px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; }
+    .scope-option:hover { border-color: var(--red); background: var(--red-bg); }
+    .scope-option input[type=radio] { margin-top: 2px; accent-color: var(--red); }
+    .scope-option-text strong { display: block; font-size: 14px; margin-bottom: 2px; }
+    .scope-option-text span { font-size: 12.5px; color: var(--muted); }
+
+    @media (max-width: 700px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .appt-card { flex-wrap: wrap; }
+      .appt-right { width: 100%; justify-content: flex-start; }
+      .filter-bar { flex-direction: column; align-items: flex-start; }
+      .filter-divider { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="timeslot_scheduler_mockup.html">
+      <div class="nav-brand-icon">🏥</div>
+      CARES Scheduler
+    </a>
+    <div class="nav-links">
+      <a href="timeslot_scheduler_mockup.html" class="nav-link">📅 Schedule</a>
+      <a href="shift-setup.html" class="nav-link">⚙️ Shifts</a>
+      <a href="book-appointment.html" class="nav-link">➕ Book</a>
+      <a href="appointments.html" class="nav-link active">📋 Appointments</a>
+      <a href="recurring-edit.html" class="nav-link">🔄 Recurring</a>
+      <a href="therapist-change.html" class="nav-link">🔀 Change Therapist</a>
+    </div>
+    <div class="nav-right">
+      <span class="role-badge">Admin</span>
+      <div class="avatar">AL</div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <h1>📋 Appointments</h1>
+        <p>View and manage all booked appointments — by senior or by therapist</p>
+      </div>
+      <a href="book-appointment.html" class="btn btn-new">＋ New Appointment</a>
+    </div>
+  </div>
+
+  <!-- VIEW TOGGLE -->
+  <div class="view-toggle-row">
+    <div class="view-toggle">
+      <button class="view-btn active" id="btnSenior" onclick="switchView('senior')">👤 By Senior</button>
+      <button class="view-btn" id="btnTherapist" onclick="switchView('therapist')">👨‍⚕️ By Therapist</button>
+    </div>
+    <div style="font-size:13px;color:var(--muted);">
+      Showing <strong id="viewCount">14</strong> appointments
+    </div>
+  </div>
+
+  <!-- PERSON SELECTOR — SENIORS (searchable combobox) -->
+  <div id="selectorSeniors">
+    <div class="search-select-wrap" id="seniorSearchWrap">
+      <div class="search-select-input-row" onclick="openSeniorDropdown()">
+        <div class="search-select-avatar" id="seniorInputAvatar" style="background:#0d9488;display:none;">LS</div>
+        <input
+          type="text"
+          id="seniorSearchInput"
+          class="search-select-input"
+          placeholder="🔍  Search senior by name or NRIC..."
+          autocomplete="off"
+          oninput="filterSeniors(this.value)"
+          onkeydown="seniorKeyNav(event)"
+          onfocus="openSeniorDropdown()"
+        />
+        <button class="search-select-clear" id="seniorClearBtn" onclick="clearSeniorSearch(event)" title="Clear">✕</button>
+        <span class="search-select-caret">▾</span>
+      </div>
+      <div class="search-select-dropdown" id="seniorDropdown">
+        <div class="ss-section-header">All Seniors — Block C</div>
+        <div id="seniorOptionsList">
+          <!-- Filled by JS -->
+        </div>
+        <div class="ss-no-results" id="seniorNoResults" style="display:none;">No seniors found</div>
+      </div>
+    </div>
+    <div class="selected-senior-badge" id="selectedSeniorBadge">
+      <div class="ssb-avatar" id="selectedSeniorBadgeAvatar" style="background:#0d9488;">LS</div>
+      <span id="selectedSeniorBadgeName">Mdm Lim Siew Lan</span>
+      <span style="color:var(--muted);font-size:12px;" id="selectedSeniorBadgeMeta">Block C, Room 12</span>
+    </div>
+  </div>
+
+  <!-- PERSON SELECTOR — THERAPISTS (chips — small list, chips work well) -->
+  <div class="person-selector" id="selectorTherapists" style="display:none;">
+    <div class="person-chip active" onclick="selectTherapist(this,'angela')">
+      <div class="p-avatar" style="background:#0d9488;">AL</div>
+      Ms Angela Lim
+    </div>
+    <div class="person-chip" onclick="selectTherapist(this,'marcus')">
+      <div class="p-avatar" style="background:#0f766e;">ML</div>
+      Dr Marcus Lee
+    </div>
+    <div class="person-chip" onclick="selectTherapist(this,'janice')">
+      <div class="p-avatar" style="background:#7c3aed;">JT</div>
+      Nurse Janice Tan
+    </div>
+    <div class="person-chip" onclick="selectTherapist(this,'wei')">
+      <div class="p-avatar" style="background:#2563eb;">WC</div>
+      Dr Wei Chen
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>From</label>
+      <input type="date" value="2026-04-01">
+    </div>
+    <div class="filter-group">
+      <label>To</label>
+      <input type="date" value="2026-06-30">
+    </div>
+    <div class="filter-divider"></div>
+    <div class="filter-group">
+      <label>Status</label>
+      <select onchange="filterChanged()">
+        <option>All</option>
+        <option>Upcoming</option>
+        <option>Completed</option>
+        <option>Cancelled</option>
+        <option>⚠ Conflict</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Type</label>
+      <select onchange="filterChanged()">
+        <option>All types</option>
+        <option>Recurring only</option>
+        <option>Single only</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Service</label>
+      <select onchange="filterChanged()">
+        <option>All services</option>
+        <option>Occupational Therapy</option>
+        <option>Physiotherapy</option>
+        <option>Speech Therapy</option>
+        <option>Nursing</option>
+      </select>
+    </div>
+    <div class="filter-divider"></div>
+    <button class="clear-filters" onclick="clearFilters()">✕ Clear</button>
+  </div>
+
+  <!-- STATS ROW -->
+  <div class="stats-row">
+    <div class="stat-card s-upcoming">
+      <div class="stat-num" id="statUpcoming">9</div>
+      <div class="stat-label">Upcoming</div>
+    </div>
+    <div class="stat-card s-recurring">
+      <div class="stat-num" id="statRecurring">2</div>
+      <div class="stat-label">Recurring Series</div>
+    </div>
+    <div class="stat-card s-completed">
+      <div class="stat-num" id="statCompleted">3</div>
+      <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat-card s-conflict">
+      <div class="stat-num" id="statConflict">2</div>
+      <div class="stat-label">Conflicts</div>
+    </div>
+  </div>
+
+  <!-- ======================== CONTENT (By Senior — Mdm Lim Siew Lan) ======================== -->
+  <div id="contentSeniorLim">
+
+    <!-- RECURRING SERIES 1 -->
+    <div class="section-heading">
+      <span>🔄 Recurring Series (2)</span>
+      <div class="section-heading-line"></div>
+    </div>
+    <div class="appt-list">
+
+      <!-- OT Series -->
+      <div class="series-card">
+        <div class="series-header" onclick="toggleSeries('series-ot')">
+          <div class="series-icon">🖐️</div>
+          <div class="series-info">
+            <div class="series-title">
+              Occupational Therapy
+              <span class="badge badge-recurring">🔄 8 sessions</span>
+            </div>
+            <div class="series-meta">
+              <span>👨‍⚕️ Dr Marcus Lee</span>
+              <span class="series-meta-dot">·</span>
+              <span>📅 Every Monday · 10:00–10:30</span>
+              <span class="series-meta-dot">·</span>
+              <span>7 Apr – 25 May 2026</span>
+            </div>
+          </div>
+          <div class="series-badges">
+            <span class="badge badge-conflict">⚠ 2 conflicts</span>
+            <span class="badge badge-upcoming">6 upcoming</span>
+            <button class="series-expand-btn" id="btn-series-ot">▼</button>
+          </div>
+        </div>
+
+        <!-- Conflict inline -->
+        <div style="padding: 0 20px 14px; display:flex; gap:10px; flex-wrap:wrap;">
+          <div class="conflict-notice" style="flex:1;">
+            ⚠️ Dr Marcus Lee is on leave Apr 6–13 · Sessions 5 &amp; 6 need reassignment
+            <button class="btn btn-amber" style="padding:4px 10px;font-size:12px;margin-left:auto;" onclick="window.location='therapist-change.html'">🔀 Reassign →</button>
+          </div>
+        </div>
+
+        <!-- Sessions table -->
+        <div class="series-sessions" id="sessions-series-ot">
+          <table class="sessions-table">
+            <thead>
+              <tr>
+                <th style="width:36px;">#</th>
+                <th>Date &amp; Time</th>
+                <th>Therapist</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="sess-num done">1</div></td>
+                <td><strong>Mon, 24 Mar 2026</strong> · 10:00–10:30</td>
+                <td>Dr Marcus Lee</td>
+                <td><span class="badge badge-completed">✓ Completed</span></td>
+                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">View Notes</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="sess-num done">2</div></td>
+                <td><strong>Mon, 31 Mar 2026</strong> · 10:00–10:30</td>
+                <td>Dr Marcus Lee</td>
+                <td><span class="badge badge-completed">✓ Completed</span></td>
+                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">View Notes</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="sess-num done">3</div></td>
+                <td><strong>Mon, 7 Apr 2026</strong> · 10:00–10:30</td>
+                <td>Dr Marcus Lee</td>
+                <td><span class="badge badge-completed">✓ Completed</span></td>
+                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">View Notes</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="sess-num">4</div></td>
+                <td><strong>Mon, 14 Apr 2026</strong> · 10:00–10:30</td>
+                <td>Dr Marcus Lee</td>
+                <td><span class="badge badge-upcoming">Upcoming</span></td>
+                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+              </tr>
+              <tr style="background:#fffdf0;">
+                <td><div class="sess-num" style="background:#f59e0b;">5</div></td>
+                <td><strong>Mon, 6 Apr 2026</strong> · 10:00–10:30 &nbsp;<span style="font-size:12px;color:#92400e;font-weight:600;">⚠ Leave conflict</span></td>
+                <td style="color:#92400e;">Dr Marcus Lee <span style="font-size:11px;">(on leave)</span></td>
+                <td><span class="badge badge-conflict">⚠ Conflict</span></td>
+                <td><div class="sess-actions"><button class="btn btn-amber" style="padding:5px 10px;" onclick="window.location='therapist-change.html'">🔀 Reassign</button></div></td>
+              </tr>
+              <tr style="background:#fffdf0;">
+                <td><div class="sess-num" style="background:#f59e0b;">6</div></td>
+                <td><strong>Mon, 13 Apr 2026</strong> · 10:00–10:30 &nbsp;<span style="font-size:12px;color:#92400e;font-weight:600;">⚠ Leave conflict</span></td>
+                <td style="color:#92400e;">Dr Marcus Lee <span style="font-size:11px;">(on leave)</span></td>
+                <td><span class="badge badge-conflict">⚠ Conflict</span></td>
+                <td><div class="sess-actions"><button class="btn btn-amber" style="padding:5px 10px;" onclick="window.location='therapist-change.html'">🔀 Reassign</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="sess-num">7</div></td>
+                <td><strong>Mon, 20 Apr 2026</strong> · 10:00–10:30</td>
+                <td>Dr Marcus Lee</td>
+                <td><span class="badge badge-upcoming">Upcoming</span></td>
+                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="sess-num">8</div></td>
+                <td><strong>Mon, 27 Apr 2026</strong> · 10:00–10:30</td>
+                <td>Dr Marcus Lee</td>
+                <td><span class="badge badge-upcoming">Upcoming</span></td>
+                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="series-footer">
+          <div class="series-footer-info">3 of 8 sessions completed · 2 conflicts pending</div>
+          <div class="series-footer-actions">
+            <a href="recurring-edit.html" class="btn btn-purple">✏️ Edit Series</a>
+            <button class="btn btn-amber" onclick="window.location='therapist-change.html'">🔀 Change Therapist</button>
+            <button class="btn btn-red" onclick="openCancelModal('series')">✕ Cancel Series</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Speech Therapy Series -->
+      <div class="series-card" style="border-color:var(--blue-bg);">
+        <div class="series-header" onclick="toggleSeries('series-st')" style="">
+          <div class="series-icon" style="background:var(--blue-bg);">🗣️</div>
+          <div class="series-info">
+            <div class="series-title">
+              Speech Therapy
+              <span class="badge badge-recurring">🔄 6 sessions</span>
+            </div>
+            <div class="series-meta">
+              <span>👨‍⚕️ Dr Wei Chen</span>
+              <span class="series-meta-dot">·</span>
+              <span>📅 Every 2 weeks · Thursday · 14:00–14:30</span>
+              <span class="series-meta-dot">·</span>
+              <span>2 Apr – 11 Jun 2026</span>
+            </div>
+          </div>
+          <div class="series-badges">
+            <span class="badge badge-upcoming" style="background:var(--blue-bg);color:var(--blue);">6 upcoming</span>
+            <button class="series-expand-btn" id="btn-series-st" style="border-color:var(--blue-bg);color:var(--blue);">▼</button>
+          </div>
+        </div>
+
+        <div class="series-sessions" id="sessions-series-st" style="background:#f0f7ff;">
+          <table class="sessions-table">
+            <thead>
+              <tr style="background:#dbeafe;">
+                <th style="width:36px;">#</th>
+                <th>Date &amp; Time</th>
+                <th>Therapist</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="sess-num done">1</div></td>
+                <td><strong>Thu, 2 Apr 2026</strong> · 14:00–14:30</td>
+                <td>Dr Wei Chen</td>
+                <td><span class="badge badge-completed">✓ Completed</span></td>
+                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">View Notes</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="sess-num">2</div></td>
+                <td><strong>Thu, 16 Apr 2026</strong> · 14:00–14:30</td>
+                <td>Dr Wei Chen</td>
+                <td><span class="badge badge-upcoming">Upcoming</span></td>
+                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="sess-num">3</div></td>
+                <td><strong>Thu, 30 Apr 2026</strong> · 14:00–14:30</td>
+                <td>Dr Wei Chen</td>
+                <td><span class="badge badge-upcoming">Upcoming</span></td>
+                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="sess-num">4</div></td>
+                <td><strong>Thu, 14 May 2026</strong> · 14:00–14:30</td>
+                <td>Dr Wei Chen</td>
+                <td><span class="badge badge-upcoming">Upcoming</span></td>
+                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="sess-num">5</div></td>
+                <td><strong>Thu, 28 May 2026</strong> · 14:00–14:30</td>
+                <td>Dr Wei Chen</td>
+                <td><span class="badge badge-upcoming">Upcoming</span></td>
+                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="sess-num">6</div></td>
+                <td><strong>Thu, 11 Jun 2026</strong> · 14:00–14:30</td>
+                <td>Dr Wei Chen</td>
+                <td><span class="badge badge-upcoming">Upcoming</span></td>
+                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="series-footer" style="background:#eff6ff;border-color:var(--blue-bg);">
+          <div class="series-footer-info" style="color:var(--blue);">1 of 6 sessions completed · No conflicts</div>
+          <div class="series-footer-actions">
+            <button class="btn btn-ghost">✏️ Edit Series</button>
+            <button class="btn btn-ghost" onclick="window.location='therapist-change.html'">🔀 Change Therapist</button>
+            <button class="btn btn-red" onclick="openCancelModal('series')">✕ Cancel Series</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /appt-list recurring -->
+
+    <!-- SINGLE APPOINTMENTS -->
+    <div class="section-heading" style="margin-top:28px;">
+      <span>📌 Single Appointments (3)</span>
+      <div class="section-heading-line"></div>
+    </div>
+    <div class="appt-list">
+
+      <div class="appt-card">
+        <div class="appt-date-block">
+          <div class="a-day">10</div>
+          <div class="a-month">Apr</div>
+        </div>
+        <div class="appt-vdivider"></div>
+        <div class="appt-info">
+          <div class="appt-title">Physiotherapy Assessment</div>
+          <div class="appt-meta">
+            <span><span class="appt-meta-icon">👨‍⚕️</span>Ms Angela Lim</span>
+            <span><span class="appt-meta-icon">⏰</span>09:30 – 10:00</span>
+            <span><span class="appt-meta-icon">📍</span>Physio Room B</span>
+          </div>
+        </div>
+        <div class="appt-right">
+          <span class="badge badge-upcoming">Upcoming</span>
+          <div class="appt-actions">
+            <button class="btn btn-ghost">Edit</button>
+            <button class="btn btn-ghost" onclick="window.location='therapist-change.html'">🔀</button>
+            <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="appt-card">
+        <div class="appt-date-block">
+          <div class="a-day">23</div>
+          <div class="a-month">Apr</div>
+        </div>
+        <div class="appt-vdivider"></div>
+        <div class="appt-info">
+          <div class="appt-title">Nursing Check — Blood Pressure</div>
+          <div class="appt-meta">
+            <span><span class="appt-meta-icon">👨‍⚕️</span>Nurse Janice Tan</span>
+            <span><span class="appt-meta-icon">⏰</span>11:00 – 11:30</span>
+            <span><span class="appt-meta-icon">📍</span>Consultation Room C</span>
+          </div>
+        </div>
+        <div class="appt-right">
+          <span class="badge badge-upcoming">Upcoming</span>
+          <div class="appt-actions">
+            <button class="btn btn-ghost">Edit</button>
+            <button class="btn btn-ghost" onclick="window.location='therapist-change.html'">🔀</button>
+            <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="appt-card" style="opacity:0.75;">
+        <div class="appt-date-block">
+          <div class="a-day">17</div>
+          <div class="a-month">Mar</div>
+        </div>
+        <div class="appt-vdivider"></div>
+        <div class="appt-info">
+          <div class="appt-title">Occupational Therapy — Initial Assessment</div>
+          <div class="appt-meta">
+            <span><span class="appt-meta-icon">👨‍⚕️</span>Dr Marcus Lee</span>
+            <span><span class="appt-meta-icon">⏰</span>10:00 – 10:30</span>
+          </div>
+        </div>
+        <div class="appt-right">
+          <span class="badge badge-completed">✓ Completed</span>
+          <div class="appt-actions">
+            <button class="btn btn-ghost">View Notes</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /appt-list single -->
+
+  </div><!-- /contentSeniorLim -->
+
+
+  <!-- ======================== CONTENT (By Therapist — Ms Angela Lim) ======================== -->
+  <div id="contentTherapistAngela" style="display:none;">
+
+    <div class="section-heading">
+      <span>📅 April 2026 (5 appointments)</span>
+      <div class="section-heading-line"></div>
+    </div>
+    <div class="appt-list">
+
+      <div class="appt-card">
+        <div class="appt-date-block">
+          <div class="a-day">7</div>
+          <div class="a-month">Apr</div>
+        </div>
+        <div class="appt-vdivider"></div>
+        <div class="appt-info">
+          <div class="appt-title">Physiotherapy — Mdm Lim Siew Lan <span style="font-size:12px;color:var(--muted);font-weight:400;">S4812034D</span></div>
+          <div class="appt-meta">
+            <span><span class="appt-meta-icon">⏰</span>09:00 – 09:30</span>
+            <span><span class="appt-meta-icon">📍</span>Physio Room A</span>
+            <span style="color:var(--primary);">🔄 Series #4 of 8</span>
+          </div>
+        </div>
+        <div class="appt-right">
+          <span class="badge badge-upcoming">Upcoming</span>
+          <div class="appt-actions">
+            <button class="btn btn-ghost">Edit</button>
+            <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="appt-card">
+        <div class="appt-date-block">
+          <div class="a-day">10</div>
+          <div class="a-month">Apr</div>
+        </div>
+        <div class="appt-vdivider"></div>
+        <div class="appt-info">
+          <div class="appt-title">Physiotherapy Assessment — Mdm Lim Siew Lan</div>
+          <div class="appt-meta">
+            <span><span class="appt-meta-icon">⏰</span>09:30 – 10:00</span>
+            <span><span class="appt-meta-icon">📍</span>Physio Room B</span>
+          </div>
+        </div>
+        <div class="appt-right">
+          <span class="badge badge-upcoming">Upcoming</span>
+          <div class="appt-actions">
+            <button class="btn btn-ghost">Edit</button>
+            <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="appt-card">
+        <div class="appt-date-block">
+          <div class="a-day">14</div>
+          <div class="a-month">Apr</div>
+        </div>
+        <div class="appt-vdivider"></div>
+        <div class="appt-info">
+          <div class="appt-title">Physiotherapy — Mr Tan Boon Kiat <span style="font-size:12px;color:var(--muted);font-weight:400;">S6823011B</span></div>
+          <div class="appt-meta">
+            <span><span class="appt-meta-icon">⏰</span>10:30 – 11:00</span>
+            <span><span class="appt-meta-icon">📍</span>Physio Room A</span>
+            <span style="color:var(--primary);">🔄 Series #2 of 6</span>
+          </div>
+        </div>
+        <div class="appt-right">
+          <span class="badge badge-upcoming">Upcoming</span>
+          <div class="appt-actions">
+            <button class="btn btn-ghost">Edit</button>
+            <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="appt-card">
+        <div class="appt-date-block">
+          <div class="a-day">21</div>
+          <div class="a-month">Apr</div>
+        </div>
+        <div class="appt-vdivider"></div>
+        <div class="appt-info">
+          <div class="appt-title">Physiotherapy — Mdm Lim Siew Lan</div>
+          <div class="appt-meta">
+            <span><span class="appt-meta-icon">⏰</span>09:00 – 09:30</span>
+            <span><span class="appt-meta-icon">📍</span>Physio Room A</span>
+            <span style="color:var(--primary);">🔄 Series #5 of 8</span>
+          </div>
+        </div>
+        <div class="appt-right">
+          <span class="badge badge-upcoming">Upcoming</span>
+          <div class="appt-actions">
+            <button class="btn btn-ghost">Edit</button>
+            <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="appt-card">
+        <div class="appt-date-block">
+          <div class="a-day">28</div>
+          <div class="a-month">Apr</div>
+        </div>
+        <div class="appt-vdivider"></div>
+        <div class="appt-info">
+          <div class="appt-title">Physiotherapy — Mr Tan Boon Kiat</div>
+          <div class="appt-meta">
+            <span><span class="appt-meta-icon">⏰</span>10:30 – 11:00</span>
+            <span><span class="appt-meta-icon">📍</span>Physio Room A</span>
+            <span style="color:var(--primary);">🔄 Series #3 of 6</span>
+          </div>
+        </div>
+        <div class="appt-right">
+          <span class="badge badge-upcoming">Upcoming</span>
+          <div class="appt-actions">
+            <button class="btn btn-ghost">Edit</button>
+            <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section-heading" style="margin-top:28px;">
+      <span>📅 March 2026 (2 completed)</span>
+      <div class="section-heading-line"></div>
+    </div>
+    <div class="appt-list">
+      <div class="appt-card" style="opacity:0.75;">
+        <div class="appt-date-block">
+          <div class="a-day">24</div>
+          <div class="a-month">Mar</div>
+        </div>
+        <div class="appt-vdivider"></div>
+        <div class="appt-info">
+          <div class="appt-title">Physiotherapy — Mdm Lim Siew Lan</div>
+          <div class="appt-meta">
+            <span><span class="appt-meta-icon">⏰</span>09:00 – 09:30</span>
+            <span style="color:var(--primary);">🔄 Series #2 of 8</span>
+          </div>
+        </div>
+        <div class="appt-right">
+          <span class="badge badge-completed">✓ Completed</span>
+          <div class="appt-actions"><button class="btn btn-ghost">View Notes</button></div>
+        </div>
+      </div>
+      <div class="appt-card" style="opacity:0.75;">
+        <div class="appt-date-block">
+          <div class="a-day">31</div>
+          <div class="a-month">Mar</div>
+        </div>
+        <div class="appt-vdivider"></div>
+        <div class="appt-info">
+          <div class="appt-title">Physiotherapy — Mr Tan Boon Kiat</div>
+          <div class="appt-meta">
+            <span><span class="appt-meta-icon">⏰</span>10:30 – 11:00</span>
+            <span style="color:var(--primary);">🔄 Series #1 of 6</span>
+          </div>
+        </div>
+        <div class="appt-right">
+          <span class="badge badge-completed">✓ Completed</span>
+          <div class="appt-actions"><button class="btn btn-ghost">View Notes</button></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /contentTherapistAngela -->
+
+
+  <!-- Other person content (placeholder) -->
+  <div id="contentOther" style="display:none;">
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>Select a person above</h3>
+      <p>Choose a senior or therapist to view their appointments.</p>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<!-- ============================== CANCEL MODAL ============================== -->
+<div class="modal-overlay" id="cancelModal" onclick="if(event.target===this)closeCancelModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Cancel Appointment</div>
+      <button class="modal-close" onclick="closeCancelModal()">✕</button>
+    </div>
+    <div class="modal-body" id="cancelModalBody">
+      <!-- Filled by JS -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeCancelModal()">Keep Appointment</button>
+      <button class="btn btn-red" onclick="confirmCancel()">✕ Confirm Cancellation</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ——————————————————————————————————
+  // SENIOR DATA (mock — easily extended)
+  // ——————————————————————————————————
+  const seniors = [
+    { id: 'lim',   initials: 'LS', color: '#0d9488', name: 'Mdm Lim Siew Lan',  nric: 'S4812034D', room: 'Block C, Room 12', appts: 14, conflicts: 2 },
+    { id: 'tan',   initials: 'TK', color: '#7c3aed', name: 'Mr Tan Boon Kiat',   nric: 'S6823011B', room: 'Block C, Room 8',  appts: 6,  conflicts: 0 },
+    { id: 'wong',  initials: 'WM', color: '#2563eb', name: 'Mdm Wong Mei Ling',  nric: 'S5509034C', room: 'Block A, Room 3',  appts: 9,  conflicts: 0 },
+    { id: 'raj',   initials: 'RK', color: '#d97706', name: 'Mr Rajesh Kumar',    nric: 'S7230114F', room: 'Block B, Room 5',  appts: 4,  conflicts: 1 },
+    { id: 'chen',  initials: 'CL', color: '#db2777', name: 'Mdm Chen Li Hua',    nric: 'S3901245A', room: 'Block A, Room 7',  appts: 11, conflicts: 0 },
+    { id: 'goh',   initials: 'GH', color: '#059669', name: 'Mr Goh Hock Kian',   nric: 'S5012008G', room: 'Block C, Room 2',  appts: 5,  conflicts: 0 },
+    { id: 'siti',  initials: 'SN', color: '#7c3aed', name: 'Mdm Siti Noor Bte Yusof', nric: 'S4407123H', room: 'Block B, Room 11', appts: 7, conflicts: 0 },
+    { id: 'lee',   initials: 'LB', color: '#0284c7', name: 'Mr Lee Beng Seng',   nric: 'S6118034J', room: 'Block A, Room 14', appts: 3,  conflicts: 0 },
+    { id: 'kumar', initials: 'KP', color: '#b45309', name: 'Mr Kumar Pillai',    nric: 'S4823091D', room: 'Block B, Room 6',  appts: 8,  conflicts: 1 },
+    { id: 'ng',    initials: 'NM', color: '#0f766e', name: 'Mdm Ng Mei Fong',    nric: 'S5234012B', room: 'Block C, Room 9',  appts: 12, conflicts: 0 },
+    { id: 'ali',   initials: 'AH', color: '#6d28d9', name: 'Mr Ali Hassan',      nric: 'S3812045C', room: 'Block A, Room 1',  appts: 6,  conflicts: 0 },
+    { id: 'yong',  initials: 'YK', color: '#047857', name: 'Mdm Yong Kim Kee',   nric: 'S4612078F', room: 'Block B, Room 3',  appts: 9,  conflicts: 0 },
+  ];
+
+  let selectedSeniorId = 'lim';
+  let focusedOptionIdx = -1;
+  let filteredSeniors = [...seniors];
+
+  // ——————————————————————————————————
+  // Combobox rendering
+  // ——————————————————————————————————
+  function renderSeniorOptions(list) {
+    filteredSeniors = list;
+    focusedOptionIdx = -1;
+    const container = document.getElementById('seniorOptionsList');
+    const noResults = document.getElementById('seniorNoResults');
+
+    if (list.length === 0) {
+      container.innerHTML = '';
+      noResults.style.display = '';
+      return;
+    }
+    noResults.style.display = 'none';
+    container.innerHTML = list.map((s, i) => `
+      <div class="ss-option ${s.id === selectedSeniorId ? 'selected' : ''}"
+           id="ss-opt-${i}"
+           onclick="pickSenior('${s.id}')"
+           onmouseenter="focusedOptionIdx=${i}">
+        <div class="ss-avatar" style="background:${s.color};">${s.initials}</div>
+        <div class="ss-option-text">
+          <div class="ss-option-name">${highlightMatch(s.name, document.getElementById('seniorSearchInput').value)}</div>
+          <div class="ss-option-meta">${s.nric} · ${s.room} · ${s.appts} appt${s.appts !== 1 ? 's' : ''}${s.conflicts ? ' · <span style="color:#92400e;font-weight:600;">⚠ ' + s.conflicts + ' conflict' + (s.conflicts > 1 ? 's' : '') + '</span>' : ''}</div>
+        </div>
+        ${s.id === selectedSeniorId ? '<span class="ss-option-check">✓</span>' : ''}
+      </div>`).join('');
+  }
+
+  function highlightMatch(text, query) {
+    if (!query) return text;
+    const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+    return text.replace(re, '<mark style="background:#ccfbf1;color:#0f766e;border-radius:3px;padding:0 1px;">$1</mark>');
+  }
+
+  function openSeniorDropdown() {
+    renderSeniorOptions(seniors);
+    document.getElementById('seniorDropdown').classList.add('open');
+  }
+
+  function closeSeniorDropdown() {
+    document.getElementById('seniorDropdown').classList.remove('open');
+    focusedOptionIdx = -1;
+  }
+
+  function filterSeniors(q) {
+    document.getElementById('seniorDropdown').classList.add('open');
+    const lower = q.toLowerCase();
+    const filtered = seniors.filter(s =>
+      s.name.toLowerCase().includes(lower) || s.nric.toLowerCase().includes(lower) || s.room.toLowerCase().includes(lower)
+    );
+    renderSeniorOptions(filtered);
+    // Show/hide clear button
+    document.getElementById('seniorClearBtn').classList.toggle('visible', q.length > 0);
+  }
+
+  function pickSenior(id) {
+    selectedSeniorId = id;
+    const s = seniors.find(x => x.id === id);
+    // Update input display
+    const input = document.getElementById('seniorSearchInput');
+    const avatar = document.getElementById('seniorInputAvatar');
+    input.value = s.name;
+    input.blur();
+    avatar.style.background = s.color;
+    avatar.textContent = s.initials;
+    avatar.style.display = 'flex';
+    document.getElementById('seniorClearBtn').classList.add('visible');
+    // Update badge
+    const badge = document.getElementById('selectedSeniorBadge');
+    document.getElementById('selectedSeniorBadgeAvatar').style.background = s.color;
+    document.getElementById('selectedSeniorBadgeAvatar').textContent = s.initials;
+    document.getElementById('selectedSeniorBadgeName').textContent = s.name;
+    document.getElementById('selectedSeniorBadgeMeta').textContent = s.room;
+    badge.classList.add('visible');
+    closeSeniorDropdown();
+    // Load content
+    loadSeniorContent(id, s);
+  }
+
+  function clearSeniorSearch(e) {
+    e.stopPropagation();
+    document.getElementById('seniorSearchInput').value = '';
+    document.getElementById('seniorInputAvatar').style.display = 'none';
+    document.getElementById('seniorClearBtn').classList.remove('visible');
+    document.getElementById('selectedSeniorBadge').classList.remove('visible');
+    selectedSeniorId = null;
+    renderSeniorOptions(seniors);
+    document.getElementById('seniorDropdown').classList.add('open');
+    document.getElementById('seniorSearchInput').focus();
+    showContent('none');
+    setStats(0, 0, 0, 0);
+    document.getElementById('viewCount').textContent = '0';
+  }
+
+  function seniorKeyNav(e) {
+    const dropdown = document.getElementById('seniorDropdown');
+    if (!dropdown.classList.contains('open')) { openSeniorDropdown(); return; }
+    const opts = document.querySelectorAll('#seniorOptionsList .ss-option');
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      focusedOptionIdx = Math.min(focusedOptionIdx + 1, opts.length - 1);
+      updateFocus(opts);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      focusedOptionIdx = Math.max(focusedOptionIdx - 1, 0);
+      updateFocus(opts);
+    } else if (e.key === 'Enter' && focusedOptionIdx >= 0) {
+      e.preventDefault();
+      pickSenior(filteredSeniors[focusedOptionIdx].id);
+    } else if (e.key === 'Escape') {
+      closeSeniorDropdown();
+    }
+  }
+
+  function updateFocus(opts) {
+    opts.forEach((o, i) => o.classList.toggle('focused', i === focusedOptionIdx));
+    if (focusedOptionIdx >= 0) opts[focusedOptionIdx].scrollIntoView({ block: 'nearest' });
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', e => {
+    if (!document.getElementById('seniorSearchWrap').contains(e.target)) {
+      closeSeniorDropdown();
+    }
+  });
+
+  function loadSeniorContent(id, s) {
+    document.getElementById('contentSeniorLim').style.display      = 'none';
+    document.getElementById('contentTherapistAngela').style.display = 'none';
+    document.getElementById('contentOther').style.display           = 'none';
+
+    if (id === 'lim') {
+      document.getElementById('contentSeniorLim').style.display = '';
+      setStats(9, 2, 3, 2);
+      document.getElementById('viewCount').textContent = s.appts;
+    } else {
+      document.getElementById('contentOther').style.display = '';
+      // Show a "no data" message with the person's name
+      document.querySelector('#contentOther .empty-state h3').textContent = s.name + ' — No appointments';
+      document.querySelector('#contentOther .empty-state p').textContent = 'No appointments found for this senior in the selected date range.';
+      setStats(s.appts, 0, 0, s.conflicts);
+      document.getElementById('viewCount').textContent = s.appts;
+    }
+  }
+
+  // ——————————————————————————————————
+  // View switch: Senior / Therapist
+  // ——————————————————————————————————
+  let currentView = 'senior';
+
+  function switchView(view) {
+    currentView = view;
+    document.getElementById('btnSenior').classList.toggle('active', view === 'senior');
+    document.getElementById('btnTherapist').classList.toggle('active', view === 'therapist');
+    document.getElementById('selectorSeniors').style.display    = view === 'senior'    ? '' : 'none';
+    document.getElementById('selectorTherapists').style.display = view === 'therapist' ? '' : 'none';
+
+    if (view === 'senior') {
+      // Re-select current senior
+      const s = seniors.find(x => x.id === selectedSeniorId);
+      if (s) loadSeniorContent(selectedSeniorId, s);
+      else showContent('none');
+    } else {
+      selectTherapist(document.querySelector('#selectorTherapists .person-chip'), 'angela');
+    }
+  }
+
+  function selectTherapist(el, id) {
+    document.querySelectorAll('#selectorTherapists .person-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('contentSeniorLim').style.display      = 'none';
+    document.getElementById('contentTherapistAngela').style.display = 'none';
+    document.getElementById('contentOther').style.display           = 'none';
+    if (id === 'angela') {
+      document.getElementById('contentTherapistAngela').style.display = '';
+      setStats(5, 2, 2, 0);
+      document.getElementById('viewCount').textContent = '7';
+    } else {
+      document.getElementById('contentOther').style.display = '';
+      document.querySelector('#contentOther .empty-state h3').textContent = 'Select a therapist above';
+      document.querySelector('#contentOther .empty-state p').textContent = 'Choose a therapist to view their appointments.';
+      setStats(0, 0, 0, 0);
+      document.getElementById('viewCount').textContent = '0';
+    }
+  }
+
+  // Legacy selectPerson shim (used by therapist chips)
+  function selectPerson(el, view, id) {
+    if (view === 'therapist') selectTherapist(el, id);
+  }
+
+  function showContent(which) {
+    document.getElementById('contentSeniorLim').style.display      = which === 'lim'     ? '' : 'none';
+    document.getElementById('contentTherapistAngela').style.display = which === 'angela'  ? '' : 'none';
+    document.getElementById('contentOther').style.display           = which === 'other'   ? '' : 'none';
+  }
+
+  function setStats(upcoming, recurring, completed, conflict) {
+    document.getElementById('statUpcoming').textContent  = upcoming;
+    document.getElementById('statRecurring').textContent = recurring;
+    document.getElementById('statCompleted').textContent = completed;
+    document.getElementById('statConflict').textContent  = conflict;
+  }
+
+  // ——————————————————————————————————
+  // Expand / collapse series sessions
+  // ——————————————————————————————————
+  function toggleSeries(id) {
+    const sessions = document.getElementById('sessions-' + id);
+    const btn = document.getElementById('btn-' + id);
+    const open = sessions.classList.toggle('open');
+    btn.classList.toggle('open', open);
+  }
+
+  // ——————————————————————————————————
+  // Cancel modal
+  // ——————————————————————————————————
+  function openCancelModal(scope) {
+    const body = document.getElementById('cancelModalBody');
+    if (scope === 'series') {
+      body.innerHTML = `
+        <p style="font-size:14px;color:var(--muted);margin-bottom:16px;">How would you like to cancel this appointment?</p>
+        <label class="scope-option">
+          <input type="radio" name="cancelScope" value="single" checked>
+          <div class="scope-option-text">
+            <strong>This session only</strong>
+            <span>Only cancel this specific occurrence. Other sessions remain.</span>
+          </div>
+        </label>
+        <label class="scope-option">
+          <input type="radio" name="cancelScope" value="following">
+          <div class="scope-option-text">
+            <strong>This and all following sessions</strong>
+            <span>Cancel this session and all future sessions in the series.</span>
+          </div>
+        </label>
+        <label class="scope-option">
+          <input type="radio" name="cancelScope" value="all">
+          <div class="scope-option-text">
+            <strong>All sessions in this series</strong>
+            <span>Cancel the entire recurring appointment series.</span>
+          </div>
+        </label>`;
+    } else {
+      body.innerHTML = `
+        <div style="background:var(--red-bg);border:1.5px solid var(--red-border);border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+          <div style="font-weight:600;color:var(--red);margin-bottom:4px;">⚠️ This action cannot be undone</div>
+          <div style="font-size:13.5px;color:#7f1d1d;">This appointment will be permanently cancelled. The time slot will be freed up.</div>
+        </div>
+        <div style="font-size:14px;color:var(--text);">Are you sure you want to cancel this appointment?</div>`;
+    }
+    document.getElementById('cancelModal').classList.add('open');
+  }
+
+  function closeCancelModal() {
+    document.getElementById('cancelModal').classList.remove('open');
+  }
+
+  function confirmCancel() {
+    closeCancelModal();
+    showToast('Appointment cancelled successfully');
+  }
+
+  // ——————————————————————————————————
+  // Filter stub
+  // ——————————————————————————————————
+  function filterChanged() { /* In a real app: re-query and re-render */ }
+  function clearFilters() {
+    document.querySelectorAll('.filter-bar select').forEach(s => s.selectedIndex = 0);
+  }
+
+  // Toast helper
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1a2e2c;color:#fff;padding:14px 28px;border-radius:10px;font-size:14px;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  // Open OT series expanded by default to showcase the feature
+  window.addEventListener('DOMContentLoaded', () => {
+    // Pre-select Mdm Lim Siew Lan on load
+    pickSenior('lim');
+    // Open OT series expanded by default
+    toggleSeries('series-ot');
+  });
+</script>
+</body>
+</html>

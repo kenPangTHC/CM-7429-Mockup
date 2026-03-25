@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schedule · CARES Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* NAV STYLES */
+    .topnav { background: #1a2e2c; position: sticky; top: 0; z-index: 100; }
+    .nav-inner { max-width: 1500px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; height: 56px; gap: 6px; }
+    .nav-brand { display: flex; align-items: center; gap: 8px; color: white; text-decoration: none; font-weight: 700; font-size: 16px; flex-shrink: 0; margin-right: 16px; }
+    .nav-brand-icon { width: 30px; height: 30px; background: #0d9488; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .nav-links { display: flex; gap: 2px; flex: 1; overflow-x: auto; }
+    .nav-link { color: #94a3b8; text-decoration: none; padding: 7px 13px; border-radius: 8px; font-size: 13.5px; font-weight: 500; transition: all 0.15s; white-space: nowrap; }
+    .nav-link:hover { color: white; background: rgba(255,255,255,0.08); }
+    .nav-link.active { color: white; background: #0d9488; }
+    .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: 12px; }
+    .nav-role-badge { background: rgba(255,255,255,0.1); color: #94a3b8; padding: 4px 10px; border-radius: 20px; font-size: 12px; }
+    .nav-avatar { width: 32px; height: 32px; background: #0d9488; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --line: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --primary-soft: #dbeafe;
+      --booked-bg: #fff7ed;
+      --booked-border: #fdba74;
+      --booked-text: #9a3412;
+      --disabled: #f3f4f6;
+      --disabled-text: #9ca3af;
+      --icon-bg: rgba(255,255,255,0.92);
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      --sticky-left: 180px;
+      --col-width: 220px;
+      --head-height: 88px;
+      --slot-height: 74px;
+      --slot-gap: 8px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Outfit', Inter, ui-sans-serif, system-ui, sans-serif;
+      background: linear-gradient(180deg, #eff6ff 0%, var(--bg) 180px);
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 20px 18px 40px;
+    }
+
+    /* TWO-COLUMN LAYOUT: sidebar calendar + board */
+    .schedule-layout {
+      display: grid;
+      grid-template-columns: 256px 1fr;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    /* ——— SIDEBAR ——— */
+    .sidebar {
+      position: sticky;
+      top: 72px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* MINI CALENDAR */
+    .mini-cal {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      user-select: none;
+    }
+    .cal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    .cal-month-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .cal-nav-btn {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      transition: all 0.12s;
+    }
+    .cal-nav-btn:hover { background: #f1f5f9; color: var(--text); }
+    .cal-grid {
+      padding: 10px 12px 14px;
+    }
+    .cal-dow-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      margin-bottom: 4px;
+    }
+    .cal-dow {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      padding: 4px 0;
+    }
+    .cal-days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.12s;
+      color: var(--text);
+      border: 1.5px solid transparent;
+    }
+    .cal-day:hover:not(.empty):not(.selected) { background: #f0fdf9; color: #0f766e; }
+    .cal-day.other-month { color: #d1d5db; }
+    .cal-day.today { font-weight: 700; color: #0f766e; border-color: #0d9488; }
+    .cal-day.selected {
+      background: #0d9488;
+      color: white;
+      font-weight: 700;
+      box-shadow: 0 3px 10px rgba(13,148,136,0.35);
+    }
+    .cal-day.has-appt::after {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #0d9488;
+      position: absolute;
+      bottom: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .cal-day.has-appt { position: relative; }
+    .cal-day.has-appt.selected::after { background: rgba(255,255,255,0.7); }
+    .cal-day.empty { cursor: default; }
+
+    /* SIDEBAR INFO CARDS */
+    .sidebar-card {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 14px 16px;
+      font-size: 13px;
+    }
+    .sidebar-card-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .sidebar-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .sidebar-chip:last-child { border-bottom: none; padding-bottom: 0; }
+    .sidebar-chip .sc-icon { font-size: 15px; flex-shrink: 0; }
+    .sidebar-chip strong { color: var(--text); font-weight: 600; }
+    .sidebar-chip a { color: #0d9488; text-decoration: none; font-weight: 600; }
+    .sidebar-chip a:hover { text-decoration: underline; }
+
+    /* ——— BOARD COLUMN ——— */
+    .board-col {
+      min-width: 0;
+    }
+    .filter {
+      background: var(--card);
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 14px 16px;
+    }
+
+    .filter label {
+      display: block;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .filter select,
+    .filter input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 14px;
+      background: white;
+      outline: none;
+    }
+
+    .board {
+      background: var(--card);
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .settings-bar,
+    .board-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .settings-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .setting-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f9fafb;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .setting-card select {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 6px 8px;
+      background: white;
+    }
+
+    .board-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    }
+
+    .board-header h2 {
+      margin: 0 0 6px;
+      font-size: 22px;
+    }
+
+    .board-header p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .hint {
+      background: #f8fafc;
+      border: 1px solid #edf2f7;
+      padding: 10px 12px;
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      max-width: 360px;
+    }
+
+    .matrix-wrap {
+      overflow: auto;
+      max-height: 72vh;
+      background: white;
+    }
+
+    .matrix-board {
+      position: relative;
+      min-width: calc(var(--sticky-left) + 4 * var(--col-width));
+      background: white;
+    }
+
+    .top-row {
+      display: grid;
+      grid-template-columns: var(--sticky-left) repeat(4, var(--col-width));
+      position: sticky;
+      top: 0;
+      z-index: 6;
+      background: white;
+    }
+
+    .corner,
+    .resource-head {
+      min-height: var(--head-height);
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: #f8fbff;
+      padding: 14px;
+    }
+
+    .corner {
+      position: sticky;
+      left: 0;
+      z-index: 7;
+    }
+
+    .corner strong,
+    .resource-head strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 15px;
+    }
+
+    .corner span,
+    .resource-head span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .body-grid {
+      display: grid;
+      grid-template-columns: var(--sticky-left) 1fr;
+      position: relative;
+    }
+
+    .time-col {
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      background: white;
+    }
+
+    .time-label {
+      height: var(--slot-height);
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: #fcfdff;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .time-label strong {
+      font-size: 15px;
+    }
+
+    .time-label span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .lanes {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, var(--col-width));
+    }
+
+    .lane {
+      position: relative;
+      min-height: calc(10 * var(--slot-height));
+      border-right: 1px solid var(--line);
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent calc(var(--slot-height) - 1px),
+        var(--line) calc(var(--slot-height) - 1px),
+        var(--line) var(--slot-height)
+      );
+      background-color: white;
+    }
+
+    .slot-block {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: white;
+      padding: 10px 38px 10px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 4px;
+      font-size: 14px;
+      box-shadow: 0 1px 0 rgba(15,23,42,0.02);
+    }
+
+    .slot-block.available {
+      cursor: pointer;
+      color: var(--text);
+      justify-content: center;
+      align-items: center;
+      font-weight: 700;
+      padding-right: 10px;
+    }
+
+    .slot-block.available:hover {
+      border-color: var(--primary);
+      box-shadow: 0 12px 20px rgba(15,23,42,0.06);
+      transform: translateY(-1px);
+    }
+
+    .slot-block.selected {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      box-shadow: 0 14px 24px rgba(37,99,235,0.24);
+    }
+
+    .slot-block.booked {
+      background: var(--booked-bg);
+      border-color: var(--booked-border);
+      color: var(--booked-text);
+    }
+
+    .slot-block.unavailable {
+      background: var(--disabled);
+      color: var(--disabled-text);
+    }
+
+    .slot-time {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .slot-title {
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .slot-sub {
+      font-size: 11px;
+      opacity: 0.9;
+      line-height: 1.3;
+    }
+
+    .detail-icon {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,0.08);
+      background: var(--icon-bg);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #475569;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .detail-icon:hover {
+      background: white;
+    }
+
+    .summary {
+      padding: 18px 20px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+      background: #fcfdff;
+    }
+
+    .summary-details {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      color: var(--muted);
+    }
+
+    .summary-details strong {
+      color: var(--text);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 10px 20px rgba(37,99,235,0.22);
+    }
+
+    .btn-secondary {
+      background: #eef2ff;
+      color: #4338ca;
+    }
+
+    @media (max-width: 1100px) {
+      .schedule-layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; flex-direction: row; flex-wrap: wrap; }
+      .mini-cal { flex: 0 0 256px; }
+    }
+    @media (max-width: 680px) {
+      .hero h1 { font-size: 26px; }
+      .mini-cal { flex: 1 1 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="timeslot_scheduler_mockup.html">
+      <div class="nav-brand-icon">🏥</div>
+      CARES Scheduler
+    </a>
+    <div class="nav-links">
+      <a href="timeslot_scheduler_mockup.html" class="nav-link active">📅 Schedule</a>
+      <a href="shift-setup.html" class="nav-link">⚙️ Shifts</a>
+      <a href="book-appointment.html" class="nav-link">➕ Book</a>
+      <a href="appointments.html" class="nav-link">📋 Appointments</a>
+      <a href="recurring-edit.html" class="nav-link">🔄 Recurring</a>
+      <a href="therapist-change.html" class="nav-link">🔀 Change Therapist</a>
+    </div>
+    <div class="nav-right">
+      <span class="nav-role-badge">Admin</span>
+      <div class="nav-avatar">AL</div>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+    <div class="hero">
+      <div>
+        <h1>Resource Booking Matrix</h1>
+        <p>Select a date from the calendar to view therapist availability. Committed shift slots are shown as bookable. Click any available block to book an appointment.</p>
+      </div>
+      <div class="badge">April 2026 — Committed ✓</div>
+    </div>
+
+    <div class="schedule-layout">
+
+      <!-- ===== SIDEBAR: INLINE CALENDAR ===== -->
+      <div class="sidebar">
+
+        <div class="mini-cal">
+          <div class="cal-header">
+            <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+            <div class="cal-month-label" id="calMonthLabel">April 2026</div>
+            <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+          </div>
+          <div class="cal-grid">
+            <div class="cal-dow-row">
+              <div class="cal-dow">Su</div>
+              <div class="cal-dow">Mo</div>
+              <div class="cal-dow">Tu</div>
+              <div class="cal-dow">We</div>
+              <div class="cal-dow">Th</div>
+              <div class="cal-dow">Fr</div>
+              <div class="cal-dow">Sa</div>
+            </div>
+            <div class="cal-days-grid" id="calDaysGrid">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- LEGEND + INFO -->
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">Legend</div>
+          <div class="sidebar-chip">
+            <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#0d9488;flex-shrink:0;"></span>
+            Selected date
+          </div>
+          <div class="sidebar-chip">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#0d9488;flex-shrink:0;margin:0 2px;"></span>
+            Has appointments
+          </div>
+          <div class="sidebar-chip">
+            <span style="display:inline-block;width:12px;height:12px;border-radius:3px;border:1.5px solid #0d9488;flex-shrink:0;"></span>
+            Today
+          </div>
+        </div>
+
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">This Month</div>
+          <div class="sidebar-chip">
+            <span class="sc-icon">📍</span>
+            <span><strong>Tanjong Pagar Centre</strong></span>
+          </div>
+          <div class="sidebar-chip">
+            <span class="sc-icon">🔒</span>
+            <span>April 2026 shifts <strong style="color:#16a34a;">Committed</strong></span>
+          </div>
+          <div class="sidebar-chip">
+            <span class="sc-icon">👥</span>
+            <span><strong>4</strong> therapists active</span>
+          </div>
+          <div class="sidebar-chip">
+            <span class="sc-icon">⏱</span>
+            <span>Durations in <a href="shift-setup.html">Shifts ⚙️</a></span>
+          </div>
+          <div class="sidebar-chip">
+            <span class="sc-icon">⚠️</span>
+            <span style="color:#92400e;">Dr Marcus Lee on leave <strong>Apr 6–13</strong></span>
+          </div>
+        </div>
+
+        <a href="book-appointment.html" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#0d9488;color:white;text-decoration:none;font-weight:700;font-size:14px;padding:13px 16px;border-radius:14px;box-shadow:0 4px 14px rgba(13,148,136,0.3);transition:all 0.15s;"
+          onmouseover="this.style.background='#0f766e'" onmouseout="this.style.background='#0d9488'">
+          ➕ New Appointment
+        </a>
+
+      </div><!-- /sidebar -->
+
+      <!-- ===== BOARD COLUMN ===== -->
+      <div class="board-col">
+      <section class="board">
+
+      <div class="board-header">
+        <div>
+          <h2>Availability on Wed, 1 Apr 2026</h2>
+          <p>Session durations are set per therapist in <a href="shift-setup.html" style="color:var(--primary);font-weight:600;">Shift Setup</a>. April 2026 shifts are committed — slots shown reflect committed working hours.</p>
+        </div>
+        <div class="hint">Available blocks are clickable. Booked and unavailable blocks stay aligned to their start time.</div>
+      </div>
+
+      <div class="matrix-wrap">
+        <div class="matrix-board">
+          <div class="top-row">
+            <div class="corner">
+              <strong>Date / Time</strong>
+              <span>Y-axis time · X-axis resource</span>
+            </div>
+            <div class="resource-head">
+              <strong>Dr Angela Lim</strong>
+              <span>08:30 – 14:30<br/>Consultation Room A</span>
+            </div>
+            <div class="resource-head">
+              <strong>Dr Marcus Lee</strong>
+              <span>09:00 – 13:30<br/>Consultation Room B</span>
+              <span style="display:inline-block;margin-top:4px;background:#fffbeb;color:#92400e;border:1px solid #fde68a;border-radius:99px;font-size:11px;font-weight:700;padding:2px 8px;">🏖 On Leave Apr 6–13</span>
+            </div>
+            <div class="resource-head">
+              <strong>Nurse Janice Tan</strong>
+              <span>09:30 – 14:00<br/>Vaccination Bay</span>
+            </div>
+            <div class="resource-head">
+              <strong>Treatment Room 2</strong>
+              <span>08:30 – 13:30<br/>Procedure Room</span>
+            </div>
+          </div>
+
+          <div class="body-grid">
+            <div class="time-col">
+              <div class="time-label"><strong>08:30</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>09:00</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>09:30</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>10:00</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>10:30</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>11:00</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>11:30</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>13:00</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>13:30</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>14:00</strong><span>Wed, 1 Apr</span></div>
+            </div>
+
+            <div class="lanes">
+              <div class="lane">
+                <div class="slot-block available" style="top:8px; height:58px;" data-time="08:30" data-resource="Dr Angela Lim">08:30</div>
+                <div class="slot-block available selected" style="top:82px; height:58px;" data-time="09:00" data-resource="Dr Angela Lim">09:00</div>
+                <div class="slot-block booked" style="top:156px; height:58px;">
+                  <div class="slot-time">09:30</div>
+                  <div class="slot-title">Booked · Mr Adrian Koh</div>
+                  <div class="slot-sub">Initial consultation</div>
+                  <button class="detail-icon" type="button" data-detail-title="Dr Angela Lim · 09:30" data-detail-body="Booked with Mr Adrian Koh for initial consultation. Ref: APT-10514.">i</button>
+                </div>
+                <div class="slot-block available" style="top:230px; height:58px;" data-time="10:00" data-resource="Dr Angela Lim">10:00</div>
+                <div class="slot-block available" style="top:304px; height:58px;" data-time="10:30" data-resource="Dr Angela Lim">10:30</div>
+                <div class="slot-block unavailable" style="top:378px; height:58px;">
+                  <div class="slot-time">11:00</div>
+                  <div class="slot-title">Meeting</div>
+                  <button class="detail-icon" type="button" data-detail-title="Dr Angela Lim · 11:00" data-detail-body="Unavailable due to internal case review meeting.">i</button>
+                </div>
+                <div class="slot-block available" style="top:452px; height:58px;" data-time="11:30" data-resource="Dr Angela Lim">11:30</div>
+                <div class="slot-block available" style="top:526px; height:58px;" data-time="13:00" data-resource="Dr Angela Lim">13:00</div>
+                <div class="slot-block booked" style="top:600px; height:58px;">
+                  <div class="slot-time">13:30</div>
+                  <div class="slot-title">Booked · Ms Karen Tan</div>
+                  <div class="slot-sub">Consultation</div>
+                  <button class="detail-icon" type="button" data-detail-title="Dr Angela Lim · 13:30" data-detail-body="Booked with Ms Karen Tan for consultation. Ref: APT-10618.">i</button>
+                </div>
+                <div class="slot-block available" style="top:674px; height:58px;" data-time="14:00" data-resource="Dr Angela Lim">14:00</div>
+              </div>
+
+              <div class="lane">
+                <div class="slot-block unavailable" style="top:8px; height:58px;">
+                  <div class="slot-time">08:30</div>
+                  <div class="slot-title">Not started</div>
+                  <button class="detail-icon" type="button" data-detail-title="Dr Marcus Lee · 08:30" data-detail-body="Unavailable because Dr Marcus Lee starts at 09:00.">i</button>
+                </div>
+                <div class="slot-block booked" style="top:82px; height:132px;">
+                  <div class="slot-time">09:00 - 10:00</div>
+                  <div class="slot-title">Booked · Ms Cheryl Goh</div>
+                  <div class="slot-sub">1-hour follow-up review</div>
+                  <button class="detail-icon" type="button" onclick="window.location='recurring-edit.html'" data-detail-title="Dr Marcus Lee · 09:00" data-detail-body="Booked with Ms Cheryl Goh for a 1-hour follow-up review. Ref: APT-10501.">i</button>
+                </div>
+                <div class="slot-block booked" style="top:230px; height:132px;">
+                  <div class="slot-time">10:00 - 11:00</div>
+                  <div class="slot-title">Booked · Mdm Lim Siew Lan</div>
+                  <div class="slot-sub">Doctor review</div>
+                  <button class="detail-icon" type="button" data-detail-title="Dr Marcus Lee · 10:00" data-detail-body="Booked with Mdm Lim Siew Lan for doctor review. Ref: APT-10533.">i</button>
+                </div>
+                <div class="slot-block available" style="top:378px; height:132px;" data-time="11:00 - 12:00" data-resource="Dr Marcus Lee">11:00 - 12:00</div>
+                <div class="slot-block available" style="top:526px; height:132px;" data-time="13:00 - 14:00" data-resource="Dr Marcus Lee">13:00 - 14:00</div>
+              </div>
+
+              <div class="lane">
+                <div class="slot-block unavailable" style="top:8px; height:132px;">
+                  <div class="slot-time">08:30 - 09:30</div>
+                  <div class="slot-title">Not started</div>
+                  <button class="detail-icon" type="button" data-detail-title="Nurse Janice Tan · Morning" data-detail-body="Unavailable because Nurse Janice Tan starts at 09:30.">i</button>
+                </div>
+                <div class="slot-block available" style="top:156px; height:58px;" data-time="09:30" data-resource="Nurse Janice Tan">09:30</div>
+                <div class="slot-block unavailable" style="top:230px; height:132px;">
+                  <div class="slot-time">10:00 - 11:00</div>
+                  <div class="slot-title">Vaccination break</div>
+                  <button class="detail-icon" type="button" data-detail-title="Nurse Janice Tan · 10:00" data-detail-body="Unavailable due to vaccination break window and replenishment.">i</button>
+                </div>
+                <div class="slot-block available" style="top:378px; height:58px;" data-time="11:00" data-resource="Nurse Janice Tan">11:00</div>
+                <div class="slot-block booked" style="top:452px; height:58px;">
+                  <div class="slot-time">11:30</div>
+                  <div class="slot-title">Booked · Baby Ethan Ng</div>
+                  <div class="slot-sub">Vaccination</div>
+                  <button class="detail-icon" type="button" data-detail-title="Nurse Janice Tan · 11:30" data-detail-body="Booked with Baby Ethan Ng for vaccination. Ref: APT-10579.">i</button>
+                </div>
+                <div class="slot-block unavailable" style="top:526px; height:58px;">
+                  <div class="slot-time">13:00</div>
+                  <div class="slot-title">Resume at 13:30</div>
+                  <button class="detail-icon" type="button" data-detail-title="Nurse Janice Tan · 13:00" data-detail-body="Unavailable because Nurse Janice Tan resumes at 13:30.">i</button>
+                </div>
+                <div class="slot-block available" style="top:600px; height:58px;" data-time="13:30" data-resource="Nurse Janice Tan">13:30</div>
+                <div class="slot-block available" style="top:674px; height:58px;" data-time="14:00" data-resource="Nurse Janice Tan">14:00</div>
+              </div>
+
+              <div class="lane">
+                <div class="slot-block booked" style="top:8px; height:132px;">
+                  <div class="slot-time">08:30 - 09:30</div>
+                  <div class="slot-title">Booked · Mr Tan Wei Ming</div>
+                  <div class="slot-sub">Wound dressing</div>
+                  <button class="detail-icon" type="button" data-detail-title="Treatment Room 2 · 08:30" data-detail-body="Booked by Mr Tan Wei Ming for wound dressing. Ref: APT-10482.">i</button>
+                </div>
+                <div class="slot-block unavailable" style="top:156px; height:58px;">
+                  <div class="slot-time">09:30</div>
+                  <div class="slot-title">Preparation</div>
+                  <button class="detail-icon" type="button" data-detail-title="Treatment Room 2 · 09:30" data-detail-body="Unavailable because the procedure room is being prepared.">i</button>
+                </div>
+                <div class="slot-block available" style="top:230px; height:132px;" data-time="10:00 - 11:00" data-resource="Treatment Room 2">10:00 - 11:00</div>
+                <div class="slot-block available" style="top:378px; height:132px;" data-time="11:00 - 12:00" data-resource="Treatment Room 2">11:00 - 12:00</div>
+                <div class="slot-block booked" style="top:526px; height:132px;">
+                  <div class="slot-time">13:00 - 14:00</div>
+                  <div class="slot-title">Booked · Mr Daniel Teo</div>
+                  <div class="slot-sub">Minor procedure</div>
+                  <button class="detail-icon" type="button" data-detail-title="Treatment Room 2 · 13:00" data-detail-body="Booked by Mr Daniel Teo for minor procedure. Ref: APT-10605.">i</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary">
+        <div class="summary-details" id="selectionSummary">
+          <div><strong>Date:</strong> Wed, 1 Apr 2026</div>
+          <div><strong>Time:</strong> 09:00</div>
+          <div><strong>Resource:</strong> Dr Angela Lim</div>
+          <div><strong>Status:</strong> Available</div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-secondary" onclick="window.location='book-appointment.html'">Hold Slot</button>
+          <button class="btn btn-primary" onclick="window.location='book-appointment.html'">Confirm Booking</button>
+        </div>
+      </div>
+    </section>
+      </div><!-- /board-col -->
+    </div><!-- /schedule-layout -->
+  </div><!-- /page -->
+
+  <script>
+    // ——————————————————————————————————
+    // INLINE CALENDAR
+    // ——————————————————————————————————
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+    // Dates that have appointments (for dots)
+    const apptDates = {
+      '2026-4-1':true, '2026-4-2':true, '2026-4-6':true, '2026-4-7':true,
+      '2026-4-8':true, '2026-4-13':true, '2026-4-14':true, '2026-4-21':true,
+      '2026-4-22':true, '2026-4-23':true, '2026-4-28':true
+    };
+
+    let calYear = 2026, calMonth = 3; // 0-indexed: 3 = April
+    let selectedDate = new Date(2026, 3, 1); // Apr 1 default
+    const today = new Date(2026, 2, 24); // mock "today" = Mar 24 2026
+
+    function renderCalendar() {
+      const label = document.getElementById('calMonthLabel');
+      const grid  = document.getElementById('calDaysGrid');
+      label.textContent = MONTHS[calMonth] + ' ' + calYear;
+
+      const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      const daysInPrev  = new Date(calYear, calMonth, 0).getDate();
+
+      let html = '';
+      // Leading blanks from prev month
+      for (let i = 0; i < firstDay; i++) {
+        const d = daysInPrev - firstDay + 1 + i;
+        html += `<div class="cal-day other-month">${d}</div>`;
+      }
+      // Current month days
+      for (let d = 1; d <= daysInMonth; d++) {
+        const isToday    = (calYear === today.getFullYear() && calMonth === today.getMonth() && d === today.getDate());
+        const isSelected = (calYear === selectedDate.getFullYear() && calMonth === selectedDate.getMonth() && d === selectedDate.getDate());
+        const hasAppt    = apptDates[`${calYear}-${calMonth+1}-${d}`];
+        let cls = 'cal-day';
+        if (isToday)    cls += ' today';
+        if (isSelected) cls += ' selected';
+        if (hasAppt)    cls += ' has-appt';
+        html += `<div class="${cls}" onclick="selectDay(${calYear},${calMonth},${d})">${d}</div>`;
+      }
+      // Trailing days
+      const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+      let trail = 1;
+      for (let i = firstDay + daysInMonth; i < totalCells; i++, trail++) {
+        html += `<div class="cal-day other-month">${trail}</div>`;
+      }
+      grid.innerHTML = html;
+    }
+
+    function calNav(dir) {
+      calMonth += dir;
+      if (calMonth < 0)  { calMonth = 11; calYear--; }
+      if (calMonth > 11) { calMonth = 0;  calYear++; }
+      renderCalendar();
+    }
+
+    function selectDay(y, m, d) {
+      selectedDate = new Date(y, m, d);
+      renderCalendar();
+      // Update board header
+      const days  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const mons  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const label = `${days[selectedDate.getDay()]}, ${d} ${mons[m]} ${y}`;
+      document.querySelector('.board-header h2').textContent = 'Availability on ' + label;
+    }
+
+    renderCalendar();
+
+    // ——————————————————————————————————
+    // SLOT SELECTION (existing logic)
+    // ——————————————————————————————————
+    const selectable = document.querySelectorAll('.slot-block.available, .slot-block.selected');
+    const summary = document.getElementById('selectionSummary');
+    const detailIcons = document.querySelectorAll('.detail-icon');
+
+    selectable.forEach(block => {
+      block.addEventListener('click', () => {
+        document.querySelectorAll('.slot-block.selected').forEach(x => x.classList.remove('selected'));
+        block.classList.add('selected');
+
+        const resource = block.dataset.resource || 'Unknown resource';
+        const slotTime = block.dataset.time || block.textContent.trim();
+
+        summary.innerHTML = `
+          <div><strong>Date:</strong> Wed, 1 Apr 2026</div>
+          <div><strong>Time:</strong> ${slotTime}</div>
+          <div><strong>Resource:</strong> ${resource}</div>
+          <div><strong>Status:</strong> Available</div>
+        `;
+      });
+    });
+
+    detailIcons.forEach(icon => {
+      icon.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (icon.onclick) return; // already has navigation handler
+        const title = icon.dataset.detailTitle || 'Appointment details';
+        const body = icon.dataset.detailBody || 'No additional details.';
+        window.alert(`${title}\n\n${body}`);
+      });
+    });
+  </script>
+</body>
+</html>

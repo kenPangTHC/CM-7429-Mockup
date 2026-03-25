@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Change Therapist · CARES Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --primary-light: #ccfbf1;
+      --bg: #f0fdf9;
+      --card: #ffffff;
+      --border: #d1fae5;
+      --text: #0f1c1b;
+      --muted: #64748b;
+      --nav-bg: #1a2e2c;
+      --amber: #f59e0b;
+      --amber-bg: #fffbeb;
+      --amber-border: #fde68a;
+      --red: #ef4444;
+      --red-bg: #fef2f2;
+      --red-border: #fecaca;
+      --purple: #7c3aed;
+      --purple-bg: #ede9fe;
+      --purple-border: #ddd6fe;
+      --blue: #2563eb;
+      --blue-bg: #dbeafe;
+      --green: #16a34a;
+      --green-bg: #dcfce7;
+      --green-border: #bbf7d0;
+      --shadow: 0 4px 20px rgba(13,148,136,0.1);
+      --shadow-sm: 0 2px 8px rgba(13,148,136,0.07);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); }
+
+    /* NAV */
+    .topnav { background: var(--nav-bg); position: sticky; top: 0; z-index: 100; }
+    .nav-inner { max-width: 1500px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; height: 56px; gap: 6px; }
+    .nav-brand { display: flex; align-items: center; gap: 8px; color: white; text-decoration: none; font-weight: 700; font-size: 16px; flex-shrink: 0; margin-right: 16px; }
+    .nav-brand-icon { width: 30px; height: 30px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .nav-links { display: flex; gap: 2px; flex: 1; overflow-x: auto; }
+    .nav-link { color: #94a3b8; text-decoration: none; padding: 7px 13px; border-radius: 8px; font-size: 13.5px; font-weight: 500; transition: all 0.15s; white-space: nowrap; }
+    .nav-link:hover { color: white; background: rgba(255,255,255,0.08); }
+    .nav-link.active { color: white; background: var(--primary); }
+    .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: 12px; }
+    .role-badge { background: rgba(255,255,255,0.1); color: #94a3b8; padding: 4px 10px; border-radius: 20px; font-size: 12px; }
+    .avatar { width: 32px; height: 32px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+
+    .btn { border: none; border-radius: 12px; padding: 10px 20px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 8px 20px rgba(13,148,136,0.3); }
+    .btn-secondary { background: var(--primary-light); color: var(--primary-dark); }
+    .btn-secondary:hover { background: #99f6e4; }
+    .btn-ghost { background: #f1f5f9; color: var(--muted); }
+    .btn-ghost:hover { background: #e2e8f0; color: var(--text); }
+    .btn-danger { background: var(--red-bg); color: var(--red); border: 1.5px solid var(--red-border); }
+    .btn-lg { padding: 13px 28px; font-size: 15px; border-radius: 14px; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+    .badge-purple { background: var(--purple-bg); color: var(--purple); }
+    .badge-leave { background: var(--amber-bg); color: #92400e; border: 1px solid var(--amber-border); }
+    .badge-active { background: var(--green-bg); color: var(--green); }
+    .badge-partial { background: #fef3c7; color: #92400e; }
+
+    /* PAGE */
+    .page { max-width: 1200px; margin: 0 auto; padding: 28px 20px 80px; }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .breadcrumb a { color: var(--primary); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb span { color: #94a3b8; }
+
+    /* CONTEXT HEADER */
+    .context-bar { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px 22px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; box-shadow: var(--shadow-sm); }
+    .context-appt { flex: 1; }
+    .context-title { font-size: 16px; font-weight: 700; }
+    .context-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .scope-bar { background: var(--purple-bg); border: 1.5px solid var(--purple-border); border-radius: 12px; padding: 12px 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .scope-label { font-size: 13px; font-weight: 700; color: var(--purple); flex: 1; }
+    .scope-options { display: flex; gap: 6px; }
+    .scope-pill { padding: 5px 14px; border-radius: 99px; border: 1.5px solid var(--purple-border); background: white; font-size: 12px; font-weight: 600; color: #6d28d9; cursor: pointer; transition: all 0.15s; }
+    .scope-pill.on { background: var(--purple); color: white; border-color: var(--purple); }
+
+    /* COMPARISON LAYOUT */
+    .comparison { display: grid; grid-template-columns: 1fr 60px 1fr; gap: 0; align-items: start; margin-bottom: 24px; }
+    .compare-arrow { display: flex; align-items: center; justify-content: center; padding-top: 60px; font-size: 28px; color: var(--muted); }
+    .compare-panel { background: var(--card); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-sm); overflow: hidden; }
+    .compare-panel.before { border-top: 3px solid var(--amber); }
+    .compare-panel.after { border-top: 3px solid var(--primary); }
+    .compare-panel.after.selected { border-top-color: var(--green); box-shadow: 0 0 0 3px var(--green-border), var(--shadow); }
+    .panel-label { padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; }
+    .panel-label-text { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .before .panel-label-text { color: #92400e; }
+    .after .panel-label-text { color: var(--primary-dark); }
+    .panel-therapist { padding: 14px 18px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .t-card { display: flex; align-items: center; gap: 12px; }
+    .t-avatar { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+    .t-name { font-size: 15px; font-weight: 700; }
+    .t-role { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .panel-sessions { padding: 14px 18px; }
+    .panel-sessions h4 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 10px; }
+    .session-mini { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 13px; margin-bottom: 5px; }
+    .session-mini.before-session { background: var(--amber-bg); border: 1px solid var(--amber-border); }
+    .session-mini.after-session { background: var(--green-bg); border: 1px solid var(--green-border); }
+    .session-mini.placeholder { background: #f8fffe; border: 1.5px dashed var(--border); color: var(--muted); justify-content: center; font-size: 12px; }
+    .session-mini-num { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+    .session-mini .s-date { font-weight: 600; flex: 1; }
+    .session-mini .s-icon { font-size: 14px; }
+
+    /* THERAPIST SELECTOR */
+    .selector-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 24px; }
+    .selector-header { padding: 16px 22px; border-bottom: 1px solid var(--border); background: #f8fffe; display: flex; align-items: center; justify-content: space-between; }
+    .selector-header h3 { font-size: 16px; font-weight: 700; }
+    .therapist-options { display: flex; flex-direction: column; gap: 0; }
+    .therapist-option { display: flex; align-items: center; gap: 14px; padding: 14px 22px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
+    .therapist-option:last-child { border-bottom: none; }
+    .therapist-option:hover { background: #f0fdf9; }
+    .therapist-option.selected { background: var(--primary-light); border-left: 3px solid var(--primary); }
+    .therapist-option.leave-therapist { opacity: 0.5; pointer-events: none; }
+    .to-info { flex: 1; }
+    .to-name { font-size: 14px; font-weight: 700; }
+    .to-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .to-availability { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+    .avail-pill { padding: 3px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+    .avail-pill.full { background: var(--green-bg); color: var(--green); }
+    .avail-pill.partial { background: var(--amber-bg); color: #92400e; }
+    .avail-pill.none { background: var(--red-bg); color: var(--red); }
+    .to-select-btn { padding: 7px 16px; border: 1.5px solid var(--border); border-radius: 10px; background: white; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; color: var(--text); }
+    .to-select-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .therapist-option.selected .to-select-btn { background: var(--primary); color: white; border-color: var(--primary); }
+    .shift-mini-viz { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; }
+    .shift-mini-row { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+    .shift-mini-bar { flex: 1; height: 6px; background: #e2e8f0; border-radius: 99px; overflow: hidden; max-width: 120px; }
+    .shift-mini-fill { height: 100%; background: var(--primary); border-radius: 99px; }
+    .shift-mini-fill.leave { background: repeating-linear-gradient(90deg, #fbbf24 0, #fbbf24 3px, #fef3c7 3px, #fef3c7 6px); }
+
+    /* BOTTOM ACTION BAR */
+    .action-bar { background: var(--card); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .action-bar-left { display: flex; flex-direction: column; gap: 4px; }
+    .action-bar-title { font-size: 15px; font-weight: 700; }
+    .action-bar-meta { font-size: 13px; color: var(--muted); }
+    .action-bar-right { display: flex; gap: 10px; }
+
+    /* CONFIRM MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,28,27,0.65); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: white; border-radius: 24px; max-width: 560px; width: 100%; box-shadow: 0 24px 60px rgba(0,0,0,0.2); animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1); overflow: hidden; }
+    @keyframes popIn { from { transform: scale(0.9) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+    .modal-header { padding: 22px 24px 18px; border-bottom: 1px solid var(--border); }
+    .modal-header h3 { font-size: 19px; font-weight: 800; }
+    .modal-header p { font-size: 14px; color: var(--muted); margin-top: 4px; }
+    .modal-body { padding: 20px 24px; }
+    .diff-table { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+    .diff-table th { background: #f8fffe; padding: 10px 14px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); text-align: left; border-bottom: 1px solid var(--border); }
+    .diff-table th.before-col { border-right: 1px solid var(--border); }
+    .diff-table td { padding: 10px 14px; font-size: 13px; vertical-align: top; border-bottom: 1px solid var(--border); }
+    .diff-table td.before-col { border-right: 1px solid var(--border); background: var(--amber-bg); color: #92400e; }
+    .diff-table td.after-col { background: #f0fdf9; color: var(--primary-dark); }
+    .diff-table tr:last-child td { border-bottom: none; }
+    .diff-label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 2px; }
+    .impact-note { background: var(--purple-bg); border: 1px solid var(--purple-border); border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--purple); margin-top: 14px; display: flex; align-items: center; gap: 8px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 10px; background: #f8fffe; }
+
+    /* SUCCESS OVERLAY */
+    .success-overlay { display: none; position: fixed; inset: 0; background: rgba(15,28,27,0.7); backdrop-filter: blur(6px); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
+    .success-overlay.show { display: flex; }
+    .success-card { background: white; border-radius: 24px; padding: 48px 40px; max-width: 500px; width: 100%; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.2); animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+    .success-icon { width: 80px; height: 80px; background: var(--green-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 22px; }
+    .success-card h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .success-card p { color: var(--muted); font-size: 15px; margin-bottom: 20px; }
+    .success-detail { background: #f8fffe; border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; margin-bottom: 22px; text-align: left; }
+    .success-row { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+    .success-row:last-child { border-bottom: none; }
+    .success-row .sr-label { color: var(--muted); }
+    .success-row .sr-val { font-weight: 700; }
+    .success-actions { display: flex; gap: 10px; justify-content: center; }
+
+    @media (max-width: 900px) {
+      .comparison { grid-template-columns: 1fr; }
+      .compare-arrow { display: none; }
+    }
+    @media (max-width: 680px) {
+      .scope-options { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="timeslot_scheduler_mockup.html">
+      <div class="nav-brand-icon">🏥</div>
+      CARES Scheduler
+    </a>
+    <div class="nav-links">
+      <a href="timeslot_scheduler_mockup.html" class="nav-link">📅 Schedule</a>
+      <a href="shift-setup.html" class="nav-link">⚙️ Shifts</a>
+      <a href="book-appointment.html" class="nav-link">➕ Book</a>
+      <a href="appointments.html" class="nav-link">📋 Appointments</a>
+      <a href="recurring-edit.html" class="nav-link">🔄 Recurring</a>
+      <a href="therapist-change.html" class="nav-link active">🔀 Change Therapist</a>
+    </div>
+    <div class="nav-right">
+      <span class="role-badge">Admin</span>
+      <div class="avatar">AL</div>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="breadcrumb">
+    <a href="timeslot_scheduler_mockup.html">Schedule</a>
+    <span>›</span>
+    <a href="recurring-edit.html">APT-10501 · Recurring</a>
+    <span>›</span>
+    <span>Change Therapist</span>
+  </div>
+
+  <!-- CONTEXT HEADER -->
+  <div class="context-bar">
+    <div style="font-size:24px;flex-shrink:0;">🔀</div>
+    <div class="context-appt">
+      <div class="context-title">Change Therapist — Mdm Lim Siew Lan</div>
+      <div class="context-meta">APT-10501 · Recurring OT Session · Every Monday 09:00 · Dr Marcus Lee (currently assigned)</div>
+    </div>
+    <span class="badge badge-leave">⚠ Therapist on Leave Apr 6–13</span>
+    <span class="badge badge-purple">🔄 Recurring</span>
+  </div>
+
+  <!-- SCOPE SELECTOR -->
+  <div class="scope-bar">
+    <div>
+      <div class="scope-label">🎯 Apply change to:</div>
+    </div>
+    <div class="scope-options">
+      <span class="scope-pill" onclick="setScope(this,'this')">This session only (Mon, 6 Apr)</span>
+      <span class="scope-pill on" onclick="setScope(this,'following')">This &amp; following (8 sessions)</span>
+      <span class="scope-pill" onclick="setScope(this,'all')">All in series (12 sessions)</span>
+    </div>
+  </div>
+
+  <!-- THERAPIST SELECTOR -->
+  <div class="selector-card">
+    <div class="selector-header">
+      <h3>Select New Therapist</h3>
+      <span style="font-size:13px;color:var(--muted);">Only therapists with committed shifts on affected dates are shown</span>
+    </div>
+    <div class="therapist-options">
+
+      <!-- Dr Angela Lim -->
+      <div class="therapist-option selected" id="opt-angela" onclick="selectTherapist('angela')">
+        <div class="t-avatar" style="background:#0d9488;color:white;">AL</div>
+        <div class="to-info">
+          <div class="to-name">Dr Angela Lim</div>
+          <div class="to-meta">Occupational Therapy · Consultation Room A · 30 min sessions</div>
+          <div class="to-availability">
+            <span class="avail-pill full">✓ Available all 8 sessions</span>
+            <span style="font-size:11px;color:var(--muted);">Shift: Mon 08:30–14:30</span>
+          </div>
+          <div class="shift-mini-viz">
+            <div class="shift-mini-row"><span style="min-width:30px;font-size:10px;color:var(--muted);">Mon</span><div class="shift-mini-bar"><div class="shift-mini-fill" style="width:55%;"></div></div><span>08:30–14:30</span></div>
+          </div>
+        </div>
+        <button class="to-select-btn" onclick="selectTherapist('angela')">✓ Selected</button>
+      </div>
+
+      <!-- Dr Marcus Lee - on leave (disabled) -->
+      <div class="therapist-option leave-therapist">
+        <div class="t-avatar" style="background:#f59e0b;color:white;">ML</div>
+        <div class="to-info">
+          <div class="to-name">Dr Marcus Lee <span class="badge badge-leave" style="font-size:11px;margin-left:4px;">On Leave</span></div>
+          <div class="to-meta">Physiotherapy · Currently assigned · On leave Apr 6–13</div>
+          <div class="to-availability">
+            <span class="avail-pill none">✕ Unavailable for affected sessions</span>
+          </div>
+        </div>
+        <button class="to-select-btn" disabled style="opacity:0.4;cursor:not-allowed;">Unavailable</button>
+      </div>
+
+      <!-- Nurse Janice Tan -->
+      <div class="therapist-option" id="opt-janice" onclick="selectTherapist('janice')">
+        <div class="t-avatar" style="background:#7c3aed;color:white;">JT</div>
+        <div class="to-info">
+          <div class="to-name">Nurse Janice Tan</div>
+          <div class="to-meta">Nursing / Care · Vaccination Bay · 30 min sessions</div>
+          <div class="to-availability">
+            <span class="avail-pill partial">⚡ Partial — 6 of 8 sessions</span>
+            <span style="font-size:11px;color:var(--muted);">Missing 2 sessions (Mon breaks)</span>
+          </div>
+          <div class="shift-mini-viz">
+            <div class="shift-mini-row"><span style="min-width:30px;font-size:10px;color:var(--muted);">Mon</span><div class="shift-mini-bar"><div class="shift-mini-fill" style="width:45%;"></div></div><span>09:30–14:00</span></div>
+          </div>
+        </div>
+        <button class="to-select-btn" onclick="selectTherapist('janice')">Select</button>
+      </div>
+
+      <!-- Dr Wei Chen -->
+      <div class="therapist-option" id="opt-wei" onclick="selectTherapist('wei')">
+        <div class="t-avatar" style="background:#2563eb;color:white;">WC</div>
+        <div class="to-info">
+          <div class="to-name">Dr Wei Chen</div>
+          <div class="to-meta">Speech Therapy · Room D · 30 min sessions</div>
+          <div class="to-availability">
+            <span class="avail-pill full">✓ Available all 8 sessions</span>
+            <span style="font-size:11px;color:var(--muted);">Shift: Mon 10:00–18:00</span>
+          </div>
+          <div class="shift-mini-viz">
+            <div class="shift-mini-row"><span style="min-width:30px;font-size:10px;color:var(--muted);">Mon</span><div class="shift-mini-bar"><div class="shift-mini-fill" style="width:75%;margin-left:15%;"></div></div><span>10:00–18:00</span></div>
+          </div>
+        </div>
+        <button class="to-select-btn" onclick="selectTherapist('wei')">Select</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BEFORE / AFTER COMPARISON -->
+  <div class="comparison">
+    <!-- BEFORE -->
+    <div class="compare-panel before">
+      <div class="panel-label" style="background:#fffbeb;">
+        <span class="panel-label-text">📍 Before — Current Assignment</span>
+        <span class="badge badge-leave">Dr Marcus Lee</span>
+      </div>
+      <div class="panel-therapist">
+        <div class="t-card">
+          <div class="t-avatar" style="background:#f59e0b;color:white;width:46px;height:46px;">ML</div>
+          <div>
+            <div class="t-name">Dr Marcus Lee</div>
+            <div class="t-role">Physiotherapy · Consultation Room B</div>
+            <div class="badge badge-leave" style="margin-top:4px;font-size:11px;">🏖 On leave Apr 6–13</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-sessions">
+        <h4>Affected Sessions</h4>
+        <div class="session-mini before-session"><div class="session-mini-num" style="background:var(--amber-bg);color:#92400e;">5</div><span class="s-date">Mon, 6 Apr</span><span style="font-size:11px;color:#92400e;">⚠ On Leave</span></div>
+        <div class="session-mini before-session"><div class="session-mini-num" style="background:var(--amber-bg);color:#92400e;">6</div><span class="s-date">Mon, 13 Apr</span><span style="font-size:11px;color:#92400e;">⚠ On Leave</span></div>
+        <div class="session-mini before-session"><div class="session-mini-num" style="background:var(--amber-bg);color:#92400e;">7</div><span class="s-date">Mon, 20 Apr</span><span style="font-size:11px;color:#92400e;">Reassign</span></div>
+        <div class="session-mini before-session"><div class="session-mini-num" style="background:var(--amber-bg);color:#92400e;">8</div><span class="s-date">Mon, 27 Apr</span><span style="font-size:11px;color:#92400e;">Reassign</span></div>
+        <div style="font-size:11px;color:var(--muted);padding:4px 0;">+ 4 more sessions</div>
+      </div>
+    </div>
+
+    <!-- ARROW -->
+    <div class="compare-arrow">→</div>
+
+    <!-- AFTER -->
+    <div class="compare-panel after selected" id="afterPanel">
+      <div class="panel-label" style="background:#f0fdf9;">
+        <span class="panel-label-text">✅ After — New Assignment</span>
+        <span class="badge badge-active" id="afterBadge">Dr Angela Lim</span>
+      </div>
+      <div class="panel-therapist" id="afterTherapistCard">
+        <div class="t-card">
+          <div class="t-avatar" style="background:#0d9488;color:white;width:46px;height:46px;" id="afterAvatar">AL</div>
+          <div>
+            <div class="t-name" id="afterName">Dr Angela Lim</div>
+            <div class="t-role" id="afterRole">Occupational Therapy · Consultation Room A</div>
+            <div class="badge badge-active" style="margin-top:4px;font-size:11px;" id="afterAvailBadge">✓ Available all 8 sessions</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-sessions">
+        <h4>Sessions After Reassignment</h4>
+        <div class="session-mini after-session"><div class="session-mini-num" style="background:var(--green-bg);color:var(--green);">5</div><span class="s-date">Mon, 6 Apr</span><span style="font-size:11px;color:var(--green);">✓ Confirmed</span></div>
+        <div class="session-mini after-session"><div class="session-mini-num" style="background:var(--green-bg);color:var(--green);">6</div><span class="s-date">Mon, 13 Apr</span><span style="font-size:11px;color:var(--green);">✓ Confirmed</span></div>
+        <div class="session-mini after-session"><div class="session-mini-num" style="background:var(--green-bg);color:var(--green);">7</div><span class="s-date">Mon, 20 Apr</span><span style="font-size:11px;color:var(--green);">✓ Confirmed</span></div>
+        <div class="session-mini after-session"><div class="session-mini-num" style="background:var(--green-bg);color:var(--green);">8</div><span class="s-date">Mon, 27 Apr</span><span style="font-size:11px;color:var(--green);">✓ Confirmed</span></div>
+        <div style="font-size:11px;color:var(--muted);padding:4px 0;">+ 4 more sessions</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION BAR -->
+  <div class="action-bar">
+    <div class="action-bar-left">
+      <div class="action-bar-title" id="actionBarTitle">Reassign 8 sessions to Dr Angela Lim</div>
+      <div class="action-bar-meta" id="actionBarMeta">This and following sessions from Mon, 6 Apr 2026 · Recurring OT · Mdm Lim Siew Lan</div>
+    </div>
+    <div class="action-bar-right">
+      <button class="btn btn-ghost" onclick="window.location='recurring-edit.html'">Cancel</button>
+      <button class="btn btn-primary btn-lg" onclick="showConfirmModal()">Preview &amp; Confirm Change →</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Confirm Therapist Change</h3>
+      <p>Review the before and after details before applying changes.</p>
+    </div>
+    <div class="modal-body">
+      <table class="diff-table">
+        <thead>
+          <tr>
+            <th class="before-col">Before</th>
+            <th class="after-col">After</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="before-col">
+              <div class="diff-label">Therapist</div>
+              Dr Marcus Lee (On Leave)
+            </td>
+            <td class="after-col">
+              <div class="diff-label">Therapist</div>
+              <strong id="confirmNewTherapist">Dr Angela Lim</strong>
+            </td>
+          </tr>
+          <tr>
+            <td class="before-col">
+              <div class="diff-label">Specialty</div>
+              Physiotherapy
+            </td>
+            <td class="after-col">
+              <div class="diff-label">Specialty</div>
+              <span id="confirmNewSpec">Occupational Therapy</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="before-col">
+              <div class="diff-label">Room</div>
+              Consultation Room B
+            </td>
+            <td class="after-col">
+              <div class="diff-label">Room</div>
+              <span id="confirmNewRoom">Consultation Room A</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="before-col">
+              <div class="diff-label">Sessions Affected</div>
+              8 sessions (with conflicts)
+            </td>
+            <td class="after-col">
+              <div class="diff-label">Sessions Reassigned</div>
+              <strong id="confirmSessions">8 sessions — all confirmed</strong>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="impact-note">
+        🔄 Scope: <strong id="confirmScope">This and following events</strong> — from Mon, 6 Apr to Mon, 25 May 2026
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="document.getElementById('confirmModal').classList.remove('show')">Back</button>
+      <button class="btn btn-primary btn-lg" onclick="applyChange()">✓ Apply Change</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="success-icon">✅</div>
+    <h2>Change Applied!</h2>
+    <p id="successMsg">8 sessions successfully reassigned to Dr Angela Lim.</p>
+    <div class="success-detail">
+      <div class="success-row"><span class="sr-label">Patient</span><span class="sr-val">Mdm Lim Siew Lan</span></div>
+      <div class="success-row"><span class="sr-label">From</span><span class="sr-val">Dr Marcus Lee</span></div>
+      <div class="success-row"><span class="sr-label">To</span><span class="sr-val" id="successTo">Dr Angela Lim</span></div>
+      <div class="success-row"><span class="sr-label">Sessions</span><span class="sr-val" id="successSessions">8 sessions reassigned</span></div>
+      <div class="success-row"><span class="sr-label">Effective</span><span class="sr-val">Mon, 6 Apr 2026 onwards</span></div>
+    </div>
+    <div class="success-actions">
+      <button class="btn btn-ghost" onclick="window.location='recurring-edit.html'">View Appointment</button>
+      <button class="btn btn-primary" onclick="window.location='timeslot_scheduler_mockup.html'">Back to Schedule</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const therapistData = {
+    angela: { name: 'Dr Angela Lim', role: 'Occupational Therapy · Consultation Room A', spec: 'Occupational Therapy', room: 'Consultation Room A', avail: '✓ Available all 8 sessions', bg: '#0d9488', initials: 'AL', sessions: '8 sessions — all confirmed' },
+    janice: { name: 'Nurse Janice Tan', role: 'Nursing / Care · Vaccination Bay', spec: 'Nursing / Care', room: 'Vaccination Bay', avail: '⚡ 6 of 8 sessions available', bg: '#7c3aed', initials: 'JT', sessions: '6 sessions confirmed, 2 unresolved' },
+    wei: { name: 'Dr Wei Chen', role: 'Speech Therapy · Room D', spec: 'Speech Therapy', room: 'Room D', avail: '✓ Available all 8 sessions', bg: '#2563eb', initials: 'WC', sessions: '8 sessions — all confirmed' }
+  };
+
+  let selectedT = 'angela';
+  let currentScope = 'following';
+
+  const scopeLabels = {
+    'this': 'This session only (Mon, 6 Apr)',
+    'following': 'This and following events',
+    'all': 'All events in series (12 sessions)'
+  };
+
+  function setScope(el, scope) {
+    currentScope = scope;
+    document.querySelectorAll('.scope-pill').forEach(p => p.classList.remove('on'));
+    el.classList.add('on');
+    updateActionBar();
+  }
+
+  function selectTherapist(id) {
+    selectedT = id;
+    ['angela','janice','wei'].forEach(t => {
+      const opt = document.getElementById('opt-'+t);
+      if (!opt) return;
+      opt.classList.toggle('selected', t===id);
+      opt.querySelector('.to-select-btn').textContent = t===id ? '✓ Selected' : 'Select';
+    });
+
+    const d = therapistData[id];
+    document.getElementById('afterAvatar').textContent = d.initials;
+    document.getElementById('afterAvatar').style.background = d.bg;
+    document.getElementById('afterName').textContent = d.name;
+    document.getElementById('afterRole').textContent = d.role;
+    document.getElementById('afterAvailBadge').textContent = d.avail;
+    document.getElementById('afterBadge').textContent = d.name;
+    updateActionBar();
+  }
+
+  function updateActionBar() {
+    const d = therapistData[selectedT];
+    const sCount = currentScope === 'this' ? '1 session' : currentScope === 'following' ? '8 sessions' : '12 sessions';
+    document.getElementById('actionBarTitle').textContent = `Reassign ${sCount} to ${d.name}`;
+    document.getElementById('actionBarMeta').textContent = `${scopeLabels[currentScope]} · Recurring OT · Mdm Lim Siew Lan`;
+  }
+
+  function showConfirmModal() {
+    const d = therapistData[selectedT];
+    document.getElementById('confirmNewTherapist').textContent = d.name;
+    document.getElementById('confirmNewSpec').textContent = d.spec;
+    document.getElementById('confirmNewRoom').textContent = d.room;
+    document.getElementById('confirmSessions').textContent = d.sessions;
+    document.getElementById('confirmScope').textContent = scopeLabels[currentScope];
+    document.getElementById('confirmModal').classList.add('show');
+  }
+
+  function applyChange() {
+    document.getElementById('confirmModal').classList.remove('show');
+    const d = therapistData[selectedT];
+    const sCount = currentScope === 'this' ? '1 session' : currentScope === 'following' ? '8 sessions' : '12 sessions';
+    document.getElementById('successMsg').textContent = `${sCount} successfully reassigned to ${d.name}.`;
+    document.getElementById('successTo').textContent = d.name;
+    document.getElementById('successSessions').textContent = `${sCount} reassigned`;
+    document.getElementById('successOverlay').classList.add('show');
+  }
+</script>
+</body>
+</html>
