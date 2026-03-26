@@ -395,7 +395,7 @@
 
     .lane {
       position: relative;
-      min-height: calc(10 * var(--slot-height));
+      min-height: calc(18 * var(--slot-height));
       border-right: 1px solid var(--line);
       background-image: repeating-linear-gradient(
         to bottom,
@@ -760,20 +760,20 @@
             </div>
             <div class="resource-head">
               <strong>Dr Angela Lim</strong>
-              <span>08:30 – 14:30<br/>Consultation Room A</span>
+              <span>08:30 – 17:00<br/>Consultation Room A</span>
             </div>
             <div class="resource-head">
               <strong>Dr Marcus Lee</strong>
-              <span>09:00 – 13:30<br/>Consultation Room B</span>
+              <span>09:00 – 17:30<br/>Consultation Room B</span>
               <span style="display:inline-block;margin-top:4px;background:#fffbeb;color:#92400e;border:1px solid #fde68a;border-radius:99px;font-size:11px;font-weight:700;padding:2px 8px;">🏖 On Leave Apr 6–13</span>
             </div>
             <div class="resource-head">
               <strong>Nurse Janice Tan</strong>
-              <span>09:30 – 14:00<br/>Vaccination Bay</span>
+              <span>09:30 – 17:00<br/>Vaccination Bay</span>
             </div>
             <div class="resource-head">
               <strong>Dr Wei Chen</strong>
-              <span>09:00 – 14:00<br/>Speech Therapy Room D</span>
+              <span>09:00 – 18:00<br/>Speech Therapy Room D</span>
             </div>
           </div>
 
@@ -786,12 +786,21 @@
               <div class="time-label"><strong>10:30</strong><span>Wed, 1 Apr</span></div>
               <div class="time-label"><strong>11:00</strong><span>Wed, 1 Apr</span></div>
               <div class="time-label"><strong>11:30</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label" style="background:#f8f9fa;"><strong style="color:#94a3b8;">12:00 – 13:00</strong><span>Lunch Break</span></div>
               <div class="time-label"><strong>13:00</strong><span>Wed, 1 Apr</span></div>
               <div class="time-label"><strong>13:30</strong><span>Wed, 1 Apr</span></div>
               <div class="time-label"><strong>14:00</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>14:30</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>15:00</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>15:30</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>16:00</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>16:30</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>17:00</strong><span>Wed, 1 Apr</span></div>
+              <div class="time-label"><strong>17:30</strong><span>Wed, 1 Apr</span></div>
             </div>
 
             <div class="lanes">
+              <!-- ── Dr Angela Lim · 08:30–17:00 · 30-min slots ── -->
               <div class="lane">
                 <div class="slot-block available" style="top:8px; height:58px;" data-time="08:30" data-resource="Dr Angela Lim">08:30</div>
                 <div class="slot-block available selected" style="top:82px; height:58px;" data-time="09:00" data-resource="Dr Angela Lim">09:00</div>
@@ -805,16 +814,34 @@
                 <div class="slot-block available" style="top:304px; height:58px;" data-time="10:30" data-resource="Dr Angela Lim">10:30</div>
                 <div class="slot-block available" style="top:378px; height:58px;" data-time="11:00" data-resource="Dr Angela Lim">11:00</div>
                 <div class="slot-block available" style="top:452px; height:58px;" data-time="11:30" data-resource="Dr Angela Lim">11:30</div>
-                <div class="slot-block available" style="top:526px; height:58px;" data-time="13:00" data-resource="Dr Angela Lim">13:00</div>
-                <div class="slot-block booked" style="top:600px; height:58px;">
+                <div class="slot-block unavailable" style="top:526px; height:58px; background:repeating-linear-gradient(45deg,#f8fafc,#f8fafc 4px,#f1f5f9 4px,#f1f5f9 8px);">
+                  <div class="slot-time" style="color:#94a3b8;">12:00 – 13:00</div>
+                  <div class="slot-title" style="color:#94a3b8;">Lunch Break</div>
+                </div>
+                <div class="slot-block available" style="top:600px; height:58px;" data-time="13:00" data-resource="Dr Angela Lim">13:00</div>
+                <div class="slot-block booked" style="top:674px; height:58px;">
                   <div class="slot-time">13:30</div>
                   <div class="slot-title">Booked · Ms Karen Tan</div>
                   <div class="slot-sub">Consultation</div>
                   <button class="detail-icon" type="button" data-detail-title="Dr Angela Lim · 13:30" data-detail-body="Booked with Ms Karen Tan for consultation. Ref: APT-10618.">i</button>
                 </div>
-                <div class="slot-block available" style="top:674px; height:58px;" data-time="14:00" data-resource="Dr Angela Lim">14:00</div>
+                <div class="slot-block available" style="top:748px; height:58px;" data-time="14:00" data-resource="Dr Angela Lim">14:00</div>
+                <div class="slot-block available" style="top:822px; height:58px;" data-time="14:30" data-resource="Dr Angela Lim">14:30</div>
+                <div class="slot-block available" style="top:896px; height:58px;" data-time="15:00" data-resource="Dr Angela Lim">15:00</div>
+                <div class="slot-block available" style="top:970px; height:58px;" data-time="15:30" data-resource="Dr Angela Lim">15:30</div>
+                <div class="slot-block available" style="top:1044px; height:58px;" data-time="16:00" data-resource="Dr Angela Lim">16:00</div>
+                <div class="slot-block available" style="top:1118px; height:58px;" data-time="16:30" data-resource="Dr Angela Lim">16:30</div>
+                <div class="slot-block unavailable" style="top:1192px; height:58px;">
+                  <div class="slot-time">17:00</div>
+                  <div class="slot-title">End of shift</div>
+                </div>
+                <div class="slot-block unavailable" style="top:1266px; height:58px;">
+                  <div class="slot-time">17:30</div>
+                  <div class="slot-title">End of shift</div>
+                </div>
               </div>
 
+              <!-- ── Dr Marcus Lee · 09:00–17:30 · 60-min slots ── -->
               <div class="lane">
                 <div class="slot-block unavailable" style="top:8px; height:58px;">
                   <div class="slot-time">08:30</div>
@@ -822,29 +849,47 @@
                   <button class="detail-icon" type="button" data-detail-title="Dr Marcus Lee · 08:30" data-detail-body="Unavailable because Dr Marcus Lee starts at 09:00.">i</button>
                 </div>
                 <div class="slot-block booked" style="top:82px; height:132px;">
-                  <div class="slot-time">09:00 - 10:00</div>
+                  <div class="slot-time">09:00 – 10:00</div>
                   <div class="slot-title">Booked · Ms Cheryl Goh</div>
                   <div class="slot-sub">1-hour follow-up review</div>
                   <button class="detail-icon" type="button" onclick="window.location='recurring-edit.html'" data-detail-title="Dr Marcus Lee · 09:00" data-detail-body="Booked with Ms Cheryl Goh for a 1-hour follow-up review. Ref: APT-10501.">i</button>
                 </div>
                 <div class="slot-block booked" style="top:230px; height:132px;">
-                  <div class="slot-time">10:00 - 11:00</div>
+                  <div class="slot-time">10:00 – 11:00</div>
                   <div class="slot-title">Booked · Mdm Lim Siew Lan</div>
                   <div class="slot-sub">Doctor review</div>
                   <button class="detail-icon" type="button" data-detail-title="Dr Marcus Lee · 10:00" data-detail-body="Booked with Mdm Lim Siew Lan for doctor review. Ref: APT-10533.">i</button>
                 </div>
-                <div class="slot-block available" style="top:378px; height:132px;" data-time="11:00 - 12:00" data-resource="Dr Marcus Lee">11:00 - 12:00</div>
-                <div class="slot-block available" style="top:526px; height:132px;" data-time="13:00 - 14:00" data-resource="Dr Marcus Lee">13:00 - 14:00</div>
+                <div class="slot-block available" style="top:378px; height:132px;" data-time="11:00 – 12:00" data-resource="Dr Marcus Lee">11:00 – 12:00</div>
+                <div class="slot-block unavailable" style="top:526px; height:58px; background:repeating-linear-gradient(45deg,#f8fafc,#f8fafc 4px,#f1f5f9 4px,#f1f5f9 8px);">
+                  <div class="slot-time" style="color:#94a3b8;">12:00 – 13:00</div>
+                  <div class="slot-title" style="color:#94a3b8;">Lunch Break</div>
+                </div>
+                <div class="slot-block unavailable" style="top:600px; height:58px;">
+                  <div class="slot-time">13:00</div>
+                  <div class="slot-title">Resumes at 13:30</div>
+                </div>
+                <div class="slot-block available" style="top:674px; height:132px;" data-time="13:30 – 14:30" data-resource="Dr Marcus Lee">13:30 – 14:30</div>
+                <div class="slot-block available" style="top:822px; height:132px;" data-time="14:30 – 15:30" data-resource="Dr Marcus Lee">14:30 – 15:30</div>
+                <div class="slot-block available" style="top:970px; height:132px;" data-time="15:30 – 16:30" data-resource="Dr Marcus Lee">15:30 – 16:30</div>
+                <div class="slot-block available" style="top:1118px; height:132px;" data-time="16:30 – 17:30" data-resource="Dr Marcus Lee">16:30 – 17:30</div>
               </div>
 
+              <!-- ── Nurse Janice Tan · 09:30–17:00 · 30-min slots ── -->
               <div class="lane">
-                <div class="slot-block unavailable" style="top:8px; height:132px;">
-                  <div class="slot-time">08:30 - 09:30</div>
+                <div class="slot-block unavailable" style="top:8px; height:58px;">
+                  <div class="slot-time">08:30</div>
+                  <div class="slot-title">Not started</div>
+                  <button class="detail-icon" type="button" data-detail-title="Nurse Janice Tan · Morning" data-detail-body="Unavailable because Nurse Janice Tan starts at 09:30.">i</button>
+                </div>
+                <div class="slot-block unavailable" style="top:82px; height:58px;">
+                  <div class="slot-time">09:00</div>
                   <div class="slot-title">Not started</div>
                   <button class="detail-icon" type="button" data-detail-title="Nurse Janice Tan · Morning" data-detail-body="Unavailable because Nurse Janice Tan starts at 09:30.">i</button>
                 </div>
                 <div class="slot-block available" style="top:156px; height:58px;" data-time="09:30" data-resource="Nurse Janice Tan">09:30</div>
-                <div class="slot-block available" style="top:230px; height:132px;" data-time="10:00 - 11:00" data-resource="Nurse Janice Tan">10:00 - 11:00</div>
+                <div class="slot-block available" style="top:230px; height:58px;" data-time="10:00" data-resource="Nurse Janice Tan">10:00</div>
+                <div class="slot-block available" style="top:304px; height:58px;" data-time="10:30" data-resource="Nurse Janice Tan">10:30</div>
                 <div class="slot-block available" style="top:378px; height:58px;" data-time="11:00" data-resource="Nurse Janice Tan">11:00</div>
                 <div class="slot-block booked" style="top:452px; height:58px;">
                   <div class="slot-time">11:30</div>
@@ -852,15 +897,33 @@
                   <div class="slot-sub">Vaccination</div>
                   <button class="detail-icon" type="button" data-detail-title="Nurse Janice Tan · 11:30" data-detail-body="Booked with Baby Ethan Ng for vaccination. Ref: APT-10579.">i</button>
                 </div>
-                <div class="slot-block unavailable" style="top:526px; height:58px;">
+                <div class="slot-block unavailable" style="top:526px; height:58px; background:repeating-linear-gradient(45deg,#f8fafc,#f8fafc 4px,#f1f5f9 4px,#f1f5f9 8px);">
+                  <div class="slot-time" style="color:#94a3b8;">12:00 – 13:00</div>
+                  <div class="slot-title" style="color:#94a3b8;">Lunch Break</div>
+                </div>
+                <div class="slot-block unavailable" style="top:600px; height:58px;">
                   <div class="slot-time">13:00</div>
-                  <div class="slot-title">Resume at 13:30</div>
+                  <div class="slot-title">Resumes at 13:30</div>
                   <button class="detail-icon" type="button" data-detail-title="Nurse Janice Tan · 13:00" data-detail-body="Unavailable because Nurse Janice Tan resumes at 13:30.">i</button>
                 </div>
-                <div class="slot-block available" style="top:600px; height:58px;" data-time="13:30" data-resource="Nurse Janice Tan">13:30</div>
-                <div class="slot-block available" style="top:674px; height:58px;" data-time="14:00" data-resource="Nurse Janice Tan">14:00</div>
+                <div class="slot-block available" style="top:674px; height:58px;" data-time="13:30" data-resource="Nurse Janice Tan">13:30</div>
+                <div class="slot-block available" style="top:748px; height:58px;" data-time="14:00" data-resource="Nurse Janice Tan">14:00</div>
+                <div class="slot-block available" style="top:822px; height:58px;" data-time="14:30" data-resource="Nurse Janice Tan">14:30</div>
+                <div class="slot-block available" style="top:896px; height:58px;" data-time="15:00" data-resource="Nurse Janice Tan">15:00</div>
+                <div class="slot-block available" style="top:970px; height:58px;" data-time="15:30" data-resource="Nurse Janice Tan">15:30</div>
+                <div class="slot-block available" style="top:1044px; height:58px;" data-time="16:00" data-resource="Nurse Janice Tan">16:00</div>
+                <div class="slot-block available" style="top:1118px; height:58px;" data-time="16:30" data-resource="Nurse Janice Tan">16:30</div>
+                <div class="slot-block unavailable" style="top:1192px; height:58px;">
+                  <div class="slot-time">17:00</div>
+                  <div class="slot-title">End of shift</div>
+                </div>
+                <div class="slot-block unavailable" style="top:1266px; height:58px;">
+                  <div class="slot-time">17:30</div>
+                  <div class="slot-title">End of shift</div>
+                </div>
               </div>
 
+              <!-- ── Dr Wei Chen · 09:00–18:00 · 30-min slots ── -->
               <div class="lane">
                 <div class="slot-block unavailable" style="top:8px; height:58px;">
                   <div class="slot-time">08:30</div>
@@ -875,14 +938,31 @@
                   <button class="detail-icon" type="button" data-detail-title="Dr Wei Chen · 09:30" data-detail-body="Booked with Mdm Siti Rahimah for speech therapy session. Ref: APT-10622.">i</button>
                 </div>
                 <div class="slot-block available" style="top:230px; height:58px;" data-time="10:00" data-resource="Dr Wei Chen">10:00</div>
-                <div class="slot-block booked" style="top:304px; height:132px;">
-                  <div class="slot-time">10:30 - 11:30</div>
+                <div class="slot-block booked" style="top:304px; height:58px;">
+                  <div class="slot-time">10:30</div>
                   <div class="slot-title">Booked · Mr Lee Chong Wei</div>
                   <div class="slot-sub">Dysphagia assessment</div>
                   <button class="detail-icon" type="button" data-detail-title="Dr Wei Chen · 10:30" data-detail-body="Booked with Mr Lee Chong Wei for dysphagia assessment. Ref: APT-10641.">i</button>
                 </div>
+                <div class="slot-block booked" style="top:378px; height:58px;">
+                  <div class="slot-time">11:00</div>
+                  <div class="slot-title">Booked · Mr Lee Chong Wei</div>
+                  <div class="slot-sub">Dysphagia assessment (cont'd)</div>
+                  <button class="detail-icon" type="button" data-detail-title="Dr Wei Chen · 11:00" data-detail-body="Continuation of dysphagia assessment with Mr Lee Chong Wei. Ref: APT-10641.">i</button>
+                </div>
                 <div class="slot-block available" style="top:452px; height:58px;" data-time="11:30" data-resource="Dr Wei Chen">11:30</div>
-                <div class="slot-block available" style="top:526px; height:132px;" data-time="13:00 - 14:00" data-resource="Dr Wei Chen">13:00 - 14:00</div>
+                <div class="slot-block unavailable" style="top:526px; height:206px; background:repeating-linear-gradient(45deg,#f8fafc,#f8fafc 4px,#f1f5f9 4px,#f1f5f9 8px);">
+                  <div class="slot-time" style="color:#94a3b8;">12:00 – 14:00</div>
+                  <div class="slot-title" style="color:#94a3b8;">Lunch &amp; Break</div>
+                </div>
+                <div class="slot-block available" style="top:748px; height:58px;" data-time="14:00" data-resource="Dr Wei Chen">14:00</div>
+                <div class="slot-block available" style="top:822px; height:58px;" data-time="14:30" data-resource="Dr Wei Chen">14:30</div>
+                <div class="slot-block available" style="top:896px; height:58px;" data-time="15:00" data-resource="Dr Wei Chen">15:00</div>
+                <div class="slot-block available" style="top:970px; height:58px;" data-time="15:30" data-resource="Dr Wei Chen">15:30</div>
+                <div class="slot-block available" style="top:1044px; height:58px;" data-time="16:00" data-resource="Dr Wei Chen">16:00</div>
+                <div class="slot-block available" style="top:1118px; height:58px;" data-time="16:30" data-resource="Dr Wei Chen">16:30</div>
+                <div class="slot-block available" style="top:1192px; height:58px;" data-time="17:00" data-resource="Dr Wei Chen">17:00</div>
+                <div class="slot-block available" style="top:1266px; height:58px;" data-time="17:30" data-resource="Dr Wei Chen">17:30</div>
               </div>
             </div>
           </div>
