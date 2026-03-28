@@ -252,6 +252,19 @@
     .badge-conflict { background: var(--amber-bg); color: #92400e; border: 1px solid var(--amber-border); }
     .badge-recurring { background: var(--purple-bg); color: var(--purple); }
     .badge-single { background: #f0fdf4; color: #15803d; }
+    .badge-dna { background: var(--red-bg); color: #b91c1c; border: 1px solid var(--red-border); }
+
+    /* Mark Done */
+    .btn-complete { background: var(--green); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; padding: 5px 10px; transition: background .15s; }
+    .btn-complete:hover { background: #15803d; }
+    tr.sess-row-dna { background: #fef2f2 !important; }
+    .outcome-option { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: border-color .15s, background .15s; margin-bottom: 8px; }
+    .outcome-option input[type=radio] { margin-top: 2px; accent-color: var(--primary); flex-shrink: 0; }
+    .outcome-option-text strong { display: block; font-size: 14px; font-weight: 700; color: var(--text); }
+    .outcome-option-text span { font-size: 12.5px; color: var(--muted); }
+    .appt-summary-box { background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; }
+    .appt-summary-box .appt-sum-title { font-weight: 700; color: var(--text); font-size: 14px; margin-bottom: 6px; }
+    .appt-summary-box .appt-sum-meta { display: flex; gap: 14px; flex-wrap: wrap; color: var(--muted); font-size: 12.5px; }
 
     /* BUTTONS */
     .btn { border: none; border-radius: 9px; padding: 7px 14px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
@@ -619,12 +632,12 @@
                 <td><span class="badge badge-completed">✓ Completed</span></td>
                 <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">View Notes</button></div></td>
               </tr>
-              <tr>
+              <tr id="sess-ot-4">
                 <td><div class="sess-num">4</div></td>
                 <td><strong>Mon, 14 Apr 2026</strong> · 10:00–10:30</td>
                 <td>Dr Marcus Lee</td>
-                <td><span class="badge badge-upcoming">Upcoming</span></td>
-                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-ot-4','OT · Session 4 of 8 · Mdm Lim Siew Lan','Mon, 14 Apr 2026','10:00–10:30','Dr Marcus Lee')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
               <tr style="background:#fffdf0;">
                 <td><div class="sess-num" style="background:#f59e0b;">5</div></td>
@@ -640,19 +653,19 @@
                 <td><span class="badge badge-conflict">⚠ Conflict</span></td>
                 <td><div class="sess-actions"><button class="btn btn-amber" style="padding:5px 10px;" onclick="window.location='therapist-change.html'">🔀 Reassign</button></div></td>
               </tr>
-              <tr>
+              <tr id="sess-ot-7">
                 <td><div class="sess-num">7</div></td>
                 <td><strong>Mon, 20 Apr 2026</strong> · 10:00–10:30</td>
                 <td>Dr Marcus Lee</td>
-                <td><span class="badge badge-upcoming">Upcoming</span></td>
-                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-ot-7','OT · Session 7 of 8 · Mdm Lim Siew Lan','Mon, 20 Apr 2026','10:00–10:30','Dr Marcus Lee')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
-              <tr>
+              <tr id="sess-ot-8">
                 <td><div class="sess-num">8</div></td>
                 <td><strong>Mon, 27 Apr 2026</strong> · 10:00–10:30</td>
                 <td>Dr Marcus Lee</td>
-                <td><span class="badge badge-upcoming">Upcoming</span></td>
-                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-ot-8','OT · Session 8 of 8 · Mdm Lim Siew Lan','Mon, 27 Apr 2026','10:00–10:30','Dr Marcus Lee')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
             </tbody>
           </table>
@@ -710,40 +723,40 @@
                 <td><span class="badge badge-completed">✓ Completed</span></td>
                 <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">View Notes</button></div></td>
               </tr>
-              <tr>
+              <tr id="sess-st-2">
                 <td><div class="sess-num">2</div></td>
                 <td><strong>Thu, 16 Apr 2026</strong> · 14:00–14:30</td>
                 <td>Dr Wei Chen</td>
-                <td><span class="badge badge-upcoming">Upcoming</span></td>
-                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-st-2','Speech Therapy · Session 2 of 6','Thu, 16 Apr 2026','14:00–14:30','Dr Wei Chen')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
-              <tr>
+              <tr id="sess-st-3">
                 <td><div class="sess-num">3</div></td>
                 <td><strong>Thu, 30 Apr 2026</strong> · 14:00–14:30</td>
                 <td>Dr Wei Chen</td>
-                <td><span class="badge badge-upcoming">Upcoming</span></td>
-                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-st-3','Speech Therapy · Session 3 of 6','Thu, 30 Apr 2026','14:00–14:30','Dr Wei Chen')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
-              <tr>
+              <tr id="sess-st-4">
                 <td><div class="sess-num">4</div></td>
                 <td><strong>Thu, 14 May 2026</strong> · 14:00–14:30</td>
                 <td>Dr Wei Chen</td>
-                <td><span class="badge badge-upcoming">Upcoming</span></td>
-                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-st-4','Speech Therapy · Session 4 of 6','Thu, 14 May 2026','14:00–14:30','Dr Wei Chen')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
-              <tr>
+              <tr id="sess-st-5">
                 <td><div class="sess-num">5</div></td>
                 <td><strong>Thu, 28 May 2026</strong> · 14:00–14:30</td>
                 <td>Dr Wei Chen</td>
-                <td><span class="badge badge-upcoming">Upcoming</span></td>
-                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-st-5','Speech Therapy · Session 5 of 6','Thu, 28 May 2026','14:00–14:30','Dr Wei Chen')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
-              <tr>
+              <tr id="sess-st-6">
                 <td><div class="sess-num">6</div></td>
                 <td><strong>Thu, 11 Jun 2026</strong> · 14:00–14:30</td>
                 <td>Dr Wei Chen</td>
-                <td><span class="badge badge-upcoming">Upcoming</span></td>
-                <td><div class="sess-actions"><button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-st-6','Speech Therapy · Session 6 of 6','Thu, 11 Jun 2026','14:00–14:30','Dr Wei Chen')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
             </tbody>
           </table>
@@ -785,6 +798,7 @@
         <div class="appt-right">
           <span class="badge badge-upcoming">Upcoming</span>
           <div class="appt-actions">
+            <button class="btn-complete" onclick="openMarkDoneModal('appt-physio-apr10','Physiotherapy Assessment','Thu, 10 Apr 2026','09:30–10:00','Ms Angela Lim')">✓ Mark Done</button>
             <button class="btn btn-ghost">Edit</button>
             <button class="btn btn-ghost" onclick="window.location='therapist-change.html'">🔀</button>
             <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
@@ -792,7 +806,7 @@
         </div>
       </div>
 
-      <div class="appt-card">
+      <div class="appt-card" id="appt-nursing-apr23">
         <div class="appt-date-block">
           <div class="a-day">23</div>
           <div class="a-month">Apr</div>
@@ -809,6 +823,7 @@
         <div class="appt-right">
           <span class="badge badge-upcoming">Upcoming</span>
           <div class="appt-actions">
+            <button class="btn-complete" onclick="openMarkDoneModal('appt-nursing-apr23','Nursing Check — Blood Pressure','Thu, 23 Apr 2026','11:00–11:30','Nurse Janice Tan')">✓ Mark Done</button>
             <button class="btn btn-ghost">Edit</button>
             <button class="btn btn-ghost" onclick="window.location='therapist-change.html'">🔀</button>
             <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
@@ -1487,6 +1502,134 @@
 
 
 </script>
+
+  <!-- ═══════════════════════════════════════
+       RECORD SESSION OUTCOME MODAL
+  ════════════════════════════════════════ -->
+  <div class="modal-overlay" id="markDoneModal">
+    <div class="modal-box" style="max-width:440px;">
+      <div class="modal-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;">📋</span>
+          <span class="modal-title">Record Session Outcome</span>
+        </div>
+        <button class="modal-close" onclick="closeMarkDoneModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="appt-summary-box">
+          <div class="appt-sum-title" id="markDoneLabel">—</div>
+          <div class="appt-sum-meta">
+            <span>📅 <span id="markDoneDate">—</span></span>
+            <span>🕐 <span id="markDoneTime">—</span></span>
+            <span>🧑‍⚕️ <span id="markDoneTherapist">—</span></span>
+          </div>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:10px;">Session Outcome</div>
+        <label class="outcome-option" id="outcomeOptCompleted">
+          <input type="radio" name="outcomeStatus" value="completed" checked onchange="updateOutcomeStyle()">
+          <div class="outcome-option-text">
+            <strong>✅ Completed</strong>
+            <span>Session went ahead and was completed as planned</span>
+          </div>
+        </label>
+        <label class="outcome-option" id="outcomeOptDna">
+          <input type="radio" name="outcomeStatus" value="dna" onchange="updateOutcomeStyle()">
+          <div class="outcome-option-text">
+            <strong>🚫 Did Not Attend (DNA)</strong>
+            <span>Senior was absent, cancelled last-minute, or unavailable</span>
+          </div>
+        </label>
+        <div style="margin-top:16px;">
+          <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">
+            Session Notes <span style="font-weight:400;color:var(--muted);">(optional)</span>
+          </label>
+          <textarea id="markDoneNotes" rows="3"
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13.5px;font-family:'Outfit',sans-serif;resize:vertical;box-sizing:border-box;outline:none;transition:border-color .15s;"
+            placeholder="Add notes about this session — patient progress, observations, follow-up actions..."
+            onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeMarkDoneModal()">Cancel</button>
+        <button class="btn btn-primary" id="saveOutcomeBtn" onclick="confirmMarkDone()">Save Outcome</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  let _mdId = null;
+
+  function openMarkDoneModal(id, label, date, time, therapist) {
+    _mdId = id;
+    document.getElementById('markDoneLabel').textContent     = label;
+    document.getElementById('markDoneDate').textContent      = date;
+    document.getElementById('markDoneTime').textContent      = time;
+    document.getElementById('markDoneTherapist').textContent = therapist;
+    document.getElementById('markDoneNotes').value = '';
+    document.querySelector('input[name="outcomeStatus"][value="completed"]').checked = true;
+    updateOutcomeStyle();
+    document.getElementById('markDoneModal').classList.add('open');
+  }
+
+  function closeMarkDoneModal() {
+    document.getElementById('markDoneModal').classList.remove('open');
+    _mdId = null;
+  }
+
+  function updateOutcomeStyle() {
+    const val = document.querySelector('input[name="outcomeStatus"]:checked').value;
+    const cfg = {
+      completed: { border: 'var(--primary)', bg: '#f0fdf9' },
+      dna:       { border: 'var(--red)',     bg: 'var(--red-bg)' }
+    };
+    ['Completed','Dna'].forEach(k => {
+      const el = document.getElementById('outcomeOpt' + k);
+      if (!el) return;
+      const v = k.toLowerCase();
+      el.style.borderColor = v === val ? cfg[v].border : 'var(--border)';
+      el.style.background  = v === val ? cfg[v].bg     : '';
+    });
+    const btn = document.getElementById('saveOutcomeBtn');
+    btn.style.background = val === 'dna' ? 'var(--red)' : '';
+    btn.style.color      = val === 'dna' ? 'white'      : '';
+  }
+
+  function confirmMarkDone() {
+    const status = document.querySelector('input[name="outcomeStatus"]:checked').value;
+    const notes  = document.getElementById('markDoneNotes').value.trim();
+    const id     = _mdId;
+    closeMarkDoneModal();
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (!el) { showToast('✅ Outcome saved'); return; }
+
+    const badges = {
+      completed: '<span class="badge badge-completed">✓ Completed</span>',
+      dna:       '<span class="badge badge-dna">✗ DNA</span>'
+    };
+    const afterActs = `<button class="btn btn-ghost" style="padding:5px 10px;">📄 View Notes</button>`;
+
+    const isCard = el.classList.contains('appt-card');
+    if (isCard) {
+      const badgeEl = el.querySelector('.appt-right .badge');
+      const actsEl  = el.querySelector('.appt-right .appt-actions');
+      if (badgeEl) badgeEl.outerHTML = badges[status];
+      if (actsEl)  actsEl.innerHTML  = afterActs;
+      if (status === 'completed') el.style.opacity = '0.82';
+    } else {
+      const statusTd = el.querySelector('.sess-status');
+      const actsTd   = el.querySelector('.sess-actions');
+      const numDiv   = el.querySelector('.sess-num');
+      if (statusTd) statusTd.innerHTML = badges[status];
+      if (actsTd)   actsTd.innerHTML   = afterActs;
+      if (status === 'completed' && numDiv) numDiv.classList.add('done');
+      if (status === 'dna') el.classList.add('sess-row-dna');
+    }
+    showToast({ completed: '✅ Session marked as completed', dna: '📋 Did Not Attend recorded' }[status] + (notes ? ' · Notes saved' : ''));
+  }
+
+  </script>
+
 </div><!-- /main-wrapper -->
 </body>
 </html>
