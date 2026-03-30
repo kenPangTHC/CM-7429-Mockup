@@ -156,20 +156,6 @@
     .scope-count { display: inline-flex; margin-top: 4px; }
     .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 10px; background: #f8fffe; }
 
-    /* EDIT PANEL */
-    .edit-panel { display: none; background: var(--card); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-sm); overflow: hidden; margin-top: 20px; }
-    .edit-panel.show { display: block; }
-    .edit-panel-header { padding: 16px 22px; border-bottom: 1px solid var(--border); background: #f8fffe; display: flex; align-items: center; gap: 10px; justify-content: space-between; }
-    .edit-panel-header h3 { font-size: 15px; font-weight: 700; }
-    .scope-banner { background: var(--purple-bg); border-bottom: 1px solid var(--purple-border); padding: 10px 22px; font-size: 13px; color: var(--purple); font-weight: 600; display: flex; align-items: center; gap: 8px; }
-    .edit-panel-body { padding: 22px; }
-    .field { margin-bottom: 14px; }
-    .field label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 6px; }
-    .field input, .field select, .field textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 12px; font-family: 'Outfit', sans-serif; font-size: 14px; background: white; outline: none; color: var(--text); }
-    .field input:focus, .field select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
-    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .edit-panel-footer { padding: 16px 22px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 12px; background: #f8fffe; }
-
     /* DELETE PANEL */
     .delete-panel { display: none; background: var(--card); border: 1.5px solid var(--red-border); border-radius: 20px; box-shadow: var(--shadow-sm); overflow: hidden; margin-top: 20px; }
     .delete-panel.show { display: block; }
@@ -377,54 +363,6 @@
         </div>
       </div>
 
-      <!-- EDIT DETAILS PANEL (shown when Edit Details is clicked) -->
-      <div class="edit-panel" id="editDetailsPanel">
-        <div class="edit-panel-header">
-          <h3>✏️ Edit Appointment Details</h3>
-          <button class="btn btn-ghost" style="padding:6px 12px;font-size:13px;" onclick="closePanel('editDetailsPanel')">✕ Close</button>
-        </div>
-        <div class="scope-banner" id="editScopeBanner">🔄 Editing: <span id="editScopeText">All events in series</span></div>
-        <div class="edit-panel-body">
-          <div class="field-grid">
-            <div class="field">
-              <label>Service Type</label>
-              <select>
-                <option selected>Occupational Therapy (OT)</option>
-                <option>Physiotherapy (PT)</option>
-                <option>Speech Therapy (ST)</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Session Duration</label>
-              <select>
-                <option>30 minutes</option>
-                <option selected>60 minutes</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Start Time</label>
-              <input type="time" value="09:00" />
-            </div>
-            <div class="field">
-              <label>Priority</label>
-              <select>
-                <option selected>Normal</option>
-                <option>Urgent</option>
-                <option>Follow-up</option>
-              </select>
-            </div>
-          </div>
-          <div class="field">
-            <label>Remarks</label>
-            <textarea rows="2" style="resize:vertical;">Patient requires wheelchair access to consultation room.</textarea>
-          </div>
-        </div>
-        <div class="edit-panel-footer">
-          <button class="btn btn-ghost" onclick="closePanel('editDetailsPanel')">Cancel</button>
-          <button class="btn btn-primary" onclick="alert('Changes saved successfully!')">Save Changes</button>
-        </div>
-      </div>
-
       <!-- DELETE PANEL -->
       <div class="delete-panel" id="deletePanel">
         <div class="delete-panel-header">
@@ -450,16 +388,7 @@
         <h3>Manage Appointment</h3>
       </div>
 
-      <div class="action-item" onclick="showScopeModal('edit')">
-        <div class="action-icon" style="background:#f0fdf9;">✏️</div>
-        <div>
-          <div class="action-title">Edit Details</div>
-          <div class="action-desc">Change time, duration, notes, or service type</div>
-        </div>
-        <span class="action-arrow">›</span>
-      </div>
-
-      <a class="action-item" href="therapist-change.html" onclick="sessionStorage.setItem('changeContext','recurring')">
+      <a class="action-item" href="therapist-change.html"onclick="sessionStorage.setItem('changeContext','recurring')">
         <div class="action-icon" style="background:#fffbeb;">🔀</div>
         <div>
           <div class="action-title">Change Therapist</div>
@@ -541,21 +470,14 @@
 </div>
 
 <script>
-  let currentAction = 'edit';
   let selectedScope = 'following';
 
   function showScopeModal(action) {
-    currentAction = action;
     const modal = document.getElementById('scopeModal');
     const title = document.getElementById('scopeModalTitle');
     const sub = document.getElementById('scopeModalSub');
-    if (action === 'edit') {
-      title.textContent = 'Which events do you want to edit?';
-      sub.textContent = 'Recurring appointment · Every Monday 09:00';
-    } else {
-      title.textContent = 'Which events do you want to cancel?';
-      sub.textContent = 'This action cannot be undone';
-    }
+    title.textContent = 'Which events do you want to cancel?';
+    sub.textContent = 'This action cannot be undone';
     modal.classList.add('show');
   }
 
@@ -570,20 +492,11 @@
     });
   }
 
-  const scopeLabels = { 'this': 'This event only (Mon, 6 Apr)', 'following': 'This and following events (8 sessions)', 'all': 'All events in series (12 sessions)' };
-
   function applyScope() {
     closeModal();
-    if (currentAction === 'edit') {
-      document.getElementById('editScopeText').textContent = scopeLabels[selectedScope];
-      document.getElementById('editDetailsPanel').classList.add('show');
-      document.getElementById('deletePanel').classList.remove('show');
-    } else {
-      document.getElementById('deletePanel').classList.add('show');
-      document.getElementById('editDetailsPanel').classList.remove('show');
-    }
+    document.getElementById('deletePanel').classList.add('show');
     setTimeout(() => {
-      document.getElementById(currentAction === 'edit' ? 'editDetailsPanel' : 'deletePanel').scrollIntoView({behavior:'smooth', block:'start'});
+      document.getElementById('deletePanel').scrollIntoView({behavior:'smooth', block:'start'});
     }, 100);
   }
 
