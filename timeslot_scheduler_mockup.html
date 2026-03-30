@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -34,10 +34,10 @@
       --disabled-text: #9ca3af;
       --icon-bg: rgba(255,255,255,0.92);
       --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
-      --sticky-left: 180px;
-      --col-width: 220px;
-      --head-height: 88px;
-      --slot-height: 74px;
+      --sticky-left: 52px;
+      --col-width: 168px;
+      --head-height: 54px;
+      --slot-height: 44px;
       --slot-gap: 8px;
     }
 
@@ -244,7 +244,7 @@
 
     .settings-bar,
     .board-header {
-      padding: 16px 20px;
+      padding: 10px 16px;
       border-bottom: 1px solid var(--line);
       background: #fff;
     }
@@ -284,13 +284,14 @@
     }
 
     .board-header h2 {
-      margin: 0 0 6px;
-      font-size: 22px;
+      margin: 0 0 2px;
+      font-size: 17px;
     }
 
     .board-header p {
       margin: 0;
       color: var(--muted);
+      font-size: 12px;
     }
 
     .hint {
@@ -330,7 +331,7 @@
       border-right: 1px solid var(--line);
       border-bottom: 1px solid var(--line);
       background: #f8fbff;
-      padding: 14px;
+      padding: 6px 8px;
     }
 
     .corner {
@@ -342,15 +343,15 @@
     .corner strong,
     .resource-head strong {
       display: block;
-      margin-bottom: 4px;
-      font-size: 15px;
+      margin-bottom: 2px;
+      font-size: 12px;
     }
 
     .corner span,
     .resource-head span {
       color: var(--muted);
-      font-size: 12px;
-      line-height: 1.35;
+      font-size: 10px;
+      line-height: 1.3;
     }
 
     .body-grid {
@@ -371,20 +372,21 @@
       border-right: 1px solid var(--line);
       border-bottom: 1px solid var(--line);
       background: #fcfdff;
-      padding: 12px 14px;
+      padding: 2px 5px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 5px;
+      gap: 1px;
     }
 
     .time-label strong {
-      font-size: 15px;
+      font-size: 10px;
     }
 
     .time-label span {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 9px;
+      display: none;
     }
 
     .lanes {
@@ -409,18 +411,19 @@
 
     .slot-block {
       position: absolute;
-      left: 8px;
-      right: 8px;
-      border-radius: 14px;
+      left: 3px;
+      right: 3px;
+      border-radius: 6px;
       border: 1px solid var(--line);
       background: white;
-      padding: 10px 38px 10px 10px;
+      padding: 3px 18px 3px 5px;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      gap: 4px;
-      font-size: 14px;
+      gap: 1px;
+      font-size: 11px;
       box-shadow: 0 1px 0 rgba(15,23,42,0.02);
+      overflow: hidden;
     }
 
     .slot-block.available {
@@ -457,39 +460,39 @@
     }
 
     .slot-time {
-      font-size: 14px;
+      font-size: 10px;
       font-weight: 700;
       line-height: 1.2;
     }
 
     .slot-title {
-      font-size: 12px;
+      font-size: 9px;
       font-weight: 600;
-      line-height: 1.3;
+      line-height: 1.2;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     .slot-sub {
-      font-size: 11px;
+      font-size: 9px;
       opacity: 0.9;
-      line-height: 1.3;
+      line-height: 1.2;
     }
 
     .detail-icon {
       position: absolute;
-      right: 8px;
-      bottom: 8px;
-      width: 22px;
-      height: 22px;
+      right: 3px;
+      bottom: 3px;
+      width: 14px;
+      height: 14px;
       border-radius: 999px;
       border: 1px solid rgba(17,24,39,0.08);
       background: var(--icon-bg);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 8px;
       color: #475569;
       cursor: pointer;
       padding: 0;
@@ -546,6 +549,208 @@
       background: #eef2ff;
       color: #4338ca;
     }
+
+    /* ── Hero / Badge ── */
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .hero h1 {
+      margin: 0 0 5px;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .hero > div > p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      max-width: 600px;
+    }
+    .badge {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
+      border-radius: 99px;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    /* ── Button states & transitions ── */
+    .btn {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background .15s, box-shadow .15s, transform .1s, opacity .15s;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 10px 20px rgba(37,99,235,0.22);
+    }
+    .btn-primary:not(:disabled):hover {
+      background: #1d4ed8;
+      box-shadow: 0 14px 28px rgba(37,99,235,0.32);
+      transform: translateY(-1px);
+    }
+    .btn-primary:disabled {
+      background: #e2e8f0;
+      color: #94a3b8;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    .btn-secondary:hover {
+      background: #e0e7ff;
+    }
+
+    /* ── Slot transitions & available hover ── */
+    .slot-block {
+      transition: box-shadow .15s, transform .12s, border-color .12s;
+    }
+    .slot-block.available::after {
+      content: '+';
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--primary);
+      opacity: 0;
+      transition: opacity .15s;
+      pointer-events: none;
+    }
+    .slot-block.available:hover::after {
+      opacity: 0.7;
+    }
+    .slot-block.selected::after { display: none; }
+
+    /* ── Detail icon transitions ── */
+    .detail-icon {
+      transition: background .12s, box-shadow .12s, transform .12s;
+    }
+    .detail-icon:hover {
+      background: white !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,.12);
+      transform: scale(1.15);
+    }
+
+    /* ── Time label overflow ── */
+    .time-label strong {
+      font-size: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Resource head overflow ── */
+    .resource-head strong {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Filter input focus ── */
+    .filter select:focus,
+    .filter input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+      outline: none;
+    }
+
+    /* ── Slot detail popover (replaces window.alert) ── */
+    .slot-popover {
+      position: fixed;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 12px;
+      max-width: 260px;
+      min-width: 160px;
+      z-index: 500;
+      box-shadow: 0 8px 28px rgba(0,0,0,.28);
+      line-height: 1.5;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity .15s, transform .15s;
+    }
+    .slot-popover.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+    .slot-popover strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12.5px;
+      color: #fff;
+      font-weight: 700;
+    }
+    .slot-popover-close {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 0;
+      line-height: 1;
+    }
+    .slot-popover-close:hover { color: white; }
+
+    /* ── Book Slot Modal ── */
+    .bsm-overlay { display: none; position: fixed; inset: 0; background: rgba(15,28,27,.6); backdrop-filter: blur(4px); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
+    .bsm-overlay.open { display: flex; }
+    .bsm-box { background: white; border-radius: 20px; box-shadow: 0 24px 64px rgba(0,0,0,.22); width: 100%; max-width: 480px; overflow: hidden; animation: bsmPop .2s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes bsmPop { from { opacity:0; transform:scale(.94) translateY(8px); } to { opacity:1; transform:none; } }
+    .bsm-header { padding: 18px 22px 14px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
+    .bsm-title { font-size: 16px; font-weight: 800; color: #0f172a; }
+    .bsm-close { background: none; border: none; font-size: 18px; color: #94a3b8; cursor: pointer; padding: 4px 8px; border-radius: 8px; }
+    .bsm-close:hover { background: #f1f5f9; color: #0f172a; }
+    .bsm-slot-summary { margin: 16px 22px 0; background: #f0fdf9; border: 1.5px solid #99f6e4; border-radius: 12px; padding: 11px 14px; display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: #0f766e; font-weight: 600; }
+    .bsm-slot-summary span { display: flex; align-items: center; gap: 5px; }
+    .bsm-body { padding: 18px 22px 20px; }
+    .bsm-label { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #64748b; margin-bottom: 7px; display: block; }
+    .bsm-search-wrap { position: relative; margin-bottom: 16px; }
+    .bsm-search { width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 10px 14px 10px 38px; font-family: 'Outfit', sans-serif; font-size: 14px; outline: none; box-sizing: border-box; transition: border-color .15s; }
+    .bsm-search:focus { border-color: #0d9488; box-shadow: 0 0 0 3px #ccfbf1; }
+    .bsm-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; color: #94a3b8; pointer-events: none; }
+    .bsm-dropdown { max-height: 200px; overflow-y: auto; border: 1.5px solid #e2e8f0; border-radius: 12px; margin-bottom: 16px; background: white; }
+    .bsm-option { display: flex; align-items: center; gap: 11px; padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f8fafc; transition: background .1s; }
+    .bsm-option:last-child { border-bottom: none; }
+    .bsm-option:hover { background: #f0fdf9; }
+    .bsm-option.selected { background: #ccfbf1; }
+    .bsm-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; }
+    .bsm-opt-name { font-size: 13.5px; font-weight: 600; color: #0f172a; }
+    .bsm-opt-meta { font-size: 11.5px; color: #64748b; margin-top: 1px; }
+    .bsm-selected-pill { display: none; align-items: center; gap: 8px; background: #ccfbf1; border: 1.5px solid #0d9488; border-radius: 99px; padding: 6px 12px; margin-bottom: 16px; font-size: 13px; font-weight: 600; color: #0f766e; width: fit-content; }
+    .bsm-selected-pill.show { display: flex; }
+    .bsm-selected-pill button { background: none; border: none; font-size: 14px; color: #0f766e; cursor: pointer; padding: 0 2px; }
+    .bsm-remarks { width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; font-family: 'Outfit', sans-serif; font-size: 14px; outline: none; resize: vertical; box-sizing: border-box; transition: border-color .15s; }
+    .bsm-remarks:focus { border-color: #0d9488; box-shadow: 0 0 0 3px #ccfbf1; }
+    .bsm-footer { padding: 14px 22px 18px; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #f1f5f9; }
+    .bsm-btn-cancel { background: #f1f5f9; color: #475569; border: none; border-radius: 12px; padding: 11px 20px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .bsm-btn-cancel:hover { background: #e2e8f0; }
+    .bsm-btn-confirm { background: #0d9488; color: white; border: none; border-radius: 12px; padding: 11px 22px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(13,148,136,.3); transition: background .15s; }
+    .bsm-btn-confirm:hover { background: #0f766e; }
+    .bsm-btn-confirm:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; }
+    .bsm-no-results { padding: 14px; text-align: center; color: #94a3b8; font-size: 13.5px; }
 
     @media (max-width: 1100px) {
       .schedule-layout { grid-template-columns: 1fr; }
@@ -659,7 +864,7 @@
     <div class="hero">
       <div>
         <h1>Resource Booking Matrix</h1>
-        <p>Select a date from the calendar to view therapist availability. Committed shift slots are shown as bookable. Click any available block to book an appointment.</p>
+        <p>Select a date to view availability · click any open slot to book</p>
       </div>
       <div class="badge">April 2026 — Committed ✓</div>
     </div>
@@ -746,17 +951,15 @@
       <div class="board-header">
         <div>
           <h2>Availability on Wed, 1 Apr 2026</h2>
-          <p>Session durations are set per therapist in <a href="shift-setup.html" style="color:var(--primary);font-weight:600;">Shift Setup</a>. April 2026 shifts are committed — slots shown reflect committed working hours.</p>
+          <p>Slot durations from <a href="shift-setup.html" style="color:var(--primary);font-weight:600;">Shift Setup</a> · April 2026 committed · <span style="color:#0d9488;font-weight:600;">click any open slot to book</span></p>
         </div>
-        <div class="hint">Available blocks are clickable. Booked and unavailable blocks stay aligned to their start time.</div>
       </div>
 
       <div class="matrix-wrap">
         <div class="matrix-board">
           <div class="top-row">
-            <div class="corner">
-              <strong>Date / Time</strong>
-              <span>Y-axis time · X-axis resource</span>
+            <div class="corner" style="display:flex;align-items:center;justify-content:center;">
+              <span style="font-size:16px;opacity:0.35;">🕐</span>
             </div>
             <div class="resource-head">
               <strong>Dr Angela Lim</strong>
@@ -786,7 +989,7 @@
               <div class="time-label"><strong>10:30</strong><span>Wed, 1 Apr</span></div>
               <div class="time-label"><strong>11:00</strong><span>Wed, 1 Apr</span></div>
               <div class="time-label"><strong>11:30</strong><span>Wed, 1 Apr</span></div>
-              <div class="time-label" style="background:#f8f9fa;"><strong style="color:#94a3b8;">12:00 – 13:00</strong><span>Lunch Break</span></div>
+              <div class="time-label" style="background:#f8f9fa;"><strong style="color:#94a3b8;">Lunch</strong></div>
               <div class="time-label"><strong>13:00</strong><span>Wed, 1 Apr</span></div>
               <div class="time-label"><strong>13:30</strong><span>Wed, 1 Apr</span></div>
               <div class="time-label"><strong>14:00</strong><span>Wed, 1 Apr</span></div>
@@ -802,40 +1005,40 @@
             <div class="lanes">
               <!-- ── Dr Angela Lim · 08:30–17:00 · 30-min slots ── -->
               <div class="lane">
-                <div class="slot-block available" style="top:8px; height:58px;" data-time="08:30" data-resource="Dr Angela Lim">08:30</div>
-                <div class="slot-block available selected" style="top:82px; height:58px;" data-time="09:00" data-resource="Dr Angela Lim">09:00</div>
-                <div class="slot-block booked" style="top:156px; height:58px;">
+                <div class="slot-block available" style="top:4px; height:36px;" data-time="08:30" data-resource="Dr Angela Lim">08:30</div>
+                <div class="slot-block available selected" style="top:48px; height:36px;" data-time="09:00" data-resource="Dr Angela Lim">09:00</div>
+                <div class="slot-block booked" style="top:92px; height:36px;">
                   <div class="slot-time">09:30</div>
                   <div class="slot-title">Booked · Mr Adrian Koh</div>
                   <div class="slot-sub">Initial consultation</div>
                   <button class="detail-icon" type="button" data-detail-title="Dr Angela Lim · 09:30" data-detail-body="Booked with Mr Adrian Koh for initial consultation. Ref: APT-10514.">i</button>
                 </div>
-                <div class="slot-block available" style="top:230px; height:58px;" data-time="10:00" data-resource="Dr Angela Lim">10:00</div>
-                <div class="slot-block available" style="top:304px; height:58px;" data-time="10:30" data-resource="Dr Angela Lim">10:30</div>
-                <div class="slot-block available" style="top:378px; height:58px;" data-time="11:00" data-resource="Dr Angela Lim">11:00</div>
-                <div class="slot-block available" style="top:452px; height:58px;" data-time="11:30" data-resource="Dr Angela Lim">11:30</div>
-                <div class="slot-block unavailable" style="top:526px; height:58px; background:repeating-linear-gradient(45deg,#f8fafc,#f8fafc 4px,#f1f5f9 4px,#f1f5f9 8px);">
+                <div class="slot-block available" style="top:136px; height:36px;" data-time="10:00" data-resource="Dr Angela Lim">10:00</div>
+                <div class="slot-block available" style="top:180px; height:36px;" data-time="10:30" data-resource="Dr Angela Lim">10:30</div>
+                <div class="slot-block available" style="top:224px; height:36px;" data-time="11:00" data-resource="Dr Angela Lim">11:00</div>
+                <div class="slot-block available" style="top:268px; height:36px;" data-time="11:30" data-resource="Dr Angela Lim">11:30</div>
+                <div class="slot-block unavailable" style="top:312px; height:36px; background:repeating-linear-gradient(45deg,#f8fafc,#f8fafc 4px,#f1f5f9 4px,#f1f5f9 8px);">
                   <div class="slot-time" style="color:#94a3b8;">12:00 – 13:00</div>
                   <div class="slot-title" style="color:#94a3b8;">Lunch Break</div>
                 </div>
-                <div class="slot-block available" style="top:600px; height:58px;" data-time="13:00" data-resource="Dr Angela Lim">13:00</div>
-                <div class="slot-block booked" style="top:674px; height:58px;">
+                <div class="slot-block available" style="top:356px; height:36px;" data-time="13:00" data-resource="Dr Angela Lim">13:00</div>
+                <div class="slot-block booked" style="top:400px; height:36px;">
                   <div class="slot-time">13:30</div>
                   <div class="slot-title">Booked · Ms Karen Tan</div>
                   <div class="slot-sub">Consultation</div>
                   <button class="detail-icon" type="button" data-detail-title="Dr Angela Lim · 13:30" data-detail-body="Booked with Ms Karen Tan for consultation. Ref: APT-10618.">i</button>
                 </div>
-                <div class="slot-block available" style="top:748px; height:58px;" data-time="14:00" data-resource="Dr Angela Lim">14:00</div>
-                <div class="slot-block available" style="top:822px; height:58px;" data-time="14:30" data-resource="Dr Angela Lim">14:30</div>
-                <div class="slot-block available" style="top:896px; height:58px;" data-time="15:00" data-resource="Dr Angela Lim">15:00</div>
-                <div class="slot-block available" style="top:970px; height:58px;" data-time="15:30" data-resource="Dr Angela Lim">15:30</div>
-                <div class="slot-block available" style="top:1044px; height:58px;" data-time="16:00" data-resource="Dr Angela Lim">16:00</div>
-                <div class="slot-block available" style="top:1118px; height:58px;" data-time="16:30" data-resource="Dr Angela Lim">16:30</div>
-                <div class="slot-block unavailable" style="top:1192px; height:58px;">
+                <div class="slot-block available" style="top:444px; height:36px;" data-time="14:00" data-resource="Dr Angela Lim">14:00</div>
+                <div class="slot-block available" style="top:488px; height:36px;" data-time="14:30" data-resource="Dr Angela Lim">14:30</div>
+                <div class="slot-block available" style="top:532px; height:36px;" data-time="15:00" data-resource="Dr Angela Lim">15:00</div>
+                <div class="slot-block available" style="top:576px; height:36px;" data-time="15:30" data-resource="Dr Angela Lim">15:30</div>
+                <div class="slot-block available" style="top:620px; height:36px;" data-time="16:00" data-resource="Dr Angela Lim">16:00</div>
+                <div class="slot-block available" style="top:664px; height:36px;" data-time="16:30" data-resource="Dr Angela Lim">16:30</div>
+                <div class="slot-block unavailable" style="top:708px; height:36px;">
                   <div class="slot-time">17:00</div>
                   <div class="slot-title">End of shift</div>
                 </div>
-                <div class="slot-block unavailable" style="top:1266px; height:58px;">
+                <div class="slot-block unavailable" style="top:752px; height:36px;">
                   <div class="slot-time">17:30</div>
                   <div class="slot-title">End of shift</div>
                 </div>
@@ -843,81 +1046,81 @@
 
               <!-- ── Dr Marcus Lee · 09:00–17:30 · 60-min slots ── -->
               <div class="lane">
-                <div class="slot-block unavailable" style="top:8px; height:58px;">
+                <div class="slot-block unavailable" style="top:4px; height:36px;">
                   <div class="slot-time">08:30</div>
                   <div class="slot-title">Not started</div>
                   <button class="detail-icon" type="button" data-detail-title="Dr Marcus Lee · 08:30" data-detail-body="Unavailable because Dr Marcus Lee starts at 09:00.">i</button>
                 </div>
-                <div class="slot-block booked" style="top:82px; height:132px;">
+                <div class="slot-block booked" style="top:48px; height:80px;">
                   <div class="slot-time">09:00 – 10:00</div>
                   <div class="slot-title">Booked · Ms Cheryl Goh</div>
                   <div class="slot-sub">1-hour follow-up review</div>
                   <button class="detail-icon" type="button" onclick="window.location='recurring-edit.html'" data-detail-title="Dr Marcus Lee · 09:00" data-detail-body="Booked with Ms Cheryl Goh for a 1-hour follow-up review. Ref: APT-10501.">i</button>
                 </div>
-                <div class="slot-block booked" style="top:230px; height:132px;">
+                <div class="slot-block booked" style="top:136px; height:80px;">
                   <div class="slot-time">10:00 – 11:00</div>
                   <div class="slot-title">Booked · Mdm Lim Siew Lan</div>
                   <div class="slot-sub">Doctor review</div>
                   <button class="detail-icon" type="button" data-detail-title="Dr Marcus Lee · 10:00" data-detail-body="Booked with Mdm Lim Siew Lan for doctor review. Ref: APT-10533.">i</button>
                 </div>
-                <div class="slot-block available" style="top:378px; height:132px;" data-time="11:00 – 12:00" data-resource="Dr Marcus Lee">11:00 – 12:00</div>
-                <div class="slot-block unavailable" style="top:526px; height:58px; background:repeating-linear-gradient(45deg,#f8fafc,#f8fafc 4px,#f1f5f9 4px,#f1f5f9 8px);">
+                <div class="slot-block available" style="top:224px; height:80px;" data-time="11:00 – 12:00" data-resource="Dr Marcus Lee">11:00 – 12:00</div>
+                <div class="slot-block unavailable" style="top:312px; height:36px; background:repeating-linear-gradient(45deg,#f8fafc,#f8fafc 4px,#f1f5f9 4px,#f1f5f9 8px);">
                   <div class="slot-time" style="color:#94a3b8;">12:00 – 13:00</div>
                   <div class="slot-title" style="color:#94a3b8;">Lunch Break</div>
                 </div>
-                <div class="slot-block unavailable" style="top:600px; height:58px;">
+                <div class="slot-block unavailable" style="top:356px; height:36px;">
                   <div class="slot-time">13:00</div>
                   <div class="slot-title">Resumes at 13:30</div>
                 </div>
-                <div class="slot-block available" style="top:674px; height:132px;" data-time="13:30 – 14:30" data-resource="Dr Marcus Lee">13:30 – 14:30</div>
-                <div class="slot-block available" style="top:822px; height:132px;" data-time="14:30 – 15:30" data-resource="Dr Marcus Lee">14:30 – 15:30</div>
-                <div class="slot-block available" style="top:970px; height:132px;" data-time="15:30 – 16:30" data-resource="Dr Marcus Lee">15:30 – 16:30</div>
-                <div class="slot-block available" style="top:1118px; height:132px;" data-time="16:30 – 17:30" data-resource="Dr Marcus Lee">16:30 – 17:30</div>
+                <div class="slot-block available" style="top:400px; height:80px;" data-time="13:30 – 14:30" data-resource="Dr Marcus Lee">13:30 – 14:30</div>
+                <div class="slot-block available" style="top:488px; height:80px;" data-time="14:30 – 15:30" data-resource="Dr Marcus Lee">14:30 – 15:30</div>
+                <div class="slot-block available" style="top:576px; height:80px;" data-time="15:30 – 16:30" data-resource="Dr Marcus Lee">15:30 – 16:30</div>
+                <div class="slot-block available" style="top:664px; height:80px;" data-time="16:30 – 17:30" data-resource="Dr Marcus Lee">16:30 – 17:30</div>
               </div>
 
               <!-- ── Nurse Janice Tan · 09:30–17:00 · 30-min slots ── -->
               <div class="lane">
-                <div class="slot-block unavailable" style="top:8px; height:58px;">
+                <div class="slot-block unavailable" style="top:4px; height:36px;">
                   <div class="slot-time">08:30</div>
                   <div class="slot-title">Not started</div>
                   <button class="detail-icon" type="button" data-detail-title="Nurse Janice Tan · Morning" data-detail-body="Unavailable because Nurse Janice Tan starts at 09:30.">i</button>
                 </div>
-                <div class="slot-block unavailable" style="top:82px; height:58px;">
+                <div class="slot-block unavailable" style="top:48px; height:36px;">
                   <div class="slot-time">09:00</div>
                   <div class="slot-title">Not started</div>
                   <button class="detail-icon" type="button" data-detail-title="Nurse Janice Tan · Morning" data-detail-body="Unavailable because Nurse Janice Tan starts at 09:30.">i</button>
                 </div>
-                <div class="slot-block available" style="top:156px; height:58px;" data-time="09:30" data-resource="Nurse Janice Tan">09:30</div>
-                <div class="slot-block available" style="top:230px; height:58px;" data-time="10:00" data-resource="Nurse Janice Tan">10:00</div>
-                <div class="slot-block available" style="top:304px; height:58px;" data-time="10:30" data-resource="Nurse Janice Tan">10:30</div>
-                <div class="slot-block available" style="top:378px; height:58px;" data-time="11:00" data-resource="Nurse Janice Tan">11:00</div>
-                <div class="slot-block booked" style="top:452px; height:58px;">
+                <div class="slot-block available" style="top:92px; height:36px;" data-time="09:30" data-resource="Nurse Janice Tan">09:30</div>
+                <div class="slot-block available" style="top:136px; height:36px;" data-time="10:00" data-resource="Nurse Janice Tan">10:00</div>
+                <div class="slot-block available" style="top:180px; height:36px;" data-time="10:30" data-resource="Nurse Janice Tan">10:30</div>
+                <div class="slot-block available" style="top:224px; height:36px;" data-time="11:00" data-resource="Nurse Janice Tan">11:00</div>
+                <div class="slot-block booked" style="top:268px; height:36px;">
                   <div class="slot-time">11:30</div>
                   <div class="slot-title">Booked · Baby Ethan Ng</div>
                   <div class="slot-sub">Vaccination</div>
                   <button class="detail-icon" type="button" data-detail-title="Nurse Janice Tan · 11:30" data-detail-body="Booked with Baby Ethan Ng for vaccination. Ref: APT-10579.">i</button>
                 </div>
-                <div class="slot-block unavailable" style="top:526px; height:58px; background:repeating-linear-gradient(45deg,#f8fafc,#f8fafc 4px,#f1f5f9 4px,#f1f5f9 8px);">
+                <div class="slot-block unavailable" style="top:312px; height:36px; background:repeating-linear-gradient(45deg,#f8fafc,#f8fafc 4px,#f1f5f9 4px,#f1f5f9 8px);">
                   <div class="slot-time" style="color:#94a3b8;">12:00 – 13:00</div>
                   <div class="slot-title" style="color:#94a3b8;">Lunch Break</div>
                 </div>
-                <div class="slot-block unavailable" style="top:600px; height:58px;">
+                <div class="slot-block unavailable" style="top:356px; height:36px;">
                   <div class="slot-time">13:00</div>
                   <div class="slot-title">Resumes at 13:30</div>
                   <button class="detail-icon" type="button" data-detail-title="Nurse Janice Tan · 13:00" data-detail-body="Unavailable because Nurse Janice Tan resumes at 13:30.">i</button>
                 </div>
-                <div class="slot-block available" style="top:674px; height:58px;" data-time="13:30" data-resource="Nurse Janice Tan">13:30</div>
-                <div class="slot-block available" style="top:748px; height:58px;" data-time="14:00" data-resource="Nurse Janice Tan">14:00</div>
-                <div class="slot-block available" style="top:822px; height:58px;" data-time="14:30" data-resource="Nurse Janice Tan">14:30</div>
-                <div class="slot-block available" style="top:896px; height:58px;" data-time="15:00" data-resource="Nurse Janice Tan">15:00</div>
-                <div class="slot-block available" style="top:970px; height:58px;" data-time="15:30" data-resource="Nurse Janice Tan">15:30</div>
-                <div class="slot-block available" style="top:1044px; height:58px;" data-time="16:00" data-resource="Nurse Janice Tan">16:00</div>
-                <div class="slot-block available" style="top:1118px; height:58px;" data-time="16:30" data-resource="Nurse Janice Tan">16:30</div>
-                <div class="slot-block unavailable" style="top:1192px; height:58px;">
+                <div class="slot-block available" style="top:400px; height:36px;" data-time="13:30" data-resource="Nurse Janice Tan">13:30</div>
+                <div class="slot-block available" style="top:444px; height:36px;" data-time="14:00" data-resource="Nurse Janice Tan">14:00</div>
+                <div class="slot-block available" style="top:488px; height:36px;" data-time="14:30" data-resource="Nurse Janice Tan">14:30</div>
+                <div class="slot-block available" style="top:532px; height:36px;" data-time="15:00" data-resource="Nurse Janice Tan">15:00</div>
+                <div class="slot-block available" style="top:576px; height:36px;" data-time="15:30" data-resource="Nurse Janice Tan">15:30</div>
+                <div class="slot-block available" style="top:620px; height:36px;" data-time="16:00" data-resource="Nurse Janice Tan">16:00</div>
+                <div class="slot-block available" style="top:664px; height:36px;" data-time="16:30" data-resource="Nurse Janice Tan">16:30</div>
+                <div class="slot-block unavailable" style="top:708px; height:36px;">
                   <div class="slot-time">17:00</div>
                   <div class="slot-title">End of shift</div>
                 </div>
-                <div class="slot-block unavailable" style="top:1266px; height:58px;">
+                <div class="slot-block unavailable" style="top:752px; height:36px;">
                   <div class="slot-time">17:30</div>
                   <div class="slot-title">End of shift</div>
                 </div>
@@ -925,44 +1128,44 @@
 
               <!-- ── Dr Wei Chen · 09:00–18:00 · 30-min slots ── -->
               <div class="lane">
-                <div class="slot-block unavailable" style="top:8px; height:58px;">
+                <div class="slot-block unavailable" style="top:4px; height:36px;">
                   <div class="slot-time">08:30</div>
                   <div class="slot-title">Not started</div>
                   <button class="detail-icon" type="button" data-detail-title="Dr Wei Chen · 08:30" data-detail-body="Unavailable — Dr Wei Chen starts at 09:00.">i</button>
                 </div>
-                <div class="slot-block available" style="top:82px; height:58px;" data-time="09:00" data-resource="Dr Wei Chen">09:00</div>
-                <div class="slot-block booked" style="top:156px; height:58px;">
+                <div class="slot-block available" style="top:48px; height:36px;" data-time="09:00" data-resource="Dr Wei Chen">09:00</div>
+                <div class="slot-block booked" style="top:92px; height:36px;">
                   <div class="slot-time">09:30</div>
                   <div class="slot-title">Booked · Mdm Siti Rahimah</div>
                   <div class="slot-sub">Speech therapy</div>
                   <button class="detail-icon" type="button" data-detail-title="Dr Wei Chen · 09:30" data-detail-body="Booked with Mdm Siti Rahimah for speech therapy session. Ref: APT-10622.">i</button>
                 </div>
-                <div class="slot-block available" style="top:230px; height:58px;" data-time="10:00" data-resource="Dr Wei Chen">10:00</div>
-                <div class="slot-block booked" style="top:304px; height:58px;">
+                <div class="slot-block available" style="top:136px; height:36px;" data-time="10:00" data-resource="Dr Wei Chen">10:00</div>
+                <div class="slot-block booked" style="top:180px; height:36px;">
                   <div class="slot-time">10:30</div>
                   <div class="slot-title">Booked · Mr Lee Chong Wei</div>
                   <div class="slot-sub">Dysphagia assessment</div>
                   <button class="detail-icon" type="button" data-detail-title="Dr Wei Chen · 10:30" data-detail-body="Booked with Mr Lee Chong Wei for dysphagia assessment. Ref: APT-10641.">i</button>
                 </div>
-                <div class="slot-block booked" style="top:378px; height:58px;">
+                <div class="slot-block booked" style="top:224px; height:36px;">
                   <div class="slot-time">11:00</div>
                   <div class="slot-title">Booked · Mr Lee Chong Wei</div>
                   <div class="slot-sub">Dysphagia assessment (cont'd)</div>
                   <button class="detail-icon" type="button" data-detail-title="Dr Wei Chen · 11:00" data-detail-body="Continuation of dysphagia assessment with Mr Lee Chong Wei. Ref: APT-10641.">i</button>
                 </div>
-                <div class="slot-block available" style="top:452px; height:58px;" data-time="11:30" data-resource="Dr Wei Chen">11:30</div>
-                <div class="slot-block unavailable" style="top:526px; height:206px; background:repeating-linear-gradient(45deg,#f8fafc,#f8fafc 4px,#f1f5f9 4px,#f1f5f9 8px);">
+                <div class="slot-block available" style="top:268px; height:36px;" data-time="11:30" data-resource="Dr Wei Chen">11:30</div>
+                <div class="slot-block unavailable" style="top:312px; height:124px; background:repeating-linear-gradient(45deg,#f8fafc,#f8fafc 4px,#f1f5f9 4px,#f1f5f9 8px);">
                   <div class="slot-time" style="color:#94a3b8;">12:00 – 14:00</div>
                   <div class="slot-title" style="color:#94a3b8;">Lunch &amp; Break</div>
                 </div>
-                <div class="slot-block available" style="top:748px; height:58px;" data-time="14:00" data-resource="Dr Wei Chen">14:00</div>
-                <div class="slot-block available" style="top:822px; height:58px;" data-time="14:30" data-resource="Dr Wei Chen">14:30</div>
-                <div class="slot-block available" style="top:896px; height:58px;" data-time="15:00" data-resource="Dr Wei Chen">15:00</div>
-                <div class="slot-block available" style="top:970px; height:58px;" data-time="15:30" data-resource="Dr Wei Chen">15:30</div>
-                <div class="slot-block available" style="top:1044px; height:58px;" data-time="16:00" data-resource="Dr Wei Chen">16:00</div>
-                <div class="slot-block available" style="top:1118px; height:58px;" data-time="16:30" data-resource="Dr Wei Chen">16:30</div>
-                <div class="slot-block available" style="top:1192px; height:58px;" data-time="17:00" data-resource="Dr Wei Chen">17:00</div>
-                <div class="slot-block available" style="top:1266px; height:58px;" data-time="17:30" data-resource="Dr Wei Chen">17:30</div>
+                <div class="slot-block available" style="top:444px; height:36px;" data-time="14:00" data-resource="Dr Wei Chen">14:00</div>
+                <div class="slot-block available" style="top:488px; height:36px;" data-time="14:30" data-resource="Dr Wei Chen">14:30</div>
+                <div class="slot-block available" style="top:532px; height:36px;" data-time="15:00" data-resource="Dr Wei Chen">15:00</div>
+                <div class="slot-block available" style="top:576px; height:36px;" data-time="15:30" data-resource="Dr Wei Chen">15:30</div>
+                <div class="slot-block available" style="top:620px; height:36px;" data-time="16:00" data-resource="Dr Wei Chen">16:00</div>
+                <div class="slot-block available" style="top:664px; height:36px;" data-time="16:30" data-resource="Dr Wei Chen">16:30</div>
+                <div class="slot-block available" style="top:708px; height:36px;" data-time="17:00" data-resource="Dr Wei Chen">17:00</div>
+                <div class="slot-block available" style="top:752px; height:36px;" data-time="17:30" data-resource="Dr Wei Chen">17:30</div>
               </div>
             </div>
           </div>
@@ -977,7 +1180,7 @@
           <div><strong>Status:</strong> Available</div>
         </div>
         <div class="actions">
-          <button class="btn btn-primary" onclick="window.location='book-appointment.html'">Confirm Booking</button>
+          <button class="btn btn-primary" id="confirmBookingBtn" onclick="openBookSlotModal()" disabled>Confirm Booking</button>
         </div>
       </div>
     </section>
@@ -1057,7 +1260,7 @@
     renderCalendar();
 
     // ——————————————————————————————————
-    // SLOT SELECTION (existing logic)
+    // SLOT SELECTION
     // ——————————————————————————————————
     const selectable = document.querySelectorAll('.slot-block.available, .slot-block.selected');
     const summary = document.getElementById('selectionSummary');
@@ -1071,12 +1274,16 @@
         const resource = block.dataset.resource || 'Unknown resource';
         const slotTime = block.dataset.time || block.textContent.trim();
 
+        // Update slot info for the modal
+        bsmSlot = { date: 'Wed, 1 Apr 2026', time: slotTime, therapist: resource };
+
         summary.innerHTML = `
           <div><strong>Date:</strong> Wed, 1 Apr 2026</div>
           <div><strong>Time:</strong> ${slotTime}</div>
           <div><strong>Resource:</strong> ${resource}</div>
           <div><strong>Status:</strong> Available</div>
         `;
+        document.getElementById('confirmBookingBtn').disabled = false;
       });
     });
 
@@ -1084,13 +1291,212 @@
       icon.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (icon.onclick) return; // already has navigation handler
-        const title = icon.dataset.detailTitle || 'Appointment details';
-        const body = icon.dataset.detailBody || 'No additional details.';
-        window.alert(`${title}\n\n${body}`);
+        if (icon.dataset.skipPopover || icon.onclick) return;
+        const title = icon.dataset.detailTitle || 'Appointment';
+        const body  = icon.dataset.detailBody  || '';
+        showSlotPopover(icon, title, body);
       });
     });
+
+    // ── Slot detail popover ────────────────────────────────
+    let _pop = null;
+    function getPopover() {
+      if (_pop) return _pop;
+      _pop = document.createElement('div');
+      _pop.className = 'slot-popover';
+      _pop.innerHTML = '<button class="slot-popover-close" onclick="hideSlotPopover()">✕</button><div id="popoverContent"></div>';
+      document.body.appendChild(_pop);
+      document.addEventListener('click', (e) => {
+        if (_pop && _pop.classList.contains('show') &&
+            !_pop.contains(e.target) && !e.target.classList.contains('detail-icon')) {
+          hideSlotPopover();
+        }
+      }, true);
+      return _pop;
+    }
+    function showSlotPopover(btn, title, body) {
+      const p = getPopover();
+      document.getElementById('popoverContent').innerHTML = `<strong>${title}</strong>${body}`;
+      p.classList.add('show');
+      const r = btn.getBoundingClientRect();
+      const pw = 260, ph = 80;
+      let top  = r.top - ph - 10;
+      if (top < 8) top = r.bottom + 8;
+      let left = r.left + r.width / 2 - pw / 2;
+      left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
+      p.style.top  = top + 'px';
+      p.style.left = left + 'px';
+    }
+    function hideSlotPopover() {
+      if (_pop) _pop.classList.remove('show');
+    }
   </script>
+
+  <!-- ══════════════════════════════════════
+       BOOK SLOT MODAL
+  ══════════════════════════════════════ -->
+  <div class="bsm-overlay" id="bookSlotModal">
+    <div class="bsm-box">
+      <div class="bsm-header">
+        <div class="bsm-title">📅 Book This Slot</div>
+        <button class="bsm-close" onclick="closeBookSlotModal()">✕</button>
+      </div>
+
+      <!-- Selected slot summary -->
+      <div class="bsm-slot-summary">
+        <span>📅 <span id="bsmDate">Wed, 1 Apr 2026</span></span>
+        <span>🕐 <span id="bsmTime">09:00</span></span>
+        <span>🧑‍⚕️ <span id="bsmTherapist">Ms Angela Lim</span></span>
+      </div>
+
+      <div class="bsm-body">
+        <label class="bsm-label">Select Patient</label>
+
+        <!-- Chosen patient pill (shown after selection) -->
+        <div class="bsm-selected-pill" id="bsmSelectedPill">
+          <div class="bsm-avatar" id="bsmSelAvatar" style="width:22px;height:22px;font-size:10px;"></div>
+          <span id="bsmSelName"></span>
+          <button onclick="clearBsmSelection()" title="Change">✕</button>
+        </div>
+
+        <!-- Search + dropdown (hidden once patient chosen) -->
+        <div id="bsmSearchArea">
+          <div class="bsm-search-wrap">
+            <span class="bsm-search-icon">🔍</span>
+            <input class="bsm-search" id="bsmSearchInput" type="text"
+              placeholder="Search by name or room…"
+              oninput="filterBsmPatients(this.value)"
+              autocomplete="off" />
+          </div>
+          <div class="bsm-dropdown" id="bsmDropdown"></div>
+        </div>
+
+        <!-- Remarks -->
+        <label class="bsm-label" style="margin-top:4px;">
+          Remarks <span style="font-weight:400;color:#94a3b8;">(optional)</span>
+        </label>
+        <textarea class="bsm-remarks" id="bsmRemarks" rows="3"
+          placeholder="e.g. Wheelchair access required, post-op follow-up, first session…"></textarea>
+      </div>
+
+      <div class="bsm-footer">
+        <button class="bsm-btn-cancel" onclick="closeBookSlotModal()">Cancel</button>
+        <button class="bsm-btn-confirm" id="bsmConfirmBtn" disabled onclick="confirmBsmBooking()">Confirm Booking</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ── Book Slot Modal ────────────────────────────────
+  const BSM_PATIENTS = [
+    { id:'lim',  name:'Mdm Lim Siew Lan',  meta:'Room C-12 · OT, Physio',      color:'#0d9488', initials:'LS' },
+    { id:'tan',  name:'Mr Tan Ah Kow',      meta:'Room C-08 · Speech Therapy',  color:'#7c3aed', initials:'TA' },
+    { id:'ng',   name:'Mdm Ng Bee Lian',    meta:'Room C-15 · Nursing',         color:'#2563eb', initials:'NB' },
+    { id:'lee',  name:'Mr Lee Chong Wei',   meta:'Room C-03 · Physio, OT',      color:'#0f766e', initials:'LC' },
+    { id:'chen', name:'Mdm Chen Mei Ling',  meta:'Room C-21 · Speech Therapy',  color:'#be185d', initials:'CM' },
+    { id:'wong', name:'Mr Wong Fook Seng',  meta:'Room C-07 · Nursing, Physio', color:'#b45309', initials:'WF' },
+  ];
+
+  let bsmSelected = null;
+  let bsmSlot = { date: 'Wed, 1 Apr 2026', time: '09:00', therapist: 'Ms Angela Lim' };
+
+  function renderBsmOptions(list) {
+    const dd = document.getElementById('bsmDropdown');
+    if (!list.length) {
+      dd.innerHTML = '<div class="bsm-no-results">No patients found</div>';
+      return;
+    }
+    dd.innerHTML = list.map(p => `
+      <div class="bsm-option" onclick="selectBsmPatient('${p.id}')">
+        <div class="bsm-avatar" style="background:${p.color};">${p.initials}</div>
+        <div>
+          <div class="bsm-opt-name">${p.name}</div>
+          <div class="bsm-opt-meta">${p.meta}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function filterBsmPatients(q) {
+    const lower = q.toLowerCase();
+    renderBsmOptions(lower ? BSM_PATIENTS.filter(p =>
+      p.name.toLowerCase().includes(lower) || p.meta.toLowerCase().includes(lower)
+    ) : BSM_PATIENTS);
+  }
+
+  function selectBsmPatient(id) {
+    bsmSelected = BSM_PATIENTS.find(p => p.id === id);
+    if (!bsmSelected) return;
+    document.getElementById('bsmSelName').textContent = bsmSelected.name;
+    const av = document.getElementById('bsmSelAvatar');
+    av.textContent = bsmSelected.initials;
+    av.style.background = bsmSelected.color;
+    document.getElementById('bsmSelectedPill').classList.add('show');
+    document.getElementById('bsmSearchArea').style.display = 'none';
+    document.getElementById('bsmConfirmBtn').disabled = false;
+  }
+
+  function clearBsmSelection() {
+    bsmSelected = null;
+    document.getElementById('bsmSelectedPill').classList.remove('show');
+    document.getElementById('bsmSearchArea').style.display = '';
+    document.getElementById('bsmSearchInput').value = '';
+    renderBsmOptions(BSM_PATIENTS);
+    document.getElementById('bsmConfirmBtn').disabled = true;
+  }
+
+  function openBookSlotModal() {
+    document.getElementById('bsmDate').textContent      = bsmSlot.date;
+    document.getElementById('bsmTime').textContent      = bsmSlot.time;
+    document.getElementById('bsmTherapist').textContent = bsmSlot.therapist;
+    clearBsmSelection();
+    document.getElementById('bsmRemarks').value = '';
+    document.getElementById('bookSlotModal').classList.add('open');
+  }
+
+  function closeBookSlotModal() {
+    document.getElementById('bookSlotModal').classList.remove('open');
+  }
+
+  function confirmBsmBooking() {
+    if (!bsmSelected) return;
+    const remarks = document.getElementById('bsmRemarks').value.trim();
+    closeBookSlotModal();
+    // Visually mark the slot as booked
+    const sel = document.querySelector('.slot-block.selected');
+    if (sel) {
+      sel.classList.remove('selected', 'available');
+      sel.classList.add('booked');
+      const shortName = bsmSelected.name.split(' ').slice(-2).join(' ');
+      sel.innerHTML = `<div class="slot-title">${shortName}</div>${remarks ? `<div class="slot-sub">${remarks.length > 26 ? remarks.substring(0,26)+'…' : remarks}</div>` : ''}`;
+      sel.style.cursor = 'default';
+      sel.removeAttribute('data-time');
+      sel.removeAttribute('data-resource');
+    }
+    // Reset summary bar
+    document.getElementById('selectionSummary').innerHTML = '<div style="color:#64748b;font-size:13.5px;">Select an available slot to book</div>';
+    document.getElementById('confirmBookingBtn').disabled = true;
+    showBsmToast(`✅ Booked for ${bsmSelected.name} · ${bsmSlot.time}`);
+  }
+
+  function showBsmToast(msg) {
+    let t = document.getElementById('bsmToast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'bsmToast';
+      t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#0f172a;color:white;padding:12px 22px;border-radius:12px;font-size:14px;font-weight:600;z-index:400;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;transition:opacity .3s;pointer-events:none;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.style.opacity = '0'; }, 3200);
+  }
+
+  document.getElementById('bookSlotModal').addEventListener('click', function(e) {
+    if (e.target === this) closeBookSlotModal();
+  });
+  </script>
+
 </div><!-- /main-wrapper -->
 </body>
 </html>
