@@ -1,0 +1,545 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schedule Conflicts · CARES Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --primary-light: #ccfbf1;
+      --bg: #f0fdf9;
+      --card: #ffffff;
+      --border: #d1fae5;
+      --text: #0f1c1b;
+      --muted: #64748b;
+      --nav-bg: #1a2e2c;
+      --amber: #f59e0b;
+      --amber-bg: #fffbeb;
+      --amber-border: #fde68a;
+      --red: #ef4444;
+      --red-bg: #fef2f2;
+      --red-border: #fecaca;
+      --green: #16a34a;
+      --green-bg: #dcfce7;
+      --green-border: #bbf7d0;
+      --blue: #2563eb;
+      --blue-bg: #dbeafe;
+      --shadow: 0 4px 20px rgba(13,148,136,0.1);
+      --shadow-sm: 0 2px 8px rgba(13,148,136,0.07);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    /* ── LEFT SIDEBAR NAV ── */
+    .nav-sidebar {
+      width: 200px; min-width: 200px;
+      background: var(--nav-bg);
+      position: fixed; top: 0; left: 0; height: 100vh;
+      overflow-y: auto; z-index: 200;
+      display: flex; flex-direction: column;
+    }
+    .nav-sidebar-profile {
+      padding: 20px 14px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .nav-sidebar-avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: rgba(13,148,136,0.25);
+      border: 2px solid rgba(13,148,136,0.45);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; margin-bottom: 9px;
+    }
+    .nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
+    .nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; cursor: pointer; }
+    .nav-sidebar-nav { flex: 1; padding: 4px 0; }
+    .nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+
+    .nav-sidebar-link {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px; color: rgba(255,255,255,0.68);
+      text-decoration: none; font-size: 12px; font-weight: 500;
+      transition: all 0.15s; border-left: 3px solid transparent;
+    }
+    .nav-sidebar-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.95); }
+    .nav-sidebar-link.active { background: rgba(13,148,136,0.18); color: #5eead4; border-left-color: #0d9488; }
+    .nav-sidebar-link-inner { display: flex; align-items: center; gap: 8px; }
+    .nav-chevron { font-size: 10px; opacity: 0.35; }
+
+    /* ── MAIN WRAPPER ── */
+    .main-wrapper { margin-left: 200px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar {
+      background: #fff; border-bottom: 1px solid #e5e7eb;
+      padding: 0 20px; height: 46px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-hamburger {
+      background: var(--primary); border: none; border-radius: 5px;
+      color: white; width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; cursor: pointer;
+    }
+    .topbar-logo { font-size: 22px; }
+    .topbar-session { font-size: 11.5px; color: #6b7280; }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .topbar-welcome { font-size: 11.5px; color: #9ca3af; }
+    .topbar-facility {
+      border: 1px solid #d1d5db; border-radius: 6px;
+      padding: 3px 8px; font-size: 11px; color: #374151; background: white;
+      max-width: 230px; cursor: pointer;
+    }
+    .topbar-notif { position: relative; background: none; border: none; cursor: pointer; font-size: 17px; padding: 0; }
+    .topbar-notif-badge {
+      position: absolute; top: -4px; right: -5px;
+      background: var(--amber); color: white;
+      border-radius: 10px; font-size: 9px; padding: 1px 4px; font-weight: 700;
+    }
+    .topbar-logout { color: #6b7280; font-size: 11.5px; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+    .topbar-logout:hover { color: #374151; }
+    .page-loaded-bar { background: #fff; border-bottom: 1px solid #f3f4f6; padding: 3px 20px; font-size: 11px; color: #9ca3af; }
+
+    /* ── PAGE ── */
+    .page-wrap { padding: 24px 24px 60px; }
+    .page-header { margin-bottom: 22px; display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    .page-header-left h1 { font-size: 24px; font-weight: 800; color: var(--text); }
+    .page-header-left p { color: var(--muted); font-size: 13.5px; margin-top: 3px; }
+    .page-header-right { display: flex; align-items: center; gap: 10px; }
+
+    /* ── BUTTONS ── */
+    .btn { border: none; border-radius: 10px; padding: 9px 18px; font-family: 'Outfit', sans-serif; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-ghost { background: transparent; color: var(--primary); border: 1.5px solid var(--border); }
+    .btn-ghost:hover { background: var(--primary-light); border-color: var(--primary); }
+    .btn-danger { background: var(--red); color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-sm { padding: 5px 12px; font-size: 12.5px; border-radius: 8px; }
+
+    /* ── SUMMARY STRIP ── */
+    .summary-strip { display: flex; gap: 14px; margin-bottom: 20px; }
+    .kpi-card {
+      background: var(--card); border: 1.5px solid var(--border);
+      border-radius: 16px; padding: 16px 20px;
+      box-shadow: var(--shadow-sm); display: flex; gap: 14px; align-items: flex-start; flex: 1;
+    }
+    .kpi-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .kpi-icon.red { background: var(--red-bg); }
+    .kpi-icon.amber { background: var(--amber-bg); }
+    .kpi-icon.teal { background: var(--primary-light); }
+    .kpi-body { display: flex; flex-direction: column; gap: 2px; }
+    .kpi-val { font-size: 26px; font-weight: 800; line-height: 1; }
+    .kpi-val.red { color: var(--red); }
+    .kpi-val.amber { color: var(--amber); }
+    .kpi-val.teal { color: var(--primary); }
+    .kpi-lbl { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .kpi-trend { font-size: 11.5px; margin-top: 2px; }
+    .kpi-trend.warn { color: var(--amber); }
+    .kpi-trend.good { color: var(--green); }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      background: var(--card); border: 1.5px solid var(--border); border-radius: 14px;
+      padding: 12px 16px; display: flex; align-items: center; gap: 14px;
+      margin-bottom: 20px; flex-wrap: wrap; box-shadow: var(--shadow-sm);
+    }
+    .filter-group { display: flex; align-items: center; gap: 8px; }
+    .filter-group label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+    .filter-group select, .filter-group input[type=text] {
+      border: 1.5px solid var(--border); border-radius: 10px;
+      padding: 6px 10px; font-family: 'Outfit', sans-serif; font-size: 13px;
+      color: var(--text); background: white; outline: none;
+    }
+    .filter-group select:focus, .filter-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
+    /* ── INFO BANNER ── */
+    .info-banner {
+      background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 14px;
+      padding: 12px 16px; font-size: 13px; color: #1e40af;
+      display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px;
+    }
+    .info-banner a { color: var(--primary); font-weight: 600; }
+
+    /* ── SECTION HEADER ── */
+    .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .section-title { font-size: 15px; font-weight: 700; color: var(--text); }
+    .section-badge {
+      font-size: 11px; font-weight: 700; padding: 2px 10px;
+      border-radius: 99px;
+    }
+    .section-badge.red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+    .section-badge.muted { background: #f1f5f9; color: var(--muted); }
+
+    /* ── TABLE ── */
+    .table-card {
+      background: var(--card); border: 1.5px solid var(--border);
+      border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm); margin-bottom: 24px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: #f0fdf9; }
+    th {
+      padding: 10px 16px; font-size: 11px; font-weight: 700;
+      color: var(--muted); text-align: left;
+      text-transform: uppercase; letter-spacing: .05em;
+      border-bottom: 1.5px solid var(--border);
+    }
+    td { padding: 12px 16px; font-size: 13.5px; border-bottom: 1px solid #f0fdf9; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafffe; }
+
+    /* ── STATUS CHIPS ── */
+    .chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 99px; font-size: 11.5px; font-weight: 600; white-space: nowrap;
+    }
+    .chip-red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+    .chip-amber { background: var(--amber-bg); color: #92400e; border: 1px solid var(--amber-border); }
+    .chip-teal { background: var(--primary-light); color: var(--primary-dark); border: 1px solid #a7f3d0; }
+
+    /* ── LEAVE BADGE ── */
+    .leave-badge {
+      display: inline-block; background: var(--amber-bg); color: #92400e;
+      border: 1px solid var(--amber-border); border-radius: 6px;
+      font-size: 10.5px; font-weight: 600; padding: 1px 7px; margin-left: 5px; white-space: nowrap;
+    }
+
+    /* ── ACTION BUTTON ── */
+    .action-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 600;
+      cursor: pointer; border: 1.5px solid; transition: all .15s; white-space: nowrap;
+      font-family: 'Outfit', sans-serif;
+    }
+    .action-btn-teal { color: var(--primary-dark); border-color: var(--border); background: var(--primary-light); }
+    .action-btn-teal:hover { background: #a7f3d0; border-color: #5eead4; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center; padding: 48px 24px;
+      color: var(--muted); font-size: 14px;
+    }
+    .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.4); z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: white; border-radius: 18px; padding: 28px 30px;
+      width: 480px; max-width: 95vw;
+      box-shadow: 0 24px 60px rgba(13,148,136,0.18);
+    }
+    .modal-title { font-size: 17px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+    .modal-info-row { margin-bottom: 16px; display: flex; flex-direction: column; gap: 7px; }
+    .modal-info-item { display: flex; gap: 10px; font-size: 13.5px; }
+    .modal-info-item .lbl { color: var(--muted); min-width: 110px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+    .resolve-option {
+      display: flex; flex-direction: column; gap: 3px;
+      padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--border);
+      cursor: pointer; transition: all .15s; background: white; text-align: left;
+      width: 100%; font-family: 'Outfit', sans-serif; margin-bottom: 8px;
+    }
+    .resolve-option:hover { border-color: var(--primary); background: var(--bg); }
+    .resolve-option-title { font-size: 13.5px; font-weight: 700; color: var(--text); }
+    .resolve-option-desc { font-size: 11.5px; color: var(--muted); }
+    .resolve-option.primary { border-color: var(--primary); background: var(--primary-light); }
+    .resolve-option.primary .resolve-option-title { color: var(--primary-dark); }
+  </style>
+</head>
+<body>
+
+<!-- ── LEFT NAV ── -->
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-profile">
+    <div class="nav-sidebar-avatar">🤖</div>
+    <div class="nav-sidebar-name">Cares Admin<br>TETSUYU</div>
+    <div class="nav-sidebar-role">Enterprise Admin ▾</div>
+  </div>
+  <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
+    <a href="coordinator-dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
+    <a href="timeslot_scheduler_mockup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
+    <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
+    <a href="appointments.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
+    <a href="recurring-edit.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔄</span><span>Recurring</span></span><span class="nav-chevron">‹</span></a>
+    <a href="therapist-change.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔀</span><span>Change Therapist</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage1-automation.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🤖</span><span>Auto-fill (Stage 1)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage2-manual.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>✏️</span><span>Manual Fill (Stage 2)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="conflicts.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>⚠️</span><span>Conflicts</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🗺️</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
+  </nav>
+</aside>
+
+<!-- ── MAIN WRAPPER ── -->
+<div class="main-wrapper">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-hamburger">☰</button>
+      <span class="topbar-logo">🏥</span>
+      <span class="topbar-session">Session logout in 1772 seconds</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-welcome">Welcome to CARES</span>
+      <select class="topbar-facility"><option>SCC @ Tampines</option></select>
+      <button class="topbar-notif">🔔<span class="topbar-notif-badge">6</span></button>
+      <a class="topbar-logout" href="#">↪ Log out</a>
+    </div>
+  </div>
+  <div class="page-loaded-bar">Page Loaded on: 31-Mar-2026 2:30 PM</div>
+
+  <div class="page-wrap">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>⚠️ Schedule Conflicts</h1>
+        <p>Appointments conflicting with approved therapist leave — generated live against May 2026 shift data</p>
+      </div>
+      <div class="page-header-right">
+        <button class="btn btn-ghost btn-sm" onclick="window.location.href='shift-setup.html#tab-leave'">📋 View Leave Plan</button>
+        <button class="btn btn-primary btn-sm" onclick="window.location.href='therapist-change.html'">↔ Change Therapist</button>
+      </div>
+    </div>
+
+    <!-- Summary strip -->
+    <div class="summary-strip">
+      <div class="kpi-card">
+        <div class="kpi-icon red">⚠️</div>
+        <div class="kpi-body">
+          <div class="kpi-val red">6</div>
+          <div class="kpi-lbl">Unresolved Conflicts</div>
+          <div class="kpi-trend warn">Needs immediate action</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon amber">👩‍⚕️</div>
+        <div class="kpi-body">
+          <div class="kpi-val amber">2</div>
+          <div class="kpi-lbl">Therapists on Leave</div>
+          <div class="kpi-trend warn">Dr Angela Lim · Dr Marcus Lee</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon teal">📅</div>
+        <div class="kpi-body">
+          <div class="kpi-val teal">May 2026</div>
+          <div class="kpi-lbl">Conflict Period</div>
+          <div class="kpi-trend good">Committed shifts loaded</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info banner -->
+    <div class="info-banner">
+      <span style="font-size:18px;flex-shrink:0;">ℹ️</span>
+      <div>
+        These conflicts are auto-detected by comparing committed appointments against approved therapist leave for <strong>May 2026</strong>.
+        For each conflict, reassign to an available therapist via <a href="therapist-change.html">Change Therapist ↗</a>.
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>Month</label>
+        <select id="filterMonth" onchange="renderConflicts()">
+          <option value="may">May 2026</option>
+          <option value="jun">June 2026</option>
+          <option value="apr">April 2026</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Therapist</label>
+        <select id="filterTherapist" onchange="renderConflicts()">
+          <option value="">All</option>
+          <option value="angela">Dr Angela Lim</option>
+          <option value="marcus">Dr Marcus Lee</option>
+          <option value="janice">Nurse Janice Tan</option>
+          <option value="wei">Dr Wei Chen</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Patient</label>
+        <input type="text" id="filterPatient" placeholder="Search name..." oninput="renderConflicts()">
+      </div>
+    </div>
+
+    <!-- Section header -->
+    <div class="section-header">
+      <span class="section-title">🔴 Unresolved Conflicts</span>
+      <span class="section-badge red" id="conflictCount">6 appointments</span>
+    </div>
+
+    <!-- Conflicts table -->
+    <div class="table-card">
+      <table id="conflictsTable">
+        <thead>
+          <tr>
+            <th>Appointment</th>
+            <th>Patient</th>
+            <th>Therapist (on leave)</th>
+            <th>Leave Period</th>
+            <th>Leave Type</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="conflictsBody"></tbody>
+      </table>
+    </div>
+
+  </div><!-- /page-wrap -->
+</div><!-- /main-wrapper -->
+
+<!-- ── RESOLVE MODAL ── -->
+<div id="resolveModal" class="modal-overlay" onclick="if(event.target===this)closeResolveModal()">
+  <div class="modal-box">
+    <div class="modal-title">Resolve Conflict</div>
+    <div class="modal-sub" id="resolveModalSub">—</div>
+    <div class="modal-info-row" id="resolveModalInfo"></div>
+    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Choose resolution</div>
+    <button class="resolve-option primary" onclick="goReassign()">
+      <span class="resolve-option-title">↔ Reassign to a different therapist</span>
+      <span class="resolve-option-desc">Opens Change Therapist page for this appointment</span>
+    </button>
+    <button class="resolve-option" onclick="closeResolveModal()">
+      <span class="resolve-option-title">⏱ Reschedule to a different time slot</span>
+      <span class="resolve-option-desc">Move appointment to an available slot in the same week</span>
+    </button>
+    <button class="resolve-option" onclick="closeResolveModal()">
+      <span class="resolve-option-title">✕ Cancel this appointment</span>
+      <span class="resolve-option-desc">Permanently cancel and notify the patient</span>
+    </button>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeResolveModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ── Mock data: appointments that clash with leave ── */
+  const CONFLICTS = [
+    { id:1, date:'Mon 5 May 2026', time:'09:00–09:30', service:'OT Session',
+      patient:'Tan Ah Kow', episode:'EP-2026-4401',
+      therapistKey:'angela', therapist:'Dr Angela Lim',
+      leaveFrom:'5 May', leaveTo:'9 May 2026', leaveType:'Annual Leave' },
+    { id:2, date:'Tue 6 May 2026', time:'09:00–09:30', service:'OT Session',
+      patient:'Lim Bee Hoon', episode:'EP-2026-4405',
+      therapistKey:'angela', therapist:'Dr Angela Lim',
+      leaveFrom:'5 May', leaveTo:'9 May 2026', leaveType:'Annual Leave' },
+    { id:3, date:'Wed 7 May 2026', time:'10:00–10:30', service:'OT Session',
+      patient:'Wong Siew Ling', episode:'EP-2026-4410',
+      therapistKey:'angela', therapist:'Dr Angela Lim',
+      leaveFrom:'5 May', leaveTo:'9 May 2026', leaveType:'Annual Leave' },
+    { id:4, date:'Mon 12 May 2026', time:'13:00–13:30', service:'PT Session',
+      patient:'Ang Chee Keong', episode:'EP-2026-3322',
+      therapistKey:'marcus', therapist:'Dr Marcus Lee',
+      leaveFrom:'12 May', leaveTo:'16 May 2026', leaveType:'Medical Leave' },
+    { id:5, date:'Wed 14 May 2026', time:'09:30–10:00', service:'PT Session',
+      patient:'Krishnan Pillai', episode:'EP-2026-3350',
+      therapistKey:'marcus', therapist:'Dr Marcus Lee',
+      leaveFrom:'12 May', leaveTo:'16 May 2026', leaveType:'Medical Leave' },
+    { id:6, date:'Thu 15 May 2026', time:'10:00–10:30', service:'PT Session',
+      patient:'Rajan Subramaniam', episode:'EP-2026-3361',
+      therapistKey:'marcus', therapist:'Dr Marcus Lee',
+      leaveFrom:'12 May', leaveTo:'16 May 2026', leaveType:'Medical Leave' },
+  ];
+
+  let _activeConflict = null;
+
+  function renderConflicts() {
+    const thFilter = document.getElementById('filterTherapist').value;
+    const ptFilter = document.getElementById('filterPatient').value.toLowerCase();
+    const tbody = document.getElementById('conflictsBody');
+
+    const filtered = CONFLICTS.filter(c => {
+      if (thFilter && c.therapistKey !== thFilter) return false;
+      if (ptFilter && !c.patient.toLowerCase().includes(ptFilter)) return false;
+      return true;
+    });
+
+    document.getElementById('conflictCount').textContent =
+      filtered.length + ' appointment' + (filtered.length !== 1 ? 's' : '');
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6">
+        <div class="empty-state">
+          <div class="icon">✅</div>
+          <div>No conflicts match the current filters.</div>
+        </div>
+      </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(c => `
+      <tr>
+        <td>
+          <div style="font-weight:700;">${c.date}</div>
+          <div style="font-size:12px;color:var(--muted);">${c.time} · ${c.service}</div>
+        </td>
+        <td>
+          <div style="font-weight:700;">${c.patient}</div>
+          <div style="font-size:12px;color:var(--muted);">${c.episode}</div>
+        </td>
+        <td>
+          ${c.therapist}
+          <span class="leave-badge">On Leave</span>
+        </td>
+        <td style="font-size:13px;">${c.leaveFrom} – ${c.leaveTo}</td>
+        <td>
+          <span class="chip ${c.leaveType === 'Annual Leave' ? 'chip-teal' : 'chip-amber'}">${c.leaveType}</span>
+        </td>
+        <td>
+          <button class="action-btn action-btn-teal" onclick="showResolveModal(${c.id})">↔ Reassign</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function showResolveModal(id) {
+    _activeConflict = CONFLICTS.find(c => c.id === id);
+    if (!_activeConflict) return;
+    const c = _activeConflict;
+    document.getElementById('resolveModalSub').textContent =
+      `${c.patient} — ${c.date} at ${c.time}`;
+    document.getElementById('resolveModalInfo').innerHTML = `
+      <div class="modal-info-item"><span class="lbl">Patient</span><strong>${c.patient} (${c.episode})</strong></div>
+      <div class="modal-info-item"><span class="lbl">Date & Time</span>${c.date} · ${c.time}</div>
+      <div class="modal-info-item"><span class="lbl">Therapist</span><span style="color:var(--red);">${c.therapist} (on leave ${c.leaveFrom}–${c.leaveTo})</span></div>
+    `;
+    document.getElementById('resolveModal').classList.add('open');
+  }
+
+  function closeResolveModal() {
+    document.getElementById('resolveModal').classList.remove('open');
+    _activeConflict = null;
+  }
+
+  function goReassign() {
+    if (_activeConflict) {
+      sessionStorage.setItem('conflictAppt', JSON.stringify(_activeConflict));
+    }
+    closeResolveModal();
+    window.location.href = 'therapist-change.html';
+  }
+
+  // Initial render
+  renderConflicts();
+</script>
+</body>
+</html>

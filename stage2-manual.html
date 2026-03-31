@@ -1,0 +1,566 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stage 2: Manual Fill — CARES Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { display: flex !important; min-height: 100vh; margin: 0; font-family: 'Outfit', Inter, ui-sans-serif; background: #f5f7fb; color: #111827; }
+
+    /* NAV SIDEBAR */
+    .nav-sidebar { width: 200px; min-width: 200px; background: #1a2e2c; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 200; display: flex; flex-direction: column; }
+    .nav-sidebar-profile { padding: 20px 14px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .nav-sidebar-avatar { width: 46px; height: 46px; border-radius: 50%; background: rgba(13,148,136,0.25); border: 2px solid rgba(13,148,136,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 9px; }
+    .nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
+    .nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; }
+    .nav-sidebar-nav { flex: 1; padding: 4px 0; }
+    .nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+
+    .nav-sidebar-link { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; color: rgba(255,255,255,0.68); text-decoration: none; font-size: 12px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
+    .nav-sidebar-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.95); }
+    .nav-sidebar-link.active { background: rgba(13,148,136,0.18); color: #5eead4; border-left-color: #0d9488; }
+    .nav-sidebar-link-inner { display: flex; align-items: center; gap: 8px; }
+    .nav-chevron { font-size: 10px; opacity: 0.35; }
+
+    /* MAIN */
+    .main-wrapper { margin-left: 200px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 0 20px; height: 46px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-hamburger { background: #0d9488; border: none; border-radius: 5px; color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; }
+    .topbar-logo { font-size: 22px; }
+    .topbar-session { font-size: 11.5px; color: #6b7280; }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .topbar-welcome { font-size: 11.5px; color: #9ca3af; }
+    .topbar-facility { border: 1px solid #d1d5db; border-radius: 6px; padding: 3px 8px; font-size: 11px; color: #374151; background: white; max-width: 230px; cursor: pointer; }
+    .topbar-notif { position: relative; background: none; border: none; cursor: pointer; font-size: 17px; padding: 0; }
+    .topbar-notif-badge { position: absolute; top: -4px; right: -5px; background: #f59e0b; color: white; border-radius: 10px; font-size: 9px; padding: 1px 4px; font-weight: 700; }
+    .topbar-logout { color: #6b7280; font-size: 11.5px; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+    .page-loaded-bar { background: #fff; border-bottom: 1px solid #f3f4f6; padding: 3px 20px; font-size: 11px; color: #9ca3af; }
+
+    /* PAGE CONTENT */
+    .page-content { padding: 24px; flex: 1; }
+    .page-header { margin-bottom: 20px; }
+    .page-title { font-size: 22px; font-weight: 800; color: #111827; margin: 0 0 4px; }
+    .page-sub { font-size: 13px; color: #6b7280; }
+
+    /* CONTEXT BANNER */
+    .context-banner { background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%); border-radius: 14px; padding: 16px 22px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+    .context-banner-icon { font-size: 28px; }
+    .context-banner-text { flex: 1; }
+    .context-banner-title { color: #fff; font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+    .context-banner-sub { color: rgba(255,255,255,0.78); font-size: 12px; }
+    .context-banner-chips { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    .chip { background: rgba(255,255,255,0.18); color: #fff; border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 600; }
+    .chip-warn { background: rgba(245,158,11,0.25); color: #fde68a; }
+
+    /* PROGRESS SECTION */
+    .progress-section { background: #fff; border-radius: 14px; border: 1px solid #e5e7eb; padding: 18px 22px; margin-bottom: 20px; }
+    .progress-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .progress-label { font-size: 13px; font-weight: 700; color: #111827; }
+    .progress-pct { font-size: 13px; font-weight: 700; color: #2563eb; }
+    .progress-track { background: #e5e7eb; border-radius: 99px; height: 10px; overflow: hidden; }
+    .progress-fill { background: linear-gradient(90deg, #2563eb, #0d9488); height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+    .progress-counts { display: flex; gap: 20px; margin-top: 10px; }
+    .progress-count { font-size: 12px; color: #6b7280; display: flex; align-items: center; gap: 5px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-blue { background: #2563eb; }
+    .dot-gray { background: #d1d5db; }
+    .dot-amber { background: #f59e0b; }
+
+    /* FILTERS */
+    .filters-bar { background: #fff; border-radius: 14px; border: 1px solid #e5e7eb; padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .filter-group { display: flex; flex-direction: column; gap: 3px; }
+    .filter-label { font-size: 10.5px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
+    .filter-select, .filter-input { border: 1.5px solid #d1d5db; border-radius: 8px; padding: 6px 10px; font-size: 12px; color: #374151; background: #fff; font-family: inherit; cursor: pointer; min-width: 140px; }
+    .filter-select:focus, .filter-input:focus { outline: none; border-color: #2563eb; }
+    .filter-divider { width: 1px; height: 36px; background: #e5e7eb; margin: 0 4px; }
+
+    /* SECTION CARD */
+    .section-card { background: #fff; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 4px 16px rgba(15,23,42,0.06); overflow: hidden; }
+    .section-header { padding: 18px 22px 14px; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
+    .section-title { font-size: 15px; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 8px; }
+
+    /* TABLE */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { background: #f9fafb; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 14px; text-align: left; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
+    .data-table td { padding: 10px 14px; font-size: 12.5px; color: #374151; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover { background: #fafafa; }
+    .data-table tbody tr.row-assigned { background: #f0fdf4; }
+    .data-table tbody tr.row-assigned:hover { background: #e8fdf0; }
+
+    /* BADGES */
+    .badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .badge-assigned { background: #dcfce7; color: #16a34a; }
+    .badge-unassigned { background: #f3f4f6; color: #6b7280; }
+
+    .reason-chip { display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; padding: 3px 9px; font-size: 10.5px; font-weight: 600; white-space: nowrap; }
+    .reason-leave    { background: #fff7ed; color: #c2410c; }
+    .reason-taken    { background: #fee2e2; color: #dc2626; }
+    .reason-no-slot  { background: #fef3c7; color: #92400e; }
+    .reason-no-match { background: #f3e8ff; color: #7c3aed; }
+
+    /* PATIENT CELL */
+    .patient-name { font-weight: 700; color: #111827; font-size: 13px; display: block; }
+    .service-tag { display: inline-block; background: #eff6ff; color: #1d4ed8; border-radius: 6px; padding: 2px 8px; font-size: 10.5px; font-weight: 600; margin-top: 3px; }
+    .series-label { font-size: 10.5px; color: #9ca3af; margin-top: 2px; display: block; }
+
+    /* THERAPIST COLORS */
+    .therapist-tag { display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .therapist-angela { background: #ede9fe; color: #6d28d9; }
+    .therapist-marcus { background: #fce7f3; color: #9d174d; }
+    .therapist-janice { background: #ecfdf5; color: #065f46; }
+    .therapist-wei    { background: #eff6ff; color: #1e40af; }
+    .therapist-leave  { background: #fef2f2; color: #991b1b; text-decoration: line-through; opacity: 0.75; }
+
+    /* SLOT SELECTOR */
+    .slot-select { border: 1.5px solid #d1d5db; border-radius: 8px; padding: 6px 10px; font-size: 11.5px; color: #374151; background: #fff; font-family: inherit; cursor: pointer; width: 100%; min-width: 200px; max-width: 240px; }
+    .slot-select:focus { outline: none; border-color: #2563eb; }
+    .slot-select.has-value { border-color: #16a34a; background: #f0fdf4; color: #15803d; font-weight: 600; }
+
+    /* ASSIGNED SLOT PREVIEW */
+    .slot-preview { display: none; margin-top: 5px; padding: 5px 9px; border-radius: 7px; background: #f0fdf4; border: 1px solid #bbf7d0; font-size: 11px; color: #15803d; font-weight: 600; }
+    .slot-preview.show { display: block; }
+
+    .btn-save-row { background: #2563eb; color: #fff; border: none; border-radius: 7px; padding: 5px 14px; font-size: 11.5px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.15s; white-space: nowrap; }
+    .btn-save-row:hover { opacity: 0.85; }
+    .btn-save-row.saved { background: #16a34a; }
+    .btn-save-row:disabled { background: #9ca3af; cursor: not-allowed; }
+
+    /* BOTTOM ACTIONS */
+    .table-footer { padding: 18px 22px; border-top: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .btn-save-all { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none; border-radius: 10px; padding: 12px 28px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.15s; }
+    .btn-save-all:hover { opacity: 0.88; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #1a2e2c; color: #fff; padding: 14px 22px; border-radius: 12px; font-size: 13px; font-weight: 600; z-index: 999; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.22); max-width: 380px; }
+    .toast.show { display: flex; align-items: center; gap: 10px; }
+
+    .col-date { white-space: nowrap; font-size: 12px; font-weight: 600; color: #111827; }
+    .col-series { font-size: 11px; color: #6b7280; }
+  </style>
+</head>
+<body>
+
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-profile">
+    <div class="nav-sidebar-avatar">🤖</div>
+    <div class="nav-sidebar-name">Cares Admin<br>TETSUYU</div>
+    <div class="nav-sidebar-role">Enterprise Admin ▾</div>
+  </div>
+  <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
+    <a href="coordinator-dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
+    <a href="timeslot_scheduler_mockup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
+    <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
+    <a href="appointments.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
+    <a href="recurring-edit.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔄</span><span>Recurring</span></span><span class="nav-chevron">‹</span></a>
+    <a href="therapist-change.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔀</span><span>Change Therapist</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage1-automation.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🤖</span><span>Auto-fill (Stage 1)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage2-manual.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>✏️</span><span>Manual Fill (Stage 2)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="conflicts.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚠️</span><span>Conflicts</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🗺️</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
+  </nav>
+</aside>
+
+<div class="main-wrapper">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-hamburger">☰</button>
+      <span class="topbar-logo">🏥</span>
+      <span class="topbar-session">Session logout in 1772 seconds</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-welcome">Welcome to CARES</span>
+      <select class="topbar-facility"><option>SCC @ Tampines</option></select>
+      <button class="topbar-notif">🔔<span class="topbar-notif-badge">5</span></button>
+      <a class="topbar-logout" href="#">↪ Log out</a>
+    </div>
+  </div>
+  <div class="page-loaded-bar">Page Loaded on: 25-Mar-2026 3:01 PM</div>
+
+  <div class="page-content">
+    <div class="page-header">
+      <div class="page-title">✏️ Stage 2 — Manual Assignment</div>
+      <div class="page-sub">Unassigned recurring appointments from Stage 1 — find and assign a suitable therapist open slot</div>
+    </div>
+
+    <!-- CONTEXT BANNER -->
+    <div class="context-banner">
+      <div class="context-banner-icon">🔄</div>
+      <div class="context-banner-text">
+        <div class="context-banner-title">Stage 1 auto-fill complete — 9 recurring appointments could not be filled</div>
+        <div class="context-banner-sub">Each appointment below has a <strong>fixed date and time</strong> from its recurring series. Stage 1 failed because the original therapist was unavailable at that specific slot. Assign a replacement therapist who has an open slot at the <em>same time</em>.</div>
+        <div class="context-banner-chips">
+          <span class="chip chip-warn">⚠️ 4 therapist on leave</span>
+          <span class="chip">🚫 3 no matching slot</span>
+          <span class="chip">🔒 2 slot already taken</span>
+          <span class="chip">April 2026</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRESS SECTION -->
+    <div class="progress-section">
+      <div class="progress-header">
+        <div class="progress-label">Assignment Progress</div>
+        <div class="progress-pct" id="progress-pct-label">0 / 9 assigned</div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="main-progress" style="width: 0%;"></div>
+      </div>
+      <div class="progress-counts">
+        <span class="progress-count"><span class="dot dot-blue"></span> <span id="cnt-assigned">0</span> assigned</span>
+        <span class="progress-count"><span class="dot dot-gray"></span> <span id="cnt-pending">9</span> pending</span>
+        <span class="progress-count"><span class="dot dot-amber"></span> <span id="cnt-saved">0</span> saved</span>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters-bar">
+      <div class="filter-group">
+        <div class="filter-label">Patient</div>
+        <select class="filter-select" id="filter-patient" onchange="applyFilters()">
+          <option value="">All Patients</option>
+          <option>Mdm Lim Siew Lan</option>
+          <option>Mr Tan Ah Kow</option>
+          <option>Mdm Ng Bee Lian</option>
+          <option>Mr Lee Chong Wei</option>
+          <option>Mdm Chen Mei Ling</option>
+          <option>Mr Wong Fook Seng</option>
+        </select>
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-group">
+        <div class="filter-label">Week</div>
+        <select class="filter-select" id="filter-week" onchange="applyFilters()">
+          <option value="">All Weeks</option>
+          <option value="w1">Apr 1–12 (Week 1–2)</option>
+          <option value="w2">Apr 13–30 (Week 3–5)</option>
+        </select>
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-group">
+        <div class="filter-label">Status</div>
+        <select class="filter-select" id="filter-status" onchange="applyFilters()">
+          <option value="">All</option>
+          <option value="pending">Pending</option>
+          <option value="assigned">Assigned</option>
+        </select>
+      </div>
+      <div style="margin-left:auto;">
+        <button style="background:none;border:1.5px solid #d1d5db;border-radius:8px;padding:6px 14px;font-size:12px;color:#374151;cursor:pointer;font-family:inherit;" onclick="clearFilters()">✕ Clear</button>
+      </div>
+    </div>
+
+    <!-- APPOINTMENTS TABLE -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">
+          👤 Unassigned Patient Appointments
+          <span id="appt-count-badge" style="background:#fef3c7;color:#d97706;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;margin-left:6px;">9 appointments</span>
+        </div>
+        <div style="font-size:12px;color:#6b7280;">Recurring series · April 2026 · SCC @ Tampines</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table" id="slots-table">
+          <thead>
+            <tr>
+              <th style="width:32px;">#</th>
+              <th>Patient &amp; Service</th>
+              <th>Recurring Series</th>
+              <th>Due Date</th>
+              <th>Stage 1 Failure</th>
+              <th style="min-width:170px;">1. Select Therapist</th>
+              <th style="min-width:160px;">2. Assign Timeslot</th>
+              <th>Status</th>
+              <th>Save</th>
+            </tr>
+          </thead>
+          <tbody id="slots-tbody"></tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <div style="font-size:12px;color:#6b7280;">Assign all 9 appointments, then save to confirm for April 2026.</div>
+        <button class="btn-save-all" onclick="saveAll()">💾 Save All Assigned</button>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+</div><!-- /main-wrapper -->
+
+<div class="toast" id="toast">
+  <span>✅</span>
+  <span id="toast-msg">Changes saved successfully!</span>
+</div>
+
+<script>
+  // ── Step 1: Therapists with any open slot on a given date
+  const therapistsOnDate = {
+    "Mon 6 Apr":  [
+      { key:"angela", label:"Dr Angela Lim",    tClass:"therapist-angela" },
+      { key:"wei",    label:"Dr Wei Chen",       tClass:"therapist-wei"    },
+      { key:"janice", label:"Nurse Janice Tan",  tClass:"therapist-janice" },
+    ],
+    "Mon 13 Apr": [
+      { key:"angela", label:"Dr Angela Lim",    tClass:"therapist-angela" },
+      { key:"wei",    label:"Dr Wei Chen",       tClass:"therapist-wei"    },
+    ],
+    "Tue 7 Apr": [
+      { key:"angela", label:"Dr Angela Lim",    tClass:"therapist-angela" },
+      { key:"wei",    label:"Dr Wei Chen",       tClass:"therapist-wei"    },
+      { key:"janice", label:"Nurse Janice Tan",  tClass:"therapist-janice" },
+    ],
+    "Wed 8 Apr": [
+      { key:"janice", label:"Nurse Janice Tan",  tClass:"therapist-janice" },
+      { key:"wei",    label:"Dr Wei Chen",       tClass:"therapist-wei"    },
+    ],
+    "Thu 9 Apr": [
+      { key:"angela", label:"Dr Angela Lim",    tClass:"therapist-angela" },
+      { key:"wei",    label:"Dr Wei Chen",       tClass:"therapist-wei"    },
+      { key:"janice", label:"Nurse Janice Tan",  tClass:"therapist-janice" },
+    ],
+    "Fri 10 Apr": [
+      { key:"angela", label:"Dr Angela Lim",    tClass:"therapist-angela" },
+      { key:"janice", label:"Nurse Janice Tan",  tClass:"therapist-janice" },
+      { key:"wei",    label:"Dr Wei Chen",       tClass:"therapist-wei"    },
+    ],
+  };
+
+  // ── Step 2: Open timeslots per therapist per date
+  const slotsForTherapist = {
+    "Mon 6 Apr|angela":  ["09:00–09:30","10:30–11:00","14:00–14:30"],
+    "Mon 6 Apr|wei":     ["09:00–10:00","11:00–12:00","16:00–17:00"],
+    "Mon 6 Apr|janice":  ["13:00–14:00","15:00–16:00"],
+    "Mon 13 Apr|angela": ["09:00–09:30","09:30–10:00","14:00–14:30"],
+    "Mon 13 Apr|wei":    ["10:00–11:00","15:00–16:00"],
+    "Tue 7 Apr|angela":  ["13:00–13:30","14:00–14:30","15:00–15:30"],
+    "Tue 7 Apr|wei":     ["09:00–10:00","13:00–14:00","14:00–15:00"],
+    "Tue 7 Apr|janice":  ["11:00–12:00","14:00–15:00"],
+    "Wed 8 Apr|janice":  ["10:00–11:00","14:00–15:00"],
+    "Wed 8 Apr|wei":     ["15:00–16:00","16:00–17:00"],
+    "Thu 9 Apr|angela":  ["09:00–09:30","15:00–15:30"],
+    "Thu 9 Apr|wei":     ["13:00–14:00","14:00–15:00"],
+    "Thu 9 Apr|janice":  ["10:00–11:00","13:00–14:00"],
+    "Fri 10 Apr|angela": ["11:00–11:30","14:00–14:30"],
+    "Fri 10 Apr|janice": ["11:00–12:00","14:00–15:00"],
+    "Fri 10 Apr|wei":    ["13:00–14:00","16:00–17:00"],
+  };
+
+  // ── Patient appointments from recurring series that Stage 1 failed to fill
+  const apptData = [
+    { id:1, patient:"Mdm Lim Siew Lan",  service:"DRP – OT",
+      series:"Every Mon 09:00–09:30", dueDate:"Mon 6 Apr",  week:"w1",
+      origTherapist:"Dr Marcus Lee",   origLeave:true,
+      reason:"leave",    reasonLabel:"Therapist on leave",
+      therapistKey:"", slotTime:"", saved:false },
+    { id:2, patient:"Mdm Lim Siew Lan",  service:"DRP – OT",
+      series:"Every Mon 09:00–09:30", dueDate:"Mon 13 Apr", week:"w2",
+      origTherapist:"Dr Marcus Lee",   origLeave:true,
+      reason:"leave",    reasonLabel:"Therapist on leave",
+      therapistKey:"", slotTime:"", saved:false },
+    { id:3, patient:"Mr Tan Ah Kow",     service:"Dementia Day Care",
+      series:"Every Wed 10:00–11:00", dueDate:"Wed 8 Apr",  week:"w1",
+      origTherapist:"Dr Angela Lim",   origLeave:false,
+      reason:"no-slot",  reasonLabel:"No open slot found",
+      therapistKey:"", slotTime:"", saved:false },
+    { id:4, patient:"Mdm Ng Bee Lian",   service:"Integrated Home Care",
+      series:"Every Tue 14:00–15:00", dueDate:"Tue 7 Apr",  week:"w1",
+      origTherapist:"Dr Wei Chen",     origLeave:false,
+      reason:"taken",    reasonLabel:"Slot already taken",
+      therapistKey:"", slotTime:"", saved:false },
+    { id:5, patient:"Mr Lee Chong Wei",  service:"DRP – Physio",
+      series:"Every Tue 14:00–15:00", dueDate:"Tue 7 Apr",  week:"w1",
+      origTherapist:"Dr Marcus Lee",   origLeave:true,
+      reason:"leave",    reasonLabel:"Therapist on leave",
+      therapistKey:"", slotTime:"", saved:false },
+    { id:6, patient:"Mr Lee Chong Wei",  service:"DRP – Physio",
+      series:"Every Thu 14:00–15:00", dueDate:"Thu 9 Apr",  week:"w1",
+      origTherapist:"Dr Marcus Lee",   origLeave:true,
+      reason:"leave",    reasonLabel:"Therapist on leave",
+      therapistKey:"", slotTime:"", saved:false },
+    { id:7, patient:"Mdm Chen Mei Ling", service:"Home Therapy – ST",
+      series:"Every Mon 11:00–12:00", dueDate:"Mon 6 Apr",  week:"w1",
+      origTherapist:"Dr Wei Chen",     origLeave:false,
+      reason:"no-match", reasonLabel:"No therapist available",
+      therapistKey:"", slotTime:"", saved:false },
+    { id:8, patient:"Mr Wong Fook Seng", service:"CREST Mental Health",
+      series:"Every Thu 13:00–14:00", dueDate:"Thu 9 Apr",  week:"w1",
+      origTherapist:"Dr Angela Lim",   origLeave:false,
+      reason:"taken",    reasonLabel:"Slot already taken",
+      therapistKey:"", slotTime:"", saved:false },
+    { id:9, patient:"Mdm Ng Bee Lian",   service:"Integrated Home Care",
+      series:"Every Fri 14:00–15:00", dueDate:"Fri 10 Apr", week:"w1",
+      origTherapist:"Dr Wei Chen",     origLeave:false,
+      reason:"no-match", reasonLabel:"No therapist available",
+      therapistKey:"", slotTime:"", saved:false },
+  ];
+
+  function reasonBadge(reason, label) {
+    const cls = reason === 'leave' ? 'reason-leave' : reason === 'taken' ? 'reason-taken' : reason === 'no-match' ? 'reason-no-match' : 'reason-no-slot';
+    const icon = reason === 'leave' ? '🏖️' : reason === 'taken' ? '🔒' : reason === 'no-match' ? '❓' : '⚠️';
+    return `<span class="reason-chip ${cls}">${icon} ${label}</span>`;
+  }
+
+  function origTherapistCell(name, isLeave) {
+    const cls = name.includes('Angela')?'angela':name.includes('Marcus')?'marcus':name.includes('Janice')?'janice':'wei';
+    if (isLeave) return `<span class="therapist-tag therapist-leave">${name}</span><br><span style="font-size:10px;color:#dc2626;margin-top:2px;display:inline-block;">On Leave</span>`;
+    return `<span class="therapist-tag therapist-${cls}">${name}</span>`;
+  }
+
+  function buildTherapistDropdown(appt) {
+    const list = therapistsOnDate[appt.dueDate] || [];
+    if (!list.length) return `<span style="font-size:11.5px;color:#dc2626;">No therapist available on this date</span>`;
+    let opts = `<option value="">— Choose therapist —</option>`;
+    list.forEach(t => {
+      opts += `<option value="${t.key}" ${appt.therapistKey === t.key ? 'selected' : ''}>${t.label}</option>`;
+    });
+    return `<select class="slot-select ${appt.therapistKey ? 'has-value' : ''}" onchange="onTherapistPick(this, ${appt.id})" ${appt.saved ? 'disabled' : ''}>${opts}</select>`;
+  }
+
+  function buildTimeslotDropdown(appt) {
+    if (!appt.therapistKey) {
+      return `<span style="font-size:11px;color:#9ca3af;">← Pick therapist first</span>`;
+    }
+    const slots = slotsForTherapist[`${appt.dueDate}|${appt.therapistKey}`] || [];
+    if (!slots.length) {
+      return `<span style="font-size:11.5px;color:#dc2626;">No open slots for this therapist</span>`;
+    }
+    let opts = `<option value="">— Choose timeslot —</option>`;
+    slots.forEach(s => {
+      opts += `<option value="${s}" ${appt.slotTime === s ? 'selected' : ''}>${s}</option>`;
+    });
+    return `<select class="slot-select ${appt.slotTime ? 'has-value' : ''}" onchange="onSlotPick(this, ${appt.id})" ${appt.saved ? 'disabled' : ''}>${opts}</select>`;
+  }
+
+  function renderTable() {
+    const patientFilter = document.getElementById("filter-patient").value;
+    const weekFilter    = document.getElementById("filter-week").value;
+    const statusFilter  = document.getElementById("filter-status").value;
+
+    const tbody = document.getElementById("slots-tbody");
+    tbody.innerHTML = "";
+    let visible = 0;
+
+    apptData.forEach((appt) => {
+      if (patientFilter && appt.patient !== patientFilter) return;
+      if (weekFilter    && appt.week !== weekFilter)       return;
+      const fullyAssigned = !!(appt.therapistKey && appt.slotTime);
+      if (statusFilter === "assigned" && !fullyAssigned) return;
+      if (statusFilter === "pending"  &&  fullyAssigned) return;
+
+      visible++;
+      const tr = document.createElement("tr");
+      if (fullyAssigned) tr.classList.add("row-assigned");
+
+      const statusBadge = appt.saved
+        ? `<span class="badge badge-assigned">✅ Saved</span>`
+        : fullyAssigned
+          ? `<span class="badge badge-assigned">✓ Assigned</span>`
+          : appt.therapistKey
+            ? `<span class="badge" style="background:#fef3c7;color:#d97706;">⏳ Pick slot</span>`
+            : `<span class="badge badge-unassigned">— Pending</span>`;
+
+      tr.innerHTML = `
+        <td style="color:#9ca3af;font-weight:700;font-size:12px;">${appt.id}</td>
+        <td>
+          <span class="patient-name">${appt.patient}</span>
+          <span class="service-tag">${appt.service}</span>
+        </td>
+        <td class="col-series">${appt.series}</td>
+        <td class="col-date">${appt.dueDate}</td>
+        <td>
+          ${origTherapistCell(appt.origTherapist, appt.origLeave)}
+          <div style="margin-top:4px;">${reasonBadge(appt.reason, appt.reasonLabel)}</div>
+        </td>
+        <td>${buildTherapistDropdown(appt)}</td>
+        <td>${buildTimeslotDropdown(appt)}</td>
+        <td>${statusBadge}</td>
+        <td>
+          <button class="btn-save-row ${appt.saved ? 'saved' : ''}" onclick="saveRow(${appt.id})"
+            ${appt.saved || !fullyAssigned ? 'disabled' : ''}>
+            ${appt.saved ? '✓ Saved' : 'Save'}
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById("appt-count-badge").textContent = `${visible} appointments`;
+    updateProgress();
+  }
+
+  function onTherapistPick(sel, id) {
+    const appt = apptData.find(a => a.id === id);
+    appt.therapistKey = sel.value;
+    appt.slotTime = ''; // reset timeslot when therapist changes
+    appt.saved = false;
+    renderTable();
+  }
+
+  function onSlotPick(sel, id) {
+    const appt = apptData.find(a => a.id === id);
+    appt.slotTime = sel.value;
+    appt.saved = false;
+    renderTable();
+  }
+
+  function saveRow(id) {
+    const appt = apptData.find(a => a.id === id);
+    if (!appt.therapistKey || !appt.slotTime) {
+      showToast("⚠️ Please select both a therapist and timeslot before saving.", true);
+      return;
+    }
+    appt.saved = true;
+    renderTable();
+    const t = (therapistsOnDate[appt.dueDate] || []).find(t => t.key === appt.therapistKey);
+    showToast(`✅ ${appt.patient} → ${t ? t.label : appt.therapistKey} at ${appt.slotTime} on ${appt.dueDate}`);
+  }
+
+  function saveAll() {
+    let count = 0;
+    apptData.forEach(a => {
+      if (a.therapistKey && a.slotTime && !a.saved) { a.saved = true; count++; }
+    });
+    renderTable();
+    if (count) showToast(`✅ ${count} appointment(s) saved for April 2026!`);
+    else showToast("⚠️ No complete assignments to save yet.", true);
+  }
+
+  function updateProgress() {
+    const assigned = apptData.filter(a => !!(a.therapistKey && a.slotTime)).length;
+    const saved    = apptData.filter(a => a.saved).length;
+    const total    = apptData.length;
+    const pct      = Math.round((assigned / total) * 100);
+    document.getElementById("main-progress").style.width = pct + "%";
+    document.getElementById("progress-pct-label").textContent = `${assigned} / ${total} assigned`;
+    document.getElementById("cnt-assigned").textContent = assigned;
+    document.getElementById("cnt-pending").textContent  = total - assigned;
+    document.getElementById("cnt-saved").textContent    = saved;
+  }
+
+  function applyFilters() { renderTable(); }
+  function clearFilters() {
+    document.getElementById("filter-patient").value = "";
+    document.getElementById("filter-week").value    = "";
+    document.getElementById("filter-status").value  = "";
+    renderTable();
+  }
+
+  function showToast(msg, warn) {
+    const toast = document.getElementById("toast");
+    document.getElementById("toast-msg").textContent = msg;
+    toast.style.background = warn ? "#7c2d12" : "#1a2e2c";
+    toast.classList.add("show");
+    toast.style.display = "flex";
+    setTimeout(() => { toast.classList.remove("show"); toast.style.display = "none"; }, 3500);
+  }
+
+  renderTable();
+</script>
+</body>
+</html>

@@ -60,16 +60,14 @@
     .mini-cal-card { background: white; border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 14px 16px; position: sticky; top: 56px; }
     .mini-cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
     .mini-cal-title { font-size: 13px; font-weight: 700; color: var(--text); }
-    .mini-cal-nav { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 2px 5px; border-radius: 6px; }
-    .mini-cal-nav:hover { background: var(--primary-light); color: var(--primary); }
+    .mini-cal-nav { background: none; border: none; color: var(--muted); cursor: default; font-size: 15px; padding: 2px 5px; border-radius: 6px; opacity: 0.4; pointer-events: none; }
     .mini-cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
     .mini-cal-dow { font-size: 9.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); text-align: center; padding: 2px 0 5px; }
     .mini-cal-day {
       aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      font-size: 11px; border-radius: 7px; cursor: pointer; position: relative; gap: 1px;
-      transition: background 0.12s;
+      font-size: 11px; border-radius: 7px; cursor: default; position: relative; gap: 1px;
+      pointer-events: none;
     }
-    .mini-cal-day:hover:not(.empty):not(.other-month) { background: var(--primary-light); color: var(--primary); }
     .mini-cal-day.today { background: var(--primary); color: white; font-weight: 700; }
     .mini-cal-day.selected { background: var(--primary-light); color: var(--primary); font-weight: 700; border: 1.5px solid var(--primary); }
     .mini-cal-day.other-month { color: #cbd5e1; cursor: default; }
@@ -338,6 +336,8 @@
   .nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
   .nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; cursor: pointer; }
   .nav-sidebar-nav { flex: 1; padding: 4px 0; }
+    .nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+
   .nav-sidebar-link {
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 12px; color: rgba(255,255,255,0.68);
@@ -390,13 +390,19 @@
     <div class="nav-sidebar-role">Enterprise Admin ▾</div>
   </div>
   <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
     <a href="coordinator-dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
     <a href="timeslot_scheduler_mockup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
-    <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
     <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
     <a href="appointments.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
     <a href="recurring-edit.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔄</span><span>Recurring</span></span><span class="nav-chevron">‹</span></a>
     <a href="therapist-change.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔀</span><span>Change Therapist</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage1-automation.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🤖</span><span>Auto-fill (Stage 1)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage2-manual.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>✏️</span><span>Manual Fill (Stage 2)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="conflicts.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚠️</span><span>Conflicts</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🗺️</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
   </nav>
 </aside>
 <div class="main-wrapper">
@@ -1041,9 +1047,12 @@
   <div class="appt-sidebar" style="grid-column:2;grid-row:3/7;padding-top:0;">
     <div class="mini-cal-card">
       <div class="mini-cal-header">
-        <button class="mini-cal-nav" onclick="miniCalNav(-1)">‹</button>
-        <span class="mini-cal-title" id="miniCalTitle">April 2026</span>
-        <button class="mini-cal-nav" onclick="miniCalNav(1)">›</button>
+        <button class="mini-cal-nav" disabled>‹</button>
+        <div style="text-align:center;">
+          <span class="mini-cal-title" id="miniCalTitle">April 2026</span>
+          <div style="font-size:9.5px;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-top:1px;">📅 Display Only</div>
+        </div>
+        <button class="mini-cal-nav" disabled>›</button>
       </div>
       <div class="mini-cal-grid" id="miniCalGrid"><!-- filled by JS --></div>
       <div class="mini-cal-legend">

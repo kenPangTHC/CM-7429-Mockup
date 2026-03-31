@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -283,6 +283,8 @@
   .nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
   .nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; cursor: pointer; }
   .nav-sidebar-nav { flex: 1; padding: 4px 0; }
+    .nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+
   .nav-sidebar-link {
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 12px; color: rgba(255,255,255,0.68);
@@ -324,7 +326,9 @@
   }
   .topbar-logout { color: #6b7280; font-size: 11.5px; text-decoration: none; display: flex; align-items: center; gap: 4px; }
   .topbar-logout:hover { color: #374151; }
-  .page-loaded-bar { background: #fff; border-bottom: 1px solid #f3f4f6; padding: 3px 20px; font-size: 11px; color: #9ca3af; }</style>
+  .page-loaded-bar { background: #fff; border-bottom: 1px solid #f3f4f6; padding: 3px 20px; font-size: 11px; color: #9ca3af; }
+  .day-check { padding: 5px 12px; border-radius: 99px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--muted); transition: all 0.15s; user-select: none; display: inline-block; }
+  .day-check.on { background: var(--primary); color: white; border-color: var(--primary); }</style>
 </head>
 <body>
 
@@ -335,13 +339,19 @@
     <div class="nav-sidebar-role">Enterprise Admin ▾</div>
   </div>
   <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
     <a href="coordinator-dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
     <a href="timeslot_scheduler_mockup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
-    <a href="shift-setup.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
     <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
     <a href="appointments.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="shift-setup.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
     <a href="recurring-edit.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔄</span><span>Recurring</span></span><span class="nav-chevron">‹</span></a>
     <a href="therapist-change.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔀</span><span>Change Therapist</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage1-automation.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🤖</span><span>Auto-fill (Stage 1)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage2-manual.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>✏️</span><span>Manual Fill (Stage 2)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="conflicts.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚠️</span><span>Conflicts</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🗺️</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
   </nav>
 </aside>
 <div class="main-wrapper">
@@ -364,46 +374,555 @@
     <p>Configure working hours and session durations per therapist. Shifts must be <strong>committed monthly</strong> before appointments can be booked against them.</p>
   </div>
 
-  <!-- MONTH NAVIGATOR -->
-  <div class="month-nav">
-    <button class="month-nav-arrow" onclick="prevMonth()">‹</button>
-    <div class="month-tabs">
-      <div class="month-tab" onclick="selectMonth(this,'mar')" id="month-mar">
-        <div class="month-tab-name">March 2026</div>
-        <div class="month-tab-status committed">🔒 All Committed</div>
-      </div>
-      <div class="month-tab active" onclick="selectMonth(this,'apr')" id="month-apr">
-        <div class="month-tab-name">April 2026</div>
-        <div class="month-tab-status conflict">⚠ 1 Conflict</div>
-      </div>
-      <div class="month-tab" onclick="selectMonth(this,'may')" id="month-may">
-        <div class="month-tab-name">May 2026</div>
-        <div class="month-tab-status draft">📝 3 Draft</div>
-      </div>
-      <div class="month-tab" onclick="selectMonth(this,'jun')" id="month-jun">
-        <div class="month-tab-name">June 2026</div>
-        <div class="month-tab-status future">Not set</div>
-      </div>
-    </div>
-    <button class="month-nav-arrow" onclick="nextMonth()">›</button>
-  </div>
-
-  <!-- COMMIT STATUS BANNER (dynamic) -->
-  <div class="commit-banner conflict" id="commitBanner">
-    <span class="commit-banner-icon">⚠️</span>
-    <div class="commit-banner-text">
-      <div class="commit-banner-title" id="bannerTitle">April 2026 — Shifts Committed · 1 Leave Conflict</div>
-      <div class="commit-banner-desc" id="bannerDesc">Shift slots are locked for editing. Dr Marcus Lee has appointments conflicting with leave Apr 6–13. Use Change Therapist to reassign.</div>
-    </div>
-    <div class="commit-banner-actions">
-      <button class="btn btn-ghost" style="padding:8px 14px;font-size:13px;" onclick="window.location='therapist-change.html'">🔀 Reassign Appointments</button>
-      <button class="btn btn-primary" id="commitMonthBtn" style="padding:8px 16px;font-size:13px;display:none;" onclick="openCommitModal()">🔒 Commit May 2026 Shifts</button>
-    </div>
-  </div>
-
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('therapists')">Therapist Schedules</button>
+    <button class="tab-btn active" onclick="switchTab('therapists')">Commit Schedule</button>
+    <button class="tab-btn" onclick="switchTab('templates')">Date Overrides</button>
+    <button class="tab-btn" onclick="switchTab('default-templates')">Therapist Default Schedule</button>
+    <button class="tab-btn" onclick="switchTab('leave')">Leave Planning</button>
     <button class="tab-btn" onclick="switchTab('global')">Global Settings</button>
+  </div>
+
+  <!-- DEFAULT WEEKLY TEMPLATES TAB (Tier 2) -->
+  <div class="tab-panel" id="tab-default-templates">
+    <div style="display:flex;gap:16px;min-height:600px;">
+      <!-- LEFT: Therapist sidebar -->
+      <div style="width:200px;flex-shrink:0;background:white;border:1.5px solid var(--border);border-radius:16px;padding:12px;overflow-y:auto;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:4px 8px 10px;">Therapist</div>
+        <div class="therapist-item active" onclick="selectDefaultTmplTherapist(this,'angela')" style="cursor:pointer;padding:9px 10px;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#0d9488;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">AL</div>Dr Angela Lim
+        </div>
+        <div class="therapist-item" onclick="selectDefaultTmplTherapist(this,'marcus')" style="cursor:pointer;padding:9px 10px;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#f59e0b;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">ML</div>Dr Marcus Lee
+        </div>
+        <div class="therapist-item" onclick="selectDefaultTmplTherapist(this,'janice')" style="cursor:pointer;padding:9px 10px;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#7c3aed;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">JT</div>Nurse Janice Tan
+        </div>
+        <div class="therapist-item" onclick="selectDefaultTmplTherapist(this,'wei')" style="cursor:pointer;padding:9px 10px;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#2563eb;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">WC</div>Dr Wei Chen
+        </div>
+      </div>
+
+      <!-- RIGHT: Content -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:16px;overflow-y:auto;min-width:0;">
+        <!-- Info banner -->
+        <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:14px 18px;">
+          <div style="font-size:13px;font-weight:700;color:#1e3a8a;margin-bottom:4px;">📋 Tier 2 — Default Weekly Templates</div>
+          <div style="font-size:12.5px;color:#1e40af;line-height:1.6;">Each therapist's <strong>standard weekly schedule</strong>. Applied on any date where no Tier 1 date-specific override is active. Tier 1 overrides always take priority over this default.</div>
+        </div>
+
+        <!-- Dr Angela Lim -->
+        <div id="dtemplate-angela">
+          <div style="background:white;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;">
+            <div style="background:#f0fdf9;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e0f5f0;flex-wrap:wrap;gap:10px;">
+              <div>
+                <div style="font-size:15px;font-weight:700;color:var(--text);">Dr Angela Lim <span style="font-size:11px;background:#0d9488;color:white;padding:2px 8px;border-radius:99px;margin-left:6px;font-weight:600;">30-min slots</span></div>
+                <div style="font-size:12px;color:var(--muted);margin-top:3px;">Mon/Wed/Fri 09:00–14:30 · Tue/Thu 10:00–13:00 · Sat/Sun Off</div>
+              </div>
+              <button class="btn btn-secondary" style="font-size:13px;padding:7px 14px;" onclick="toggleDefaultEditForm('angela')">✏️ Edit Default Schedule</button>
+            </div>
+            <div style="padding:16px 18px;">
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Mon<br><span style="font-size:11px;font-weight:400;opacity:.9;">09:00–14:30</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Tue<br><span style="font-size:11px;font-weight:400;opacity:.9;">10:00–13:00</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Wed<br><span style="font-size:11px;font-weight:400;opacity:.9;">09:00–14:30</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Thu<br><span style="font-size:11px;font-weight:400;opacity:.9;">10:00–13:00</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Fri<br><span style="font-size:11px;font-weight:400;opacity:.9;">09:00–14:30</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:#f1f5f9;color:#94a3b8;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Sat<br><span style="font-size:11px;">Off</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:#f1f5f9;color:#94a3b8;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Sun<br><span style="font-size:11px;">Off</span></div>
+              </div>
+            </div>
+            <div id="dtemplate-angela-form" style="display:none;padding:18px;border-top:1.5px solid var(--border);background:#fafffe;">
+              <div style="font-size:13px;font-weight:700;margin-bottom:12px;">✏️ Edit Default Weekly Schedule</div>
+              <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:4px;align-items:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;padding:0 8px 6px;letter-spacing:.04em;"><span></span><span>Day–Period</span><span>Start</span><span>End</span></div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Mon <span style="font-size:10px;background:#0d9488;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Mon <span style="font-size:10px;background:#0369a1;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" value="13:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="14:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Tue <span style="font-size:10px;background:#0d9488;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" value="10:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="13:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Tue <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Wed <span style="font-size:10px;background:#0d9488;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Wed <span style="font-size:10px;background:#0369a1;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" value="13:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="14:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Thu <span style="font-size:10px;background:#0d9488;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" value="10:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="13:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Thu <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Fri <span style="font-size:10px;background:#0d9488;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Fri <span style="font-size:10px;background:#0369a1;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" value="13:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="14:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sat <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sat <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sun <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sun <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:8px 0 12px;">
+                <label style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;">Session Duration:</label>
+                <select style="border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;font-family:'Outfit',sans-serif;font-size:13px;background:white;outline:none;">
+                  <option value="15">15 minutes</option>
+                  <option value="30" selected>30 minutes</option>
+                  <option value="45">45 minutes</option>
+                  <option value="60">60 minutes</option>
+                  <option value="90">90 minutes</option>
+                </select>
+                <span style="font-size:11.5px;color:var(--muted);">per slot</span>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:10px;">
+                <button class="btn btn-ghost" onclick="toggleDefaultEditForm('angela')">Cancel</button>
+                <button class="btn btn-primary" onclick="toggleDefaultEditForm('angela');showToast('✅ Default schedule updated for Dr Angela Lim')">Save Changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dr Marcus Lee -->
+        <div id="dtemplate-marcus" style="display:none;">
+          <div style="background:white;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;">
+            <div style="background:#fffbeb;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #fde68a;flex-wrap:wrap;gap:10px;">
+              <div>
+                <div style="font-size:15px;font-weight:700;color:var(--text);">Dr Marcus Lee <span style="font-size:11px;background:#f59e0b;color:white;padding:2px 8px;border-radius:99px;margin-left:6px;font-weight:600;">30-min slots</span></div>
+                <div style="font-size:12px;color:var(--muted);margin-top:3px;">Mon–Thu 09:00–15:00 · Fri/Sat/Sun Off</div>
+              </div>
+              <button class="btn btn-secondary" style="font-size:13px;padding:7px 14px;" onclick="toggleDefaultEditForm('marcus')">✏️ Edit Default Schedule</button>
+            </div>
+            <div style="padding:16px 18px;">
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Mon<br><span style="font-size:11px;font-weight:400;opacity:.9;">09:00–15:00</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Tue<br><span style="font-size:11px;font-weight:400;opacity:.9;">09:00–15:00</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Wed<br><span style="font-size:11px;font-weight:400;opacity:.9;">09:00–15:00</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Thu<br><span style="font-size:11px;font-weight:400;opacity:.9;">09:00–15:00</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:#f1f5f9;color:#94a3b8;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Fri<br><span style="font-size:11px;">Off</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:#f1f5f9;color:#94a3b8;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Sat<br><span style="font-size:11px;">Off</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:#f1f5f9;color:#94a3b8;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Sun<br><span style="font-size:11px;">Off</span></div>
+              </div>
+            </div>
+            <div id="dtemplate-marcus-form" style="display:none;padding:18px;border-top:1.5px solid var(--border);background:#fafffe;">
+              <div style="font-size:13px;font-weight:700;margin-bottom:12px;">✏️ Edit Default Weekly Schedule</div>
+              <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:4px;align-items:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;padding:0 8px 6px;letter-spacing:.04em;"><span></span><span>Day–Period</span><span>Start</span><span>End</span></div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Mon <span style="font-size:10px;background:#0d9488;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Mon <span style="font-size:10px;background:#0369a1;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" value="13:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="15:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Tue <span style="font-size:10px;background:#0d9488;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Tue <span style="font-size:10px;background:#0369a1;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" value="13:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="15:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Wed <span style="font-size:10px;background:#0d9488;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Wed <span style="font-size:10px;background:#0369a1;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" value="13:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="15:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Thu <span style="font-size:10px;background:#0d9488;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Thu <span style="font-size:10px;background:#0369a1;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" value="13:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="15:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Fri <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Fri <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sat <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sat <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sun <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sun <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:8px 0 12px;">
+                <label style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;">Session Duration:</label>
+                <select style="border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;font-family:'Outfit',sans-serif;font-size:13px;background:white;outline:none;">
+                  <option value="15">15 minutes</option>
+                  <option value="30" selected>30 minutes</option>
+                  <option value="45">45 minutes</option>
+                  <option value="60">60 minutes</option>
+                  <option value="90">90 minutes</option>
+                </select>
+                <span style="font-size:11.5px;color:var(--muted);">per slot</span>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:10px;">
+                <button class="btn btn-ghost" onclick="toggleDefaultEditForm('marcus')">Cancel</button>
+                <button class="btn btn-primary" onclick="toggleDefaultEditForm('marcus');showToast('✅ Default schedule updated for Dr Marcus Lee')">Save Changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nurse Janice Tan -->
+        <div id="dtemplate-janice" style="display:none;">
+          <div style="background:white;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;">
+            <div style="background:#faf5ff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e9d5ff;flex-wrap:wrap;gap:10px;">
+              <div>
+                <div style="font-size:15px;font-weight:700;color:var(--text);">Nurse Janice Tan <span style="font-size:11px;background:#7c3aed;color:white;padding:2px 8px;border-radius:99px;margin-left:6px;font-weight:600;">30-min slots</span></div>
+                <div style="font-size:12px;color:var(--muted);margin-top:3px;">Mon–Thu 08:30–12:30 · Fri/Sat/Sun Off</div>
+              </div>
+              <button class="btn btn-secondary" style="font-size:13px;padding:7px 14px;" onclick="toggleDefaultEditForm('janice')">✏️ Edit Default Schedule</button>
+            </div>
+            <div style="padding:16px 18px;">
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Mon<br><span style="font-size:11px;font-weight:400;opacity:.9;">08:30–12:30</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Tue<br><span style="font-size:11px;font-weight:400;opacity:.9;">08:30–12:30</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Wed<br><span style="font-size:11px;font-weight:400;opacity:.9;">08:30–12:30</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Thu<br><span style="font-size:11px;font-weight:400;opacity:.9;">08:30–12:30</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:#f1f5f9;color:#94a3b8;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Fri<br><span style="font-size:11px;">Off</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:#f1f5f9;color:#94a3b8;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Sat<br><span style="font-size:11px;">Off</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:#f1f5f9;color:#94a3b8;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Sun<br><span style="font-size:11px;">Off</span></div>
+              </div>
+            </div>
+            <div id="dtemplate-janice-form" style="display:none;padding:18px;border-top:1.5px solid var(--border);background:#fafffe;">
+              <div style="font-size:13px;font-weight:700;margin-bottom:12px;">✏️ Edit Default Weekly Schedule</div>
+              <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:4px;align-items:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;padding:0 8px 6px;letter-spacing:.04em;"><span></span><span>Day–Period</span><span>Start</span><span>End</span></div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Mon <span style="font-size:10px;background:#0d9488;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" value="08:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Mon <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Tue <span style="font-size:10px;background:#0d9488;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" value="08:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Tue <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Wed <span style="font-size:10px;background:#0d9488;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" value="08:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Wed <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Thu <span style="font-size:10px;background:#0d9488;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" value="08:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Thu <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Fri <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Fri <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sat <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sat <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sun <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sun <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:8px 0 12px;">
+                <label style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;">Session Duration:</label>
+                <select style="border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;font-family:'Outfit',sans-serif;font-size:13px;background:white;outline:none;">
+                  <option value="15">15 minutes</option>
+                  <option value="30" selected>30 minutes</option>
+                  <option value="45">45 minutes</option>
+                  <option value="60">60 minutes</option>
+                  <option value="90">90 minutes</option>
+                </select>
+                <span style="font-size:11.5px;color:var(--muted);">per slot</span>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:10px;">
+                <button class="btn btn-ghost" onclick="toggleDefaultEditForm('janice')">Cancel</button>
+                <button class="btn btn-primary" onclick="toggleDefaultEditForm('janice');showToast('✅ Default schedule updated for Nurse Janice Tan')">Save Changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dr Wei Chen -->
+        <div id="dtemplate-wei" style="display:none;">
+          <div style="background:white;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;">
+            <div style="background:#eff6ff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #bfdbfe;flex-wrap:wrap;gap:10px;">
+              <div>
+                <div style="font-size:15px;font-weight:700;color:var(--text);">Dr Wei Chen <span style="font-size:11px;background:#2563eb;color:white;padding:2px 8px;border-radius:99px;margin-left:6px;font-weight:600;">30-min slots</span></div>
+                <div style="font-size:12px;color:var(--muted);margin-top:3px;">Mon–Fri 13:00–17:00 · Sat/Sun Off</div>
+              </div>
+              <button class="btn btn-secondary" style="font-size:13px;padding:7px 14px;" onclick="toggleDefaultEditForm('wei')">✏️ Edit Default Schedule</button>
+            </div>
+            <div style="padding:16px 18px;">
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Mon<br><span style="font-size:11px;font-weight:400;opacity:.9;">13:00–17:00</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Tue<br><span style="font-size:11px;font-weight:400;opacity:.9;">13:00–17:00</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Wed<br><span style="font-size:11px;font-weight:400;opacity:.9;">13:00–17:00</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Thu<br><span style="font-size:11px;font-weight:400;opacity:.9;">13:00–17:00</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:var(--primary);color:white;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Fri<br><span style="font-size:11px;font-weight:400;opacity:.9;">13:00–17:00</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:#f1f5f9;color:#94a3b8;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Sat<br><span style="font-size:11px;">Off</span></div>
+                <div style="padding:8px 14px;border-radius:10px;background:#f1f5f9;color:#94a3b8;font-size:12px;font-weight:600;text-align:center;min-width:76px;">Sun<br><span style="font-size:11px;">Off</span></div>
+              </div>
+            </div>
+            <div id="dtemplate-wei-form" style="display:none;padding:18px;border-top:1.5px solid var(--border);background:#fafffe;">
+              <div style="font-size:13px;font-weight:700;margin-bottom:12px;">✏️ Edit Default Weekly Schedule</div>
+              <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:4px;align-items:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;padding:0 8px 6px;letter-spacing:.04em;"><span></span><span>Day–Period</span><span>Start</span><span>End</span></div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Mon <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Mon <span style="font-size:10px;background:#0369a1;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" value="13:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="17:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Tue <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Tue <span style="font-size:10px;background:#0369a1;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" value="13:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="17:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Wed <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Wed <span style="font-size:10px;background:#0369a1;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" value="13:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="17:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Thu <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Thu <span style="font-size:10px;background:#0369a1;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" value="13:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="17:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Fri <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:white;border-radius:8px;border:1px solid var(--border);"><input type="checkbox" checked><span style="font-size:13px;font-weight:600;">Fri <span style="font-size:10px;background:#0369a1;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" value="13:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"><input type="time" value="17:00" style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sat <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sat <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sun <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">AM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+                <div style="display:grid;grid-template-columns:24px 62px 1fr 1fr;gap:6px;align-items:center;padding:7px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.55;"><input type="checkbox"><span style="font-size:13px;font-weight:600;color:var(--muted);">Sun <span style="font-size:10px;background:#94a3b8;color:white;padding:1px 5px;border-radius:4px;">PM</span></span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:'Outfit',sans-serif;font-size:13px;background:#f1f5f9;"></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:8px 0 12px;">
+                <label style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;">Session Duration:</label>
+                <select style="border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;font-family:'Outfit',sans-serif;font-size:13px;background:white;outline:none;">
+                  <option value="15">15 minutes</option>
+                  <option value="30" selected>30 minutes</option>
+                  <option value="45">45 minutes</option>
+                  <option value="60">60 minutes</option>
+                  <option value="90">90 minutes</option>
+                </select>
+                <span style="font-size:11.5px;color:var(--muted);">per slot</span>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:10px;">
+                <button class="btn btn-ghost" onclick="toggleDefaultEditForm('wei')">Cancel</button>
+                <button class="btn btn-primary" onclick="toggleDefaultEditForm('wei');showToast('✅ Default schedule updated for Dr Wei Chen')">Save Changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHEDULE TEMPLATES TAB -->
+  <div class="tab-panel" id="tab-templates">
+    <div style="display:flex;gap:16px;height:100%;min-height:600px;">
+      <!-- LEFT: Therapist list -->
+      <div style="width:200px;flex-shrink:0;background:white;border:1.5px solid var(--border);border-radius:16px;padding:12px;overflow-y:auto;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:4px 8px 10px;">Therapist</div>
+        <div class="therapist-item active" onclick="selectTemplateTherapist(this,'angela')" style="cursor:pointer;padding:9px 10px;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#0d9488;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">AL</div>Dr Angela Lim
+        </div>
+        <div class="therapist-item" onclick="selectTemplateTherapist(this,'marcus')" style="cursor:pointer;padding:9px 10px;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#f59e0b;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">ML</div>Dr Marcus Lee
+        </div>
+        <div class="therapist-item" onclick="selectTemplateTherapist(this,'janice')" style="cursor:pointer;padding:9px 10px;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#7c3aed;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">JT</div>Nurse Janice Tan
+        </div>
+        <div class="therapist-item" onclick="selectTemplateTherapist(this,'wei')" style="cursor:pointer;padding:9px 10px;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#2563eb;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">WC</div>Dr Wei Chen
+        </div>
+      </div>
+
+      <!-- RIGHT: Template tiers -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:16px;overflow-y:auto;">
+
+        <!-- Tier legend -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;">⚡ Schedule Template Priority</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;">
+            <span style="padding:4px 12px;background:#0d9488;color:white;border-radius:99px;font-weight:700;">1 — Date-Specific Override</span>
+            <span style="font-size:18px;color:var(--muted);">›</span>
+            <span style="padding:4px 12px;background:#2563eb;color:white;border-radius:99px;font-weight:700;">2 — Therapist Default</span>
+            <span style="font-size:18px;color:var(--muted);">›</span>
+            <span style="padding:4px 12px;background:#64748b;color:white;border-radius:99px;font-weight:700;">3 — Global Settings</span>
+          </div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:8px;">The highest matching tier is applied when generating slots for a given date.</div>
+        </div>
+
+        <!-- Tier 1: Date-Specific Templates -->
+        <div style="background:white;border:1.5px solid #0d9488;border-radius:14px;overflow:hidden;">
+          <div style="background:#f0fdf9;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e0f5f0;">
+            <div>
+              <span style="font-size:12px;font-weight:700;background:#0d9488;color:white;padding:2px 10px;border-radius:99px;margin-right:8px;">Tier 1</span>
+              <span style="font-size:14px;font-weight:700;color:var(--text);">Date-Specific Override</span>
+              <div style="font-size:11.5px;color:var(--muted);margin-top:3px;">Applies only within the specified date range. Overrides all lower tiers.</div>
+            </div>
+            <button class="btn btn-primary" style="padding:7px 14px;font-size:13px;" onclick="showAddTemplateModal()">+ Add Override</button>
+          </div>
+          <div style="padding:14px 18px;">
+            <!-- Template row 1 -->
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:8px;">
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:700;color:var(--text);">School Holiday Schedule</div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">📅 Jun 1 – Jun 30 2026 &nbsp;·&nbsp; Mon/Wed/Fri 09:00–13:00, shorter 30-min slots</div>
+              </div>
+              <div style="display:flex;gap:4px;">
+                <span style="padding:2px 10px;background:#dcfce7;color:#166534;border-radius:99px;font-size:11px;font-weight:700;">Active</span>
+              </div>
+              <div style="display:flex;gap:6px;">
+                <button style="padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:white;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;" onclick="showAddTemplateModal()">Edit</button>
+                <button style="padding:5px 10px;border-radius:8px;border:1px solid #fecaca;background:white;color:#dc2626;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;">Delete</button>
+              </div>
+            </div>
+            <!-- Template row 2 -->
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:700;color:var(--text);">CNY Reduced Hours</div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">📅 Jan 28 – Feb 5 2026 &nbsp;·&nbsp; Tue/Thu only 10:00–13:00</div>
+              </div>
+              <div style="display:flex;gap:4px;">
+                <span style="padding:2px 10px;background:#fef3c7;color:#92400e;border-radius:99px;font-size:11px;font-weight:700;">Upcoming</span>
+              </div>
+              <div style="display:flex;gap:6px;">
+                <button style="padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:white;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;" onclick="showAddTemplateModal()">Edit</button>
+                <button style="padding:5px 10px;border-radius:8px;border:1px solid #fecaca;background:white;color:#dc2626;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tier 2: Default Schedule -->
+        <div style="background:white;border:1.5px solid #2563eb;border-radius:14px;overflow:hidden;">
+          <div style="background:#eff6ff;padding:14px 18px;border-bottom:1px solid #dbeafe;">
+            <span style="font-size:12px;font-weight:700;background:#2563eb;color:white;padding:2px 10px;border-radius:99px;margin-right:8px;">Tier 2</span>
+            <span style="font-size:14px;font-weight:700;color:var(--text);">Therapist Default Schedule</span>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:3px;">Used when no Tier 1 override applies. Set in the Therapist Schedules tab.</div>
+          </div>
+          <div style="padding:14px 18px;display:flex;align-items:center;gap:12px;">
+            <div style="flex:1;font-size:13px;color:var(--text);">Mon/Wed/Fri 09:00–14:30 · 30 min slots · Consultation Room A</div>
+            <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px;" onclick="switchTab('default-templates')">✏️ Edit Therapist Default Schedule →</button>
+          </div>
+        </div>
+
+        <!-- Tier 3: Global Fallback -->
+        <div style="background:white;border:1.5px solid #94a3b8;border-radius:14px;overflow:hidden;opacity:0.75;">
+          <div style="background:#f8fafc;padding:14px 18px;border-bottom:1px solid #e2e8f0;">
+            <span style="font-size:12px;font-weight:700;background:#64748b;color:white;padding:2px 10px;border-radius:99px;margin-right:8px;">Tier 3</span>
+            <span style="font-size:14px;font-weight:700;color:var(--text);">Global Settings Fallback</span>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:3px;">Used when neither Tier 1 nor Tier 2 is defined. Managed in Global Settings tab.</div>
+          </div>
+          <div style="padding:14px 18px;display:flex;align-items:center;gap:12px;">
+            <div style="flex:1;font-size:13px;color:var(--text);">Mon–Fri 08:30–17:00 · 30 min default slots</div>
+            <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px;" onclick="switchTab('global')">Edit in Global Settings →</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD/EDIT TEMPLATE MODAL -->
+  <div id="templateModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;" onclick="if(event.target===this)closeTemplateModal()">
+    <div style="background:white;border-radius:18px;padding:28px;max-width:480px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.25);">
+      <h3 style="margin:0 0 20px;font-size:17px;font-weight:800;">Add Date-Specific Override</h3>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="field"><label>Template Name</label><input type="text" placeholder="e.g. School Holiday Schedule" style="width:100%;box-sizing:border-box;" /></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field"><label>Start Date</label><input type="date" value="2026-06-01" /></div>
+          <div class="field"><label>End Date</label><input type="date" value="2026-06-30" /></div>
+        </div>
+        <div class="field">
+          <label>Active Days</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <span class="day-check on" onclick="this.classList.toggle('on')" data-day="Mon">Mon</span>
+            <span class="day-check" onclick="this.classList.toggle('on')" data-day="Tue">Tue</span>
+            <span class="day-check on" onclick="this.classList.toggle('on')" data-day="Wed">Wed</span>
+            <span class="day-check" onclick="this.classList.toggle('on')" data-day="Thu">Thu</span>
+            <span class="day-check on" onclick="this.classList.toggle('on')" data-day="Fri">Fri</span>
+            <span class="day-check" onclick="this.classList.toggle('on')" data-day="Sat">Sat</span>
+            <span class="day-check" onclick="this.classList.toggle('on')" data-day="Sun">Sun</span>
+          </div>
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">Weekly Time Schedule (AM / PM per day)</label>
+          <div style="display:grid;grid-template-columns:20px 70px 1fr 1fr;gap:4px;align-items:center;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;padding:0 6px 6px;letter-spacing:.04em;"><span></span><span>Period</span><span>Start</span><span>End</span></div>
+          <div style="display:flex;flex-direction:column;gap:3px;">
+            <!-- MON AM -->
+            <div style="display:grid;grid-template-columns:20px 70px 1fr 1fr;gap:6px;align-items:center;padding:5px 8px;background:#f0fdf9;border-radius:8px;border:1px solid #a7f3d0;"><input type="checkbox" checked><span style="font-size:12px;font-weight:700;">Mon AM</span><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;"></div>
+            <!-- MON PM -->
+            <div style="display:grid;grid-template-columns:20px 70px 1fr 1fr;gap:6px;align-items:center;padding:5px 8px;background:#f0fdf9;border-radius:8px;border:1px solid #a7f3d0;"><input type="checkbox" checked><span style="font-size:12px;font-weight:700;">Mon PM</span><input type="time" value="13:30" style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;"><input type="time" value="17:00" style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;"></div>
+            <!-- TUE AM -->
+            <div style="display:grid;grid-template-columns:20px 70px 1fr 1fr;gap:6px;align-items:center;padding:5px 8px;background:#f0fdf9;border-radius:8px;border:1px solid #a7f3d0;"><input type="checkbox" checked><span style="font-size:12px;font-weight:700;">Tue AM</span><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;"></div>
+            <!-- TUE PM -->
+            <div style="display:grid;grid-template-columns:20px 70px 1fr 1fr;gap:6px;align-items:center;padding:5px 8px;background:#f0fdf9;border-radius:8px;border:1px solid #a7f3d0;"><input type="checkbox" checked><span style="font-size:12px;font-weight:700;">Tue PM</span><input type="time" value="13:30" style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;"><input type="time" value="17:00" style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;"></div>
+            <!-- WED AM -->
+            <div style="display:grid;grid-template-columns:20px 70px 1fr 1fr;gap:6px;align-items:center;padding:5px 8px;background:#f0fdf9;border-radius:8px;border:1px solid #a7f3d0;"><input type="checkbox" checked><span style="font-size:12px;font-weight:700;">Wed AM</span><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;"></div>
+            <!-- WED PM -->
+            <div style="display:grid;grid-template-columns:20px 70px 1fr 1fr;gap:6px;align-items:center;padding:5px 8px;background:#f0fdf9;border-radius:8px;border:1px solid #a7f3d0;"><input type="checkbox" checked><span style="font-size:12px;font-weight:700;">Wed PM</span><input type="time" value="13:30" style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;"><input type="time" value="17:00" style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;"></div>
+            <!-- THU AM -->
+            <div style="display:grid;grid-template-columns:20px 70px 1fr 1fr;gap:6px;align-items:center;padding:5px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.5;"><input type="checkbox"><span style="font-size:12px;font-weight:600;color:var(--muted);">Thu AM</span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;background:#f1f5f9;"></div>
+            <!-- THU PM -->
+            <div style="display:grid;grid-template-columns:20px 70px 1fr 1fr;gap:6px;align-items:center;padding:5px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.5;"><input type="checkbox"><span style="font-size:12px;font-weight:600;color:var(--muted);">Thu PM</span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;background:#f1f5f9;"></div>
+            <!-- FRI AM -->
+            <div style="display:grid;grid-template-columns:20px 70px 1fr 1fr;gap:6px;align-items:center;padding:5px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.5;"><input type="checkbox"><span style="font-size:12px;font-weight:600;color:var(--muted);">Fri AM</span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;background:#f1f5f9;"></div>
+            <!-- FRI PM -->
+            <div style="display:grid;grid-template-columns:20px 70px 1fr 1fr;gap:6px;align-items:center;padding:5px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.5;"><input type="checkbox"><span style="font-size:12px;font-weight:600;color:var(--muted);">Fri PM</span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;background:#f1f5f9;"></div>
+            <!-- SAT AM -->
+            <div style="display:grid;grid-template-columns:20px 70px 1fr 1fr;gap:6px;align-items:center;padding:5px 8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;opacity:.5;"><input type="checkbox"><span style="font-size:12px;font-weight:600;color:var(--muted);">Sat AM</span><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;background:#f1f5f9;"><input type="time" disabled style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-family:'Outfit',sans-serif;font-size:12px;background:#f1f5f9;"></div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px;">Break time = gap between AM end and PM start (e.g. 12:30–13:30 = 1hr break)</div>
+        </div>
+        <!-- Session Duration for this override -->
+        <div class="field">
+          <label>Session Duration</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+            <select style="border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:'Outfit',sans-serif;font-size:13px;background:white;outline:none;">
+              <option value="">Use therapist default</option>
+              <option value="15">15 minutes</option>
+              <option value="30" selected>30 minutes</option>
+              <option value="45">45 minutes</option>
+              <option value="60">60 minutes</option>
+              <option value="90">90 minutes</option>
+            </select>
+            <span style="font-size:12px;color:var(--muted);">Overrides therapist default for this period</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px;">
+        <button class="btn btn-ghost" onclick="closeTemplateModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="closeTemplateModal()">Save Override</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEAVE PLANNING TAB -->
+  <div class="tab-panel" id="tab-leave">
+    <div style="display:flex;gap:16px;min-height:600px;">
+      <!-- LEFT: Therapist list -->
+      <div style="width:200px;flex-shrink:0;background:white;border:1.5px solid var(--border);border-radius:16px;padding:12px;overflow-y:auto;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:4px 8px 10px;">Therapist</div>
+        <div class="therapist-item active" onclick="selectLeaveTherapist(this,'angela')" style="cursor:pointer;padding:9px 10px;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#0d9488;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">AL</div>Dr Angela Lim
+        </div>
+        <div class="therapist-item" onclick="selectLeaveTherapist(this,'marcus')" style="cursor:pointer;padding:9px 10px;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#f59e0b;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">ML</div>Dr Marcus Lee
+        </div>
+        <div class="therapist-item" onclick="selectLeaveTherapist(this,'janice')" style="cursor:pointer;padding:9px 10px;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#7c3aed;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">JT</div>Nurse Janice Tan
+        </div>
+        <div class="therapist-item" onclick="selectLeaveTherapist(this,'wei')" style="cursor:pointer;padding:9px 10px;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#2563eb;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">WC</div>Dr Wei Chen
+        </div>
+      </div>
+
+      <!-- RIGHT: Leave calendar -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:16px;overflow-y:auto;">
+
+        <!-- Header bar -->
+        <div style="background:white;border:1.5px solid var(--border);border-radius:14px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:16px;font-weight:800;color:var(--text);" id="leaveTherapistName">Dr Angela Lim</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:3px;">Annual Leave Planning · 2026 &nbsp;·&nbsp; <span style="color:#16a34a;font-weight:700;">12 days remaining of 18</span></div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:5px;font-size:12px;"><span style="width:12px;height:12px;background:#ef4444;border-radius:3px;display:inline-block;"></span>Annual Leave</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:12px;"><span style="width:12px;height:12px;background:#f59e0b;border-radius:3px;display:inline-block;"></span>Medical Leave</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:12px;"><span style="width:12px;height:12px;background:#8b5cf6;border-radius:3px;display:inline-block;"></span>Emergency Leave</div>
+            <button class="btn btn-primary" style="padding:7px 14px;font-size:13px;" onclick="showAddLeaveModal()">+ Add Leave</button>
+          </div>
+        </div>
+
+        <!-- Leave summary cards -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <div style="background:white;border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;text-align:center;">
+            <div style="font-size:22px;font-weight:800;color:#ef4444;">6</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px;">Annual Leave taken</div>
+          </div>
+          <div style="background:white;border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;text-align:center;">
+            <div style="font-size:22px;font-weight:800;color:#f59e0b;">2</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px;">Medical Leave taken</div>
+          </div>
+          <div style="background:white;border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;text-align:center;">
+            <div style="font-size:22px;font-weight:800;color:#8b5cf6;">0</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px;">Emergency Leave</div>
+          </div>
+          <div style="background:white;border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;text-align:center;">
+            <div style="font-size:22px;font-weight:800;color:#0d9488;">12</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px;">AL days remaining</div>
+          </div>
+        </div>
+
+        <!-- 12-month mini-calendar grid -->
+        <div style="background:white;border:1.5px solid var(--border);border-radius:14px;padding:18px 20px;">
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;">2026 Leave Calendar</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;" id="leaveCalendarGrid">
+            <!-- JS renders months here -->
+          </div>
+        </div>
+
+        <!-- Leave list -->
+        <div style="background:white;border:1.5px solid var(--border);border-radius:14px;padding:18px 20px;">
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;">Leave Applications</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fef2f2;border-radius:10px;border:1px solid #fecaca;">
+              <span style="width:10px;height:10px;background:#ef4444;border-radius:50%;flex-shrink:0;"></span>
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:700;color:var(--text);">Annual Leave</div>
+                <div style="font-size:11.5px;color:var(--muted);">Apr 6 – Apr 13, 2026 (6 working days) · Approved</div>
+              </div>
+              <span style="padding:2px 10px;background:#dcfce7;color:#166534;border-radius:99px;font-size:11px;font-weight:700;">Approved</span>
+              <button style="padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:white;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;">Edit</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fffbeb;border-radius:10px;border:1px solid #fed7aa;">
+              <span style="width:10px;height:10px;background:#f59e0b;border-radius:50%;flex-shrink:0;"></span>
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:700;color:var(--text);">Medical Leave</div>
+                <div style="font-size:11.5px;color:var(--muted);">Feb 10 – Feb 11, 2026 (2 days) · Approved</div>
+              </div>
+              <span style="padding:2px 10px;background:#dcfce7;color:#166534;border-radius:99px;font-size:11px;font-weight:700;">Approved</span>
+              <button style="padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:white;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;">Edit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- GLOBAL SETTINGS TAB -->
@@ -436,15 +955,29 @@
         </div>
       </div>
 
-      <div class="setting-group">
+            <div class="setting-group" style="grid-column:1/-1;">
         <h3><span class="icon">🕐</span> Global Working Hours</h3>
-        <div class="field">
-          <label>Default Start Time</label>
-          <input type="time" value="08:00" />
-        </div>
-        <div class="field">
-          <label>Default End Time</label>
-          <input type="time" value="18:00" />
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+            <thead>
+              <tr style="background:#f8fafc;border-bottom:1.5px solid var(--border);">
+                <th style="text-align:left;padding:7px 10px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Day</th>
+                <th style="text-align:left;padding:7px 10px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">AM Start</th>
+                <th style="text-align:left;padding:7px 10px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">AM End</th>
+                <th style="text-align:left;padding:7px 10px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">PM Start</th>
+                <th style="text-align:left;padding:7px 10px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">PM End</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:7px 10px;font-weight:600;">Mon</td><td style="padding:7px 10px;"><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="13:30" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="17:00" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td></tr>
+              <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:7px 10px;font-weight:600;">Tue</td><td style="padding:7px 10px;"><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="13:30" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="17:00" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td></tr>
+              <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:7px 10px;font-weight:600;">Wed</td><td style="padding:7px 10px;"><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="13:30" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="17:00" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td></tr>
+              <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:7px 10px;font-weight:600;">Thu</td><td style="padding:7px 10px;"><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="13:30" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="17:00" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td></tr>
+              <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:7px 10px;font-weight:600;">Fri</td><td style="padding:7px 10px;"><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="13:30" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="17:00" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td></tr>
+              <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:7px 10px;font-weight:600;">Sat</td><td style="padding:7px 10px;"><input type="time" value="09:00" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><input type="time" value="12:30" style="border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:12px;width:110px;"></td><td style="padding:7px 10px;"><span style="color:#94a3b8;font-style:italic;">—</span></td><td style="padding:7px 10px;"><span style="color:#94a3b8;font-style:italic;">—</span></td></tr>
+              <tr style="background:#f8fafc;"><td style="padding:7px 10px;font-weight:600;color:#94a3b8;">Sun</td><td colspan="4" style="padding:7px 10px;color:#94a3b8;font-style:italic;">Off</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -456,6 +989,44 @@
 
   <!-- THERAPIST SCHEDULES TAB -->
   <div class="tab-panel active" id="tab-therapists">
+
+  <!-- MONTH NAVIGATOR -->
+  <div class="month-nav" style="margin-bottom:16px;">
+    <button class="month-nav-arrow" onclick="prevMonth()">‹</button>
+    <div class="month-tabs">
+      <div class="month-tab" onclick="selectMonth(this,'mar')" id="month-mar">
+        <div class="month-tab-name">March 2026</div>
+        <div class="month-tab-status committed">🔒 All Committed</div>
+      </div>
+      <div class="month-tab active" onclick="selectMonth(this,'apr')" id="month-apr">
+        <div class="month-tab-name">April 2026</div>
+        <div class="month-tab-status conflict">⚠ 1 Conflict</div>
+      </div>
+      <div class="month-tab" onclick="selectMonth(this,'may')" id="month-may">
+        <div class="month-tab-name">May 2026</div>
+        <div class="month-tab-status draft">📝 3 Draft</div>
+      </div>
+      <div class="month-tab" onclick="selectMonth(this,'jun')" id="month-jun">
+        <div class="month-tab-name">June 2026</div>
+        <div class="month-tab-status future">Not set</div>
+      </div>
+    </div>
+    <button class="month-nav-arrow" onclick="nextMonth()">›</button>
+  </div>
+
+  <!-- COMMIT STATUS BANNER (dynamic) -->
+  <div class="commit-banner conflict" id="commitBanner" style="margin-bottom:16px;">
+    <span class="commit-banner-icon">⚠️</span>
+    <div class="commit-banner-text">
+      <div class="commit-banner-title" id="bannerTitle">April 2026 — Shifts Committed · 1 Leave Conflict</div>
+      <div class="commit-banner-desc" id="bannerDesc">Shift slots are locked for editing. Dr Marcus Lee has appointments conflicting with leave Apr 6–13. Use Change Therapist to reassign.</div>
+    </div>
+    <div class="commit-banner-actions">
+      <button class="btn btn-ghost" style="padding:8px 14px;font-size:13px;" onclick="window.location='therapist-change.html'">🔀 Reassign Appointments</button>
+      <button class="btn btn-primary" id="commitMonthBtn" style="padding:8px 16px;font-size:13px;display:none;" onclick="openCommitModal()">🔒 Commit May 2026 Shifts</button>
+    </div>
+  </div>
+
     <div class="therapist-layout">
       <!-- SIDEBAR -->
       <div class="therapist-sidebar">
@@ -504,448 +1075,80 @@
             <span class="t-commit-badge committed">🔒 Committed</span>
           </div>
         </div>
-      </div>
-
-      <!-- EDITOR -->
-      <div class="editor-panel" id="editorPanel">
-        <!-- Dr Angela Lim - default shown -->
-        <div id="editor-angela">
-          <div class="editor-panel editor-section locked" id="editorPanelAngela">
-          <div class="editor-header">
-            <div class="editor-therapist-info">
-              <div class="t-avatar" style="background:#0d9488;color:white;width:46px;height:46px;font-size:16px;">AL</div>
-              <div>
-                <div class="editor-title">Dr Angela Lim</div>
-                <div class="editor-subtitle">Occupational Therapy · Staff ID: T-0041</div>
-              </div>
-            </div>
-            <span class="badge badge-locked">🔒 April 2026 Committed</span>
-          </div>
-
-          <!-- LOCKED BANNER -->
-          <div class="lock-overlay-banner">
-            <span class="lock-icon">🔒</span>
-            April 2026 shifts are committed and locked for editing.
-            <span class="lock-desc">Only leave periods can be added. To change shift slots, commit a new month first.</span>
-          </div>
-
-          <div class="duration-row">
-            <label>Session Duration:</label>
-            <select disabled>
-              <option selected>30 minutes</option>
-              <option>45 minutes</option>
-              <option>60 minutes</option>
-            </select>
-            <span class="override-note">Locked — set before commit</span>
-          </div>
-          <div class="week-grid">
-            <h3>Weekly Schedule Template</h3>
-            <div class="days-row">
-              <span class="day-pill on" data-day="mon">Mon</span>
-              <span class="day-pill on" data-day="tue">Tue</span>
-              <span class="day-pill on" data-day="wed">Wed</span>
-              <span class="day-pill on" data-day="thu">Thu</span>
-              <span class="day-pill on" data-day="fri">Fri</span>
-              <span class="day-pill off" data-day="sat">Sat</span>
-              <span class="day-pill off" data-day="sun">Sun</span>
-            </div>
-            <div class="day-config">
-              <div class="day-config-header">📅 Per-day Configuration</div>
-              <div class="day-row" style="background:#f8fffe;border-bottom:1px solid var(--border);padding:8px 16px;">
-                <div class="day-col-label">Day / Period</div>
-                <div class="day-col-label">Start Time</div>
-                <div class="day-col-label">End Time</div>
-                <div class="day-col-label">Status</div>
-              </div>
-              <div class="day-row am-row" data-day="mon"><div class="day-label">Mon <span class="period-tag am">AM</span></div><input type="time" value="08:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="mon"><div class="day-label">Mon <span class="period-tag pm">PM</span></div><input type="time" value="13:00"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row" data-day="tue"><div class="day-label">Tue <span class="period-tag am">AM</span></div><input type="time" value="08:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="tue"><div class="day-label">Tue <span class="period-tag pm">PM</span></div><input type="time" value="13:00"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row" data-day="wed"><div class="day-label">Wed <span class="period-tag am">AM</span></div><input type="time" value="08:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="wed"><div class="day-label">Wed <span class="period-tag pm">PM</span></div><input type="time" value="13:00"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row" data-day="thu"><div class="day-label">Thu <span class="period-tag am">AM</span></div><input type="time" value="08:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="thu"><div class="day-label">Thu <span class="period-tag pm">PM</span></div><input type="time" value="13:00"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row" data-day="fri"><div class="day-label">Fri <span class="period-tag am">AM</span></div><input type="time" value="08:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="fri"><div class="day-label">Fri <span class="period-tag pm">PM</span></div><input type="time" value="13:00"><input type="time" value="16:30"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row inactive" data-day="sat"><div class="day-label">Sat <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row pm-row inactive" data-day="sat"><div class="day-label">Sat <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row am-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row pm-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-            </div>
-          </div>
-          <div class="timeline-section">
-            <h3>Weekly Shift Overview</h3>
-            <div class="timeline-container">
-              <div class="timeline-hour-labels">
-                <span></span>
-                <span>8am</span><span>9am</span><span>10am</span><span>11am</span><span>12pm</span>
-                <span>1pm</span><span>2pm</span><span>3pm</span><span>4pm</span><span>5pm</span>
-                <span>6pm</span><span>7pm</span>
-              </div>
-              <div class="timeline-rows">
-                <div class="timeline-row" data-day="mon"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.5%;width:31.8%;">AM 08:30–12:00</div><div class="timeline-shift" style="left:45.5%;width:36.4%;">PM 13:00–17:00</div></div></div>
-                <div class="timeline-row" data-day="tue"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.5%;width:31.8%;">AM 08:30–12:00</div><div class="timeline-shift" style="left:45.5%;width:36.4%;">PM 13:00–17:00</div></div></div>
-                <div class="timeline-row" data-day="wed"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.5%;width:31.8%;">AM 08:30–12:00</div><div class="timeline-shift" style="left:45.5%;width:36.4%;">PM 13:00–17:00</div></div></div>
-                <div class="timeline-row" data-day="thu"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.5%;width:31.8%;">AM 08:30–12:00</div><div class="timeline-shift" style="left:45.5%;width:36.4%;">PM 13:00–17:00</div></div></div>
-                <div class="timeline-row" data-day="fri"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-shift" style="left:4.5%;width:31.8%;">AM 08:30–12:00</div><div class="timeline-shift" style="left:45.5%;width:31.8%;">PM 13:00–16:30</div></div></div>
-                <div class="timeline-row" data-day="sat"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
-                <div class="timeline-row" data-day="sun"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
-              </div>
-            </div>
-          </div>
-          <div class="leave-section">
-            <h3>Leave / Unavailability <span style="font-size:12px;color:var(--primary);font-weight:500;">(Still editable when committed)</span></h3>
-            <button class="add-leave-btn" onclick="showLeaveModal('angela')">＋ Add Leave Period</button>
-          </div>
-          <div class="editor-footer">
-            <button class="btn btn-ghost" onclick="viewHistory(this)">View History</button>
-            <span class="btn-locked-msg" style="display:flex;">🔒 Shifts locked · Committed for April 2026</span>
-            <button class="btn btn-primary btn-save-normal" style="display:none;" onclick="saveSchedule(this)">Save Schedule</button>
-          </div>
-          </div><!-- end .editor-panel.locked -->
-        </div>
-
-        <!-- Dr Marcus Lee -->
-        <div id="editor-marcus" style="display:none;">
-          <div class="editor-panel editor-section locked">
-          <div class="editor-header">
-            <div class="editor-therapist-info">
-              <div class="t-avatar" style="background:#f59e0b;color:white;width:46px;height:46px;font-size:16px;">ML</div>
-              <div>
-                <div class="editor-title">Dr Marcus Lee</div>
-                <div class="editor-subtitle">Physiotherapy · Staff ID: T-0039</div>
-              </div>
-            </div>
-            <span class="badge badge-locked">🔒 April 2026 Committed</span>
-          </div>
-
-          <!-- LOCKED BANNER -->
-          <div class="lock-overlay-banner">
-            <span class="lock-icon">🔒</span>
-            April 2026 shifts are committed and locked for editing.
-            <span class="lock-desc">Only leave periods can be added. Shift times cannot be changed.</span>
-          </div>
-
-          <div class="duration-row">
-            <label>Session Duration:</label>
-            <select disabled><option>30 minutes</option><option selected>60 minutes</option></select>
-            <span class="override-note">Locked — set before commit</span>
-          </div>
-          <div class="week-grid">
-            <h3>Weekly Schedule Template</h3>
-            <div class="days-row">
-              <span class="day-pill on" data-day="mon">Mon</span>
-              <span class="day-pill on" data-day="tue">Tue</span>
-              <span class="day-pill on" data-day="wed">Wed</span>
-              <span class="day-pill on" data-day="thu">Thu</span>
-              <span class="day-pill off" data-day="fri">Fri</span>
-              <span class="day-pill off" data-day="sat">Sat</span>
-              <span class="day-pill off" data-day="sun">Sun</span>
-            </div>
-            <div class="day-config">
-              <div class="day-config-header">📅 Per-day Configuration</div>
-              <div class="day-row" style="background:#f8fffe;border-bottom:1px solid var(--border);padding:8px 16px;">
-                <div class="day-col-label">Day / Period</div>
-                <div class="day-col-label">Start Time</div>
-                <div class="day-col-label">End Time</div>
-                <div class="day-col-label">Status</div>
-              </div>
-              <div class="day-row am-row" data-day="mon"><div class="day-label">Mon <span class="period-tag am">AM</span></div><input type="time" value="09:00"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="mon"><div class="day-label">Mon <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:30"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row" data-day="tue"><div class="day-label">Tue <span class="period-tag am">AM</span></div><input type="time" value="09:00"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="tue"><div class="day-label">Tue <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:30"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row" data-day="wed"><div class="day-label">Wed <span class="period-tag am">AM</span></div><input type="time" value="09:00"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="wed"><div class="day-label">Wed <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:30"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row" data-day="thu"><div class="day-label">Thu <span class="period-tag am">AM</span></div><input type="time" value="09:00"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="thu"><div class="day-label">Thu <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:30"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row inactive" data-day="fri"><div class="day-label">Fri <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row pm-row inactive" data-day="fri"><div class="day-label">Fri <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row am-row inactive" data-day="sat"><div class="day-label">Sat <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row pm-row inactive" data-day="sat"><div class="day-label">Sat <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row am-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row pm-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-            </div>
-          </div>
-          <div class="timeline-section">
-            <h3>Weekly Shift Overview <span style="font-size:12px;color:var(--amber);font-weight:500;">(Apr 6–13 all working days on leave)</span></h3>
-            <div class="timeline-container">
-              <div class="timeline-hour-labels">
-                <span></span>
-                <span>8am</span><span>9am</span><span>10am</span><span>11am</span><span>12pm</span>
-                <span>1pm</span><span>2pm</span><span>3pm</span><span>4pm</span><span>5pm</span>
-                <span>6pm</span><span>7pm</span>
-              </div>
-              <div class="timeline-rows">
-                <div class="timeline-row" data-day="mon"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift leave" style="left:9.1%;width:27.3%;">AM 09:00–12:00 · LEAVE Apr 6 &amp; 13</div><div class="timeline-shift leave" style="left:50%;width:36.4%;">PM 13:30–17:30 · LEAVE Apr 6 &amp; 13</div></div></div>
-                <div class="timeline-row" data-day="tue"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift leave" style="left:9.1%;width:27.3%;">AM 09:00–12:00 · LEAVE Apr 7</div><div class="timeline-shift leave" style="left:50%;width:36.4%;">PM 13:30–17:30 · LEAVE Apr 7</div></div></div>
-                <div class="timeline-row" data-day="wed"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift leave" style="left:9.1%;width:27.3%;">AM 09:00–12:00 · LEAVE Apr 8</div><div class="timeline-shift leave" style="left:50%;width:36.4%;">PM 13:30–17:30 · LEAVE Apr 8</div></div></div>
-                <div class="timeline-row" data-day="thu"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift leave" style="left:9.1%;width:27.3%;">AM 09:00–12:00 · LEAVE Apr 9</div><div class="timeline-shift leave" style="left:50%;width:36.4%;">PM 13:30–17:30 · LEAVE Apr 9</div></div></div>
-                <div class="timeline-row" data-day="fri"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
-                <div class="timeline-row" data-day="sat"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
-                <div class="timeline-row" data-day="sun"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
-              </div>
-            </div>
-            <!-- April calendar leave indicator -->
-            <div style="margin-top:14px;">
-              <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">April 2026 — Leave Period Highlighted</div>
-              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;font-size:11px;text-align:center;">
-                <div style="font-weight:700;color:var(--muted);padding:3px;">Sun</div><div style="font-weight:700;color:var(--muted);padding:3px;">Mon</div><div style="font-weight:700;color:var(--muted);padding:3px;">Tue</div><div style="font-weight:700;color:var(--muted);padding:3px;">Wed</div><div style="font-weight:700;color:var(--muted);padding:3px;">Thu</div><div style="font-weight:700;color:var(--muted);padding:3px;">Fri</div><div style="font-weight:700;color:var(--muted);padding:3px;">Sat</div>
-                <!-- Week 1: Apr starts Wed -->
-                <div style="padding:4px;"></div><div style="padding:4px;"></div><div style="padding:4px;"></div>
-                <div style="padding:4px;background:#f0fdf9;border-radius:6px;">1</div>
-                <div style="padding:4px;background:#f0fdf9;border-radius:6px;">2</div>
-                <div style="padding:4px;color:#cbd5e1;">3</div>
-                <div style="padding:4px;color:#cbd5e1;">4</div>
-                <!-- Week 2 -->
-                <div style="padding:4px;color:#cbd5e1;">5</div>
-                <div style="padding:4px;background:#fef3c7;border-radius:6px;color:#92400e;font-weight:700;">6🏖</div>
-                <div style="padding:4px;background:#fef3c7;border-radius:6px;color:#92400e;font-weight:700;">7🏖</div>
-                <div style="padding:4px;background:#fef3c7;border-radius:6px;color:#92400e;font-weight:700;">8🏖</div>
-                <div style="padding:4px;background:#fef3c7;border-radius:6px;color:#92400e;font-weight:700;">9🏖</div>
-                <div style="padding:4px;color:#cbd5e1;">10</div>
-                <div style="padding:4px;color:#cbd5e1;">11</div>
-                <!-- Week 3 -->
-                <div style="padding:4px;color:#cbd5e1;">12</div>
-                <div style="padding:4px;background:#fef3c7;border-radius:6px;color:#92400e;font-weight:700;">13🏖</div>
-                <div style="padding:4px;background:#f0fdf9;border-radius:6px;">14</div>
-                <div style="padding:4px;background:#f0fdf9;border-radius:6px;">15</div>
-                <div style="padding:4px;background:#f0fdf9;border-radius:6px;">16</div>
-                <div style="padding:4px;color:#cbd5e1;">17</div>
-                <div style="padding:4px;color:#cbd5e1;">18</div>
-                <!-- Week 4 -->
-                <div style="padding:4px;color:#cbd5e1;">19</div>
-                <div style="padding:4px;background:#f0fdf9;border-radius:6px;">20</div>
-                <div style="padding:4px;background:#f0fdf9;border-radius:6px;">21</div>
-                <div style="padding:4px;background:#f0fdf9;border-radius:6px;">22</div>
-                <div style="padding:4px;background:#f0fdf9;border-radius:6px;">23</div>
-                <div style="padding:4px;color:#cbd5e1;">24</div>
-                <div style="padding:4px;color:#cbd5e1;">25</div>
-                <!-- Week 5 -->
-                <div style="padding:4px;color:#cbd5e1;">26</div>
-                <div style="padding:4px;background:#f0fdf9;border-radius:6px;">27</div>
-                <div style="padding:4px;background:#f0fdf9;border-radius:6px;">28</div>
-                <div style="padding:4px;background:#f0fdf9;border-radius:6px;">29</div>
-                <div style="padding:4px;background:#f0fdf9;border-radius:6px;">30</div>
-                <div style="padding:4px;"></div><div style="padding:4px;"></div>
-              </div>
-              <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;">
-                <div style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;background:#fef3c7;border-radius:3px;display:inline-block;"></span> Leave (Apr 6–13)</div>
-                <div style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;background:#f0fdf9;border-radius:3px;display:inline-block;border:1px solid #ccfbf1;"></span> Working day</div>
-                <div style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;background:white;border-radius:3px;display:inline-block;border:1px solid #e5e7eb;color:#cbd5e1;font-size:10px;text-align:center;line-height:12px;">·</span> Off day</div>
-              </div>
-            </div>
-          </div>
-          <div class="leave-section">
-            <h3>Leave / Unavailability <span style="font-size:12px;color:var(--primary);font-weight:500;">(Still editable when committed)</span></h3>
-            <div class="leave-card">
-              <div class="leave-info">
-                <span class="leave-icon">🏖️</span>
-                <div>
-                  <div class="leave-title">Annual Leave</div>
-                  <div class="leave-dates">Mon 6 Apr – Mon 13 Apr 2026 · 6 working days</div>
-                </div>
-              </div>
-              <div class="leave-actions">
-                <button class="btn btn-ghost" style="padding:6px 12px;font-size:13px;" onclick="window.location='therapist-change.html'">Reassign Appointments</button>
-                <button class="btn btn-danger" style="padding:6px 12px;font-size:13px;">Delete</button>
-              </div>
-            </div>
-
-            <!-- LEAVE CONFLICT WARNING -->
-            <div class="leave-conflict">
-              <div class="leave-conflict-header">⚠️ Appointment conflicts detected</div>
-              <div class="leave-conflict-list">
-                <div class="leave-conflict-item">
-                  <span class="ci-date">Mon, 6 Apr 2026</span>
-                  <span class="ci-count">2 appointments affected</span>
-                </div>
-                <div class="leave-conflict-item">
-                  <span class="ci-date">Mon, 13 Apr 2026</span>
-                  <span class="ci-count">2 appointments affected</span>
-                </div>
-              </div>
-              <div style="font-size:13px;color:#9a3412;margin-bottom:10px;">These appointments need to be reassigned to another therapist. Shift slots cannot be changed — use <strong>Change Therapist</strong> to resolve the conflict.</div>
-              <div class="leave-conflict-actions">
-                <button class="btn btn-ghost" style="padding:8px 14px;font-size:13px;">View Affected Sessions</button>
-                <button class="btn" style="background:#fff7ed;color:#c2410c;border:1.5px solid #fed7aa;padding:8px 14px;font-size:13px;" onclick="window.location='therapist-change.html'">🔀 Reassign Now →</button>
-              </div>
-            </div>
-
-            <button class="add-leave-btn" onclick="showLeaveModal('marcus')">＋ Add Leave Period</button>
-          </div>
-          <div class="editor-footer">
-            <button class="btn btn-ghost" onclick="viewHistory(this)">View History</button>
-            <span class="btn-locked-msg" style="display:flex;">🔒 Shifts locked · Committed for April 2026</span>
-            <button class="btn btn-primary btn-save-normal" style="display:none;" onclick="saveSchedule(this)">Save Schedule</button>
-          </div>
-          </div><!-- end .editor-panel.locked -->
-        </div>
-
-        <!-- Nurse Janice Tan -->
-        <div id="editor-janice" style="display:none;">
-          <div class="editor-panel editor-section locked">
-          <div class="editor-header">
-            <div class="editor-therapist-info">
-              <div class="t-avatar" style="background:#7c3aed;color:white;width:46px;height:46px;font-size:16px;">JT</div>
-              <div>
-                <div class="editor-title">Nurse Janice Tan</div>
-                <div class="editor-subtitle">Nursing / Vaccination · Staff ID: N-0012</div>
-              </div>
-            </div>
-            <span class="badge badge-locked">🔒 April 2026 Committed</span>
-          </div>
-          <div class="lock-overlay-banner"><span class="lock-icon">🔒</span>April 2026 shifts are committed and locked. <span class="lock-desc">Only leave periods can be added.</span></div>
-          <div class="duration-row">
-            <label>Session Duration:</label>
-            <select disabled><option selected>30 minutes</option><option>60 minutes</option></select>
-            <span class="override-note">Locked — set before commit</span>
-          </div>
-          <div class="week-grid">
-            <h3>Weekly Schedule Template</h3>
-            <div class="days-row">
-              <span class="day-pill on" data-day="mon">Mon</span>
-              <span class="day-pill on" data-day="tue">Tue</span>
-              <span class="day-pill on" data-day="wed">Wed</span>
-              <span class="day-pill on" data-day="thu">Thu</span>
-              <span class="day-pill on" data-day="fri">Fri</span>
-              <span class="day-pill on" data-day="sat">Sat</span>
-              <span class="day-pill off" data-day="sun">Sun</span>
-            </div>
-            <div class="day-config">
-              <div class="day-config-header">📅 Per-day Configuration</div>
-              <div class="day-row" style="background:#f8fffe;border-bottom:1px solid var(--border);padding:8px 16px;">
-                <div class="day-col-label">Day / Period</div>
-                <div class="day-col-label">Start Time</div>
-                <div class="day-col-label">End Time</div>
-                <div class="day-col-label">Status</div>
-              </div>
-              <div class="day-row am-row" data-day="mon"><div class="day-label">Mon <span class="period-tag am">AM</span></div><input type="time" value="09:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="mon"><div class="day-label">Mon <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row" data-day="tue"><div class="day-label">Tue <span class="period-tag am">AM</span></div><input type="time" value="09:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="tue"><div class="day-label">Tue <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row" data-day="wed"><div class="day-label">Wed <span class="period-tag am">AM</span></div><input type="time" value="09:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="wed"><div class="day-label">Wed <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row" data-day="thu"><div class="day-label">Thu <span class="period-tag am">AM</span></div><input type="time" value="09:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="thu"><div class="day-label">Thu <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row" data-day="fri"><div class="day-label">Fri <span class="period-tag am">AM</span></div><input type="time" value="09:30"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="fri"><div class="day-label">Fri <span class="period-tag pm">PM</span></div><input type="time" value="13:30"><input type="time" value="17:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row" data-day="sat"><div class="day-label">Sat <span class="period-tag am">AM</span></div><input type="time" value="09:00"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row inactive" data-day="sat"><div class="day-label">Sat <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row am-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row pm-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-            </div>
-          </div>
-          <div class="timeline-section">
-            <h3>Weekly Shift Overview</h3>
-            <div class="timeline-container">
-              <div class="timeline-hour-labels"><span></span><span>8am</span><span>9am</span><span>10am</span><span>11am</span><span>12pm</span><span>1pm</span><span>2pm</span><span>3pm</span><span>4pm</span><span>5pm</span><span>6pm</span><span>7pm</span></div>
-              <div class="timeline-rows">
-                <div class="timeline-row" data-day="mon"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift" style="left:13.6%;width:22.7%;">AM 09:30–12:00</div><div class="timeline-shift" style="left:50%;width:31.8%;">PM 13:30–17:00</div></div></div>
-                <div class="timeline-row" data-day="tue"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift" style="left:13.6%;width:22.7%;">AM 09:30–12:00</div><div class="timeline-shift" style="left:50%;width:31.8%;">PM 13:30–17:00</div></div></div>
-                <div class="timeline-row" data-day="wed"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift" style="left:13.6%;width:22.7%;">AM 09:30–12:00</div><div class="timeline-shift" style="left:50%;width:31.8%;">PM 13:30–17:00</div></div></div>
-                <div class="timeline-row" data-day="thu"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift" style="left:13.6%;width:22.7%;">AM 09:30–12:00</div><div class="timeline-shift" style="left:50%;width:31.8%;">PM 13:30–17:00</div></div></div>
-                <div class="timeline-row" data-day="fri"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-shift" style="left:13.6%;width:22.7%;">AM 09:30–12:00</div><div class="timeline-shift" style="left:50%;width:31.8%;">PM 13:30–17:00</div></div></div>
-                <div class="timeline-row" data-day="sat"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-shift" style="left:9.1%;width:27.3%;">AM 09:00–12:00</div></div></div>
-                <div class="timeline-row" data-day="sun"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
-              </div>
-            </div>
-          </div>
-          <div class="leave-section">
-            <h3>Leave / Unavailability <span style="font-size:12px;color:var(--primary);font-weight:500;">(Still editable when committed)</span></h3>
-            <button class="add-leave-btn" onclick="showLeaveModal('janice')">＋ Add Leave Period</button>
-          </div>
-          <div class="editor-footer">
-            <button class="btn btn-ghost" onclick="viewHistory(this)">View History</button>
-            <span class="btn-locked-msg" style="display:flex;">🔒 Shifts locked · Committed for April 2026</span>
-            <button class="btn btn-primary btn-save-normal" style="display:none;" onclick="saveSchedule(this)">Save Schedule</button>
-          </div>
-          </div><!-- end .editor-panel.locked -->
-        </div>
-
-        <!-- Dr Wei Chen -->
-        <div id="editor-wei" style="display:none;">
-          <div class="editor-panel editor-section locked">
-          <div class="editor-header">
-            <div class="editor-therapist-info">
-              <div class="t-avatar" style="background:#2563eb;color:white;width:46px;height:46px;font-size:16px;">WC</div>
-              <div>
-                <div class="editor-title">Dr Wei Chen</div>
-                <div class="editor-subtitle">Speech Therapy · Staff ID: T-0047</div>
-              </div>
-            </div>
-            <span class="badge badge-locked">🔒 April 2026 Committed</span>
-          </div>
-          <div class="lock-overlay-banner"><span class="lock-icon">🔒</span>April 2026 shifts are committed and locked. <span class="lock-desc">Only leave periods can be added.</span></div>
-          <div class="duration-row">
-            <label>Session Duration:</label>
-            <select disabled><option selected>30 minutes</option><option>45 minutes</option><option>60 minutes</option></select>
-            <span class="override-note">Locked — set before commit</span>
-          </div>
-          <div class="week-grid">
-            <h3>Weekly Schedule Template</h3>
-            <div class="days-row">
-              <span class="day-pill on" data-day="mon">Mon</span>
-              <span class="day-pill on" data-day="tue">Tue</span>
-              <span class="day-pill on" data-day="wed">Wed</span>
-              <span class="day-pill on" data-day="thu">Thu</span>
-              <span class="day-pill off" data-day="fri">Fri</span>
-              <span class="day-pill on" data-day="sat">Sat</span>
-              <span class="day-pill off" data-day="sun">Sun</span>
-            </div>
-            <div class="day-config">
-              <div class="day-config-header">📅 Per-day Configuration</div>
-              <div class="day-row" style="background:#f8fffe;border-bottom:1px solid var(--border);padding:8px 16px;">
-                <div class="day-col-label">Day / Period</div>
-                <div class="day-col-label">Start Time</div>
-                <div class="day-col-label">End Time</div>
-                <div class="day-col-label">Status</div>
-              </div>
-              <div class="day-row am-row" data-day="mon"><div class="day-label">Mon <span class="period-tag am">AM</span></div><input type="time" value="10:00"><input type="time" value="13:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="mon"><div class="day-label">Mon <span class="period-tag pm">PM</span></div><input type="time" value="14:00"><input type="time" value="18:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row" data-day="tue"><div class="day-label">Tue <span class="period-tag am">AM</span></div><input type="time" value="10:00"><input type="time" value="13:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="tue"><div class="day-label">Tue <span class="period-tag pm">PM</span></div><input type="time" value="14:00"><input type="time" value="18:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row" data-day="wed"><div class="day-label">Wed <span class="period-tag am">AM</span></div><input type="time" value="10:00"><input type="time" value="13:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="wed"><div class="day-label">Wed <span class="period-tag pm">PM</span></div><input type="time" value="14:00"><input type="time" value="18:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row" data-day="thu"><div class="day-label">Thu <span class="period-tag am">AM</span></div><input type="time" value="10:00"><input type="time" value="13:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row" data-day="thu"><div class="day-label">Thu <span class="period-tag pm">PM</span></div><input type="time" value="14:00"><input type="time" value="18:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row am-row inactive" data-day="fri"><div class="day-label">Fri <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row pm-row inactive" data-day="fri"><div class="day-label">Fri <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row am-row" data-day="sat"><div class="day-label">Sat <span class="period-tag am">AM</span></div><input type="time" value="09:00"><input type="time" value="12:00"><span class="badge badge-active" style="font-size:11px;">Active</span></div>
-              <div class="day-row pm-row inactive" data-day="sat"><div class="day-label">Sat <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row am-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag am">AM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-              <div class="day-row pm-row inactive" data-day="sun"><div class="day-label">Sun <span class="period-tag pm">PM</span></div><input type="time" value=""><input type="time" value=""><span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:11px;">Off</span></div>
-            </div>
-          </div>
-          <div class="timeline-section">
-            <h3>Weekly Shift Overview</h3>
-            <div class="timeline-container">
-              <div class="timeline-hour-labels"><span></span><span>8am</span><span>9am</span><span>10am</span><span>11am</span><span>12pm</span><span>1pm</span><span>2pm</span><span>3pm</span><span>4pm</span><span>5pm</span><span>6pm</span><span>7pm</span></div>
-              <div class="timeline-rows">
-                <div class="timeline-row" data-day="mon"><span class="timeline-day-label">Mon</span><div class="timeline-bar"><div class="timeline-shift" style="left:18.2%;width:27.3%;">AM 10:00–13:00</div><div class="timeline-shift" style="left:54.5%;width:36.4%;">PM 14:00–18:00</div></div></div>
-                <div class="timeline-row" data-day="tue"><span class="timeline-day-label">Tue</span><div class="timeline-bar"><div class="timeline-shift" style="left:18.2%;width:27.3%;">AM 10:00–13:00</div><div class="timeline-shift" style="left:54.5%;width:36.4%;">PM 14:00–18:00</div></div></div>
-                <div class="timeline-row" data-day="wed"><span class="timeline-day-label">Wed</span><div class="timeline-bar"><div class="timeline-shift" style="left:18.2%;width:27.3%;">AM 10:00–13:00</div><div class="timeline-shift" style="left:54.5%;width:36.4%;">PM 14:00–18:00</div></div></div>
-                <div class="timeline-row" data-day="thu"><span class="timeline-day-label">Thu</span><div class="timeline-bar"><div class="timeline-shift" style="left:18.2%;width:27.3%;">AM 10:00–13:00</div><div class="timeline-shift" style="left:54.5%;width:36.4%;">PM 14:00–18:00</div></div></div>
-                <div class="timeline-row" data-day="fri"><span class="timeline-day-label">Fri</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
-                <div class="timeline-row" data-day="sat"><span class="timeline-day-label">Sat</span><div class="timeline-bar"><div class="timeline-shift" style="left:9.1%;width:27.3%;">AM 09:00–12:00</div></div></div>
-                <div class="timeline-row" data-day="sun"><span class="timeline-day-label">Sun</span><div class="timeline-bar"><div class="timeline-off" style="left:0;width:100%;"></div></div></div>
-              </div>
-            </div>
-          </div>
-          <div class="leave-section">
-            <h3>Leave / Unavailability <span style="font-size:12px;color:var(--primary);font-weight:500;">(Still editable when committed)</span></h3>
-            <button class="add-leave-btn" onclick="showLeaveModal('wei')">＋ Add Leave Period</button>
-          </div>
-          <div class="editor-footer">
-            <button class="btn btn-ghost" onclick="viewHistory(this)">View History</button>
-            <span class="btn-locked-msg" style="display:flex;">🔒 Shifts locked · Committed for April 2026</span>
-            <button class="btn btn-primary btn-save-normal" style="display:none;" onclick="saveSchedule(this)">Save Schedule</button>
-          </div>
-          </div><!-- end .editor-panel.locked -->
+        <div style="padding:12px 14px 14px;">
+          <button class="btn btn-primary" style="width:100%;margin-top:4px;font-size:13px;" onclick="showAddTherapistModal()">+ Add Therapist</button>
         </div>
       </div>
-    </div>
-  </div>
-</div>
+
+      <!-- EDITOR: Calendar View -->
+      <div style="display:flex;flex-direction:column;gap:16px;min-width:0;">
+
+        <!-- Effective Schedule Banner -->
+        <div style="background:linear-gradient(90deg,#f0fdf9,#e8f5e9);border:1.5px solid var(--primary-light);border-radius:14px;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-size:13.5px;font-weight:800;color:var(--primary-dark);">📊 Effective Schedule — Resolved from priority tiers</div>
+            <div style="font-size:12.5px;color:var(--muted);margin-top:3px;" id="tierBanner">April 2026 · Dr Angela Lim: <strong style="color:var(--text);">Tier 2 Default</strong> — no date-specific override active</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-ghost" style="font-size:12px;padding:5px 12px;" onclick="switchTab('templates')">Date Overrides →</button>
+            <button class="btn btn-secondary" style="font-size:12px;padding:5px 12px;" onclick="switchTab('default-templates')">✏️ Edit Default Schedule</button>
+          </div>
+        </div>
+
+        <!-- Calendar Card -->
+        <div style="background:var(--card);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm);">
+
+          <!-- Calendar header -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1.5px solid var(--border);background:#f0fdf9;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span id="calMonthLabel" style="font-size:16px;font-weight:800;color:var(--text);">April 2026</span>
+              <span style="font-size:11px;color:var(--muted);font-weight:500;">(month follows selection above)</span>
+            </div>
+            <!-- Legend — color + text labels for color blindness -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <span style="display:flex;align-items:center;gap:4px;font-size:11px;"><span style="display:inline-block;width:20px;height:20px;background:#1e40af;color:white;font-size:9px;font-weight:800;border-radius:4px;text-align:center;line-height:20px;">T1</span>Date Override</span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:11px;"><span style="display:inline-block;width:20px;height:20px;background:#0f766e;color:white;font-size:9px;font-weight:800;border-radius:4px;text-align:center;line-height:20px;">T2</span>Default</span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:11px;"><span style="display:inline-block;width:20px;height:20px;background:#92400e;color:white;font-size:9px;font-weight:800;border-radius:4px;text-align:center;line-height:20px;">T3</span>Global</span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:11px;"><span style="display:inline-block;width:20px;height:20px;background:#b91c1c;color:white;font-size:9px;font-weight:800;border-radius:4px;text-align:center;line-height:20px;">🚫</span>Leave</span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:11px;"><span style="display:inline-block;width:20px;height:20px;background:#e2e8f0;color:#475569;font-size:9px;font-weight:800;border-radius:4px;text-align:center;line-height:20px;">—</span>Off</span>
+            </div>
+          </div>
+
+          <!-- Day-of-week headers -->
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border);">
+            <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Mon</div>
+            <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Tue</div>
+            <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Wed</div>
+            <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Thu</div>
+            <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Fri</div>
+            <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Sat</div>
+            <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Sun</div>
+          </div>
+
+          <!-- Calendar grid -->
+          <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:8px;background:#f8fafc;"></div>
+        </div>
+
+        <!-- Tier resolution table -->
+        <div style="background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow-sm);">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">📋 Tier Resolution Detail — <span id="tierDetailLabel">Dr Angela Lim · April 2026</span></div>
+          <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+            <thead>
+              <tr style="background:#f0fdf9;">
+                <th style="padding:7px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);">Date / Period</th>
+                <th style="padding:7px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);">Tier</th>
+                <th style="padding:7px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);">Source</th>
+                <th style="padding:7px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);">AM Hours</th>
+                <th style="padding:7px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);">PM Hours</th>
+              </tr>
+            </thead>
+            <tbody id="tierDetailBody"></tbody>
+          </table>
+        </div>
+
+      </div><!-- /editor -->
+    </div><!-- /therapist-layout -->
+  </div><!-- /tab-therapists -->
 
 <script>
   // ——————————————————————————————————
@@ -996,6 +1199,10 @@
     document.querySelectorAll('.month-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
     updateBanner(id);
+    // Also update calendar month when month selection changes
+    const MONTH_MAP = { mar:{y:2026,m:3}, apr:{y:2026,m:4}, may:{y:2026,m:5}, jun:{y:2026,m:6} };
+    if (MONTH_MAP[id]) { calYear = MONTH_MAP[id].y; calMonth = MONTH_MAP[id].m; }
+    renderCalendar();
     updateEditorLockState(id);
   }
 
@@ -1045,17 +1252,280 @@
   }
 
   function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (tab==='therapists'?i===0:i===1)));
-    document.getElementById('tab-therapists').classList.toggle('active', tab==='therapists');
-    document.getElementById('tab-global').classList.toggle('active', tab==='global');
+    const tabs = ['therapists','templates','default-templates','leave','global'];
+    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', tabs[i] === tab));
+    tabs.forEach(t => {
+      const panel = document.getElementById('tab-'+t);
+      if (panel) panel.classList.toggle('active', t === tab);
+    });
+  }
+
+  function selectTemplateTherapist(el, id) {
+    el.closest('.tab-panel').querySelectorAll('.therapist-item').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function selectLeaveTherapist(el, id) {
+    el.closest('.tab-panel').querySelectorAll('.therapist-item').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    const names = { angela:'Dr Angela Lim', marcus:'Dr Marcus Lee', janice:'Nurse Janice Tan', wei:'Dr Wei Chen' };
+    const el2 = document.getElementById('leaveTherapistName');
+    if (el2) el2.textContent = names[id] || id;
+  }
+
+  function showAddTemplateModal() {
+    const m = document.getElementById('templateModal');
+    if (m) { m.style.display = 'flex'; }
+  }
+  function closeTemplateModal() {
+    const m = document.getElementById('templateModal');
+    if (m) m.style.display = 'none';
+  }
+  function showAddLeaveModal() {
+    document.getElementById('leaveModal').classList.add('open');
+    document.getElementById('leaveConflictResult').style.display = 'none';
+    document.getElementById('leaveForm').style.display = '';
   }
 
   function selectTherapist(el, id) {
-    document.querySelectorAll('.therapist-item').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('#tab-therapists .therapist-sidebar .therapist-item').forEach(x => x.classList.remove('active'));
     el.classList.add('active');
-    ['angela','marcus','janice','wei'].forEach(t => {
-      document.getElementById('editor-'+t).style.display = (t===id) ? '' : 'none';
-    });
+    renderCalendar(id);
+  }
+
+  /* ── Calendar for Therapist Schedules tab ── */
+  const THERAPIST_NAMES = {
+    angela: 'Dr Angela Lim',
+    marcus: 'Dr Marcus Lee',
+    janice: 'Nurse Janice Tan',
+    wei: 'Dr Wei Chen'
+  };
+
+  // Per-therapist calendar data: each entry { day: 1-31, type: 't1'|'t2'|'t3'|'leave'|'off', am: '09:00–12:30', pm: '13:30–17:00', note: '' }
+  const CALENDAR_DATA = {
+    angela: {
+      2026: {
+        4: { // April — COMMITTED
+          weekdays: { mon: {type:'t2', am:'09:00–12:30', pm:'13:30–14:30'}, tue: {type:'t2', am:'10:00–13:00', pm:null}, wed: {type:'t2', am:'09:00–12:30', pm:'13:30–14:30'}, thu: {type:'t2', am:'10:00–13:00', pm:null}, fri: {type:'t2', am:'09:00–12:30', pm:'13:30–14:30'}, sat: {type:'off'}, sun: {type:'off'} },
+          overrides: { 21: {type:'t1', am:'10:00–13:00', pm:'14:00–16:00', note:'Override: Special Apr 21'} },
+          leave: [28, 29, 30]
+        },
+        5: { // May — DRAFT (from therapist default, 3 items need review)
+          weekdays: { mon: {type:'t2', am:'09:00–12:30', pm:'13:30–14:30'}, tue: {type:'t2', am:'10:00–13:00', pm:null}, wed: {type:'t2', am:'09:00–12:30', pm:'13:30–14:30'}, thu: {type:'t2', am:'10:00–13:00', pm:null}, fri: {type:'t2', am:'09:00–12:30', pm:'13:30–14:30'}, sat: {type:'off'}, sun: {type:'off'} },
+          overrides: {},
+          leave: [],
+          isDraft: true
+        },
+        6: { // June — PROJECTED from default (not set)
+          weekdays: { mon: {type:'t2', am:'09:00–12:30', pm:'13:30–14:30'}, tue: {type:'t2', am:'10:00–13:00', pm:null}, wed: {type:'t2', am:'09:00–12:30', pm:'13:30–14:30'}, thu: {type:'t2', am:'10:00–13:00', pm:null}, fri: {type:'t2', am:'09:00–12:30', pm:'13:30–14:30'}, sat: {type:'off'}, sun: {type:'off'} },
+          overrides: { 1: {type:'t1', am:'10:00–13:00', pm:null, note:'School holiday override'}, 2: {type:'t1', am:'10:00–13:00', pm:null, note:'School holiday override'}, 3: {type:'t1', am:'10:00–13:00', pm:null, note:'School holiday override'} },
+          leave: [],
+          isProjected: true
+        }
+      }
+    },
+    marcus: {
+      2026: {
+        4: {
+          weekdays: { mon: {type:'t2', am:'09:00–12:30', pm:'13:30–15:00'}, tue: {type:'t2', am:'09:00–12:30', pm:'13:30–15:00'}, wed: {type:'t2', am:'09:00–12:30', pm:'13:30–15:00'}, thu: {type:'t2', am:'09:00–12:30', pm:'13:30–15:00'}, fri: {type:'off'}, sat: {type:'off'}, sun: {type:'off'} },
+          overrides: {},
+          leave: []
+        },
+        5: {
+          weekdays: { mon: {type:'t2', am:'09:00–12:30', pm:'13:30–15:00'}, tue: {type:'t2', am:'09:00–12:30', pm:'13:30–15:00'}, wed: {type:'t2', am:'09:00–12:30', pm:'13:30–15:00'}, thu: {type:'t2', am:'09:00–12:30', pm:'13:30–15:00'}, fri: {type:'off'}, sat: {type:'off'}, sun: {type:'off'} },
+          overrides: {},
+          leave: [11, 12, 13, 14, 15],
+          isDraft: true
+        },
+        6: {
+          weekdays: { mon: {type:'t2', am:'09:00–12:30', pm:'13:30–15:00'}, tue: {type:'t2', am:'09:00–12:30', pm:'13:30–15:00'}, wed: {type:'t2', am:'09:00–12:30', pm:'13:30–15:00'}, thu: {type:'t2', am:'09:00–12:30', pm:'13:30–15:00'}, fri: {type:'off'}, sat: {type:'off'}, sun: {type:'off'} },
+          overrides: {},
+          leave: [],
+          isProjected: true
+        }
+      }
+    },
+    janice: {
+      2026: {
+        4: {
+          weekdays: { mon: {type:'t2', am:'08:30–12:30', pm:null}, tue: {type:'t2', am:'08:30–12:30', pm:null}, wed: {type:'t2', am:'08:30–12:30', pm:null}, thu: {type:'t2', am:'08:30–12:30', pm:null}, fri: {type:'off'}, sat: {type:'off'}, sun: {type:'off'} },
+          overrides: {},
+          leave: []
+        },
+        5: {
+          weekdays: { mon: {type:'t2', am:'08:30–12:30', pm:null}, tue: {type:'t2', am:'08:30–12:30', pm:null}, wed: {type:'t2', am:'08:30–12:30', pm:null}, thu: {type:'t2', am:'08:30–12:30', pm:null}, fri: {type:'off'}, sat: {type:'off'}, sun: {type:'off'} },
+          overrides: {},
+          leave: [],
+          isDraft: true
+        },
+        6: {
+          weekdays: { mon: {type:'t2', am:'08:30–12:30', pm:null}, tue: {type:'t2', am:'08:30–12:30', pm:null}, wed: {type:'t2', am:'08:30–12:30', pm:null}, thu: {type:'t2', am:'08:30–12:30', pm:null}, fri: {type:'off'}, sat: {type:'off'}, sun: {type:'off'} },
+          overrides: {},
+          leave: [],
+          isProjected: true
+        }
+      }
+    },
+    wei: {
+      2026: {
+        4: {
+          weekdays: { mon: {type:'t2', am:null, pm:'13:00–17:00'}, tue: {type:'t2', am:null, pm:'13:00–17:00'}, wed: {type:'t2', am:null, pm:'13:00–17:00'}, thu: {type:'t2', am:null, pm:'13:00–17:00'}, fri: {type:'t2', am:null, pm:'13:00–17:00'}, sat: {type:'off'}, sun: {type:'off'} },
+          overrides: {},
+          leave: []
+        },
+        5: {
+          weekdays: { mon: {type:'t2', am:null, pm:'13:00–17:00'}, tue: {type:'t2', am:null, pm:'13:00–17:00'}, wed: {type:'t2', am:null, pm:'13:00–17:00'}, thu: {type:'t2', am:null, pm:'13:00–17:00'}, fri: {type:'t2', am:null, pm:'13:00–17:00'}, sat: {type:'off'}, sun: {type:'off'} },
+          overrides: {},
+          leave: [25, 26, 27, 28, 29],
+          isDraft: true
+        },
+        6: {
+          weekdays: { mon: {type:'t2', am:null, pm:'13:00–17:00'}, tue: {type:'t2', am:null, pm:'13:00–17:00'}, wed: {type:'t2', am:null, pm:'13:00–17:00'}, thu: {type:'t2', am:null, pm:'13:00–17:00'}, fri: {type:'t2', am:null, pm:'13:00–17:00'}, sat: {type:'off'}, sun: {type:'off'} },
+          overrides: {},
+          leave: [],
+          isProjected: true
+        }
+      }
+    }
+  };
+
+  const DOW = ['sun','mon','tue','wed','thu','fri','sat']; // 0=sun
+  let calYear = 2026, calMonth = 4, calTherapist = 'angela';
+
+  function renderCalendar(therapist) {
+    if (therapist) calTherapist = therapist;
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    document.getElementById('calMonthLabel').textContent = months[calMonth-1] + ' ' + calYear;
+    document.getElementById('tierDetailLabel').textContent = THERAPIST_NAMES[calTherapist] + ' · ' + months[calMonth-1] + ' ' + calYear;
+
+    // Update sidebar header
+    const sbHeader = document.querySelector('#tab-therapists .sidebar-header');
+    if (sbHeader) sbHeader.textContent = 'Therapists — ' + months[calMonth-1] + ' ' + calYear;
+
+    const data = (CALENDAR_DATA[calTherapist]?.[calYear]?.[calMonth]) || {weekdays:{},overrides:{},leave:[]};
+    const isDraft = !!data.isDraft;
+    const isProjected = !!data.isProjected;
+
+    // Draft / projected notice banner
+    let draftBannerEl = document.getElementById('calDraftBanner');
+    if (!draftBannerEl) {
+      draftBannerEl = document.createElement('div');
+      draftBannerEl.id = 'calDraftBanner';
+      const calCard = document.getElementById('calGrid').closest('[style*="border-radius:16px"]');
+      if (calCard) calCard.parentNode.insertBefore(draftBannerEl, calCard);
+    }
+    if (isDraft) {
+      draftBannerEl.innerHTML = `<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:12px;padding:12px 18px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:20px;">📝</span>
+        <div>
+          <div style="font-size:13.5px;font-weight:800;color:#92400e;">Draft Preview — ${months[calMonth-1]} ${calYear} (Not Yet Committed)</div>
+          <div style="font-size:12px;color:#b45309;margin-top:2px;">Generated from therapist default schedules. Review and adjust before committing. Leave applications are pending confirmation.</div>
+        </div>
+        <button class="btn btn-primary" style="margin-left:auto;padding:8px 16px;font-size:13px;white-space:nowrap;" onclick="openCommitModal()">🔒 Commit ${months[calMonth-1]} ${calYear}</button>
+      </div>`;
+    } else if (isProjected) {
+      draftBannerEl.innerHTML = `<div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:12px;padding:12px 18px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:20px;">🔮</span>
+        <div>
+          <div style="font-size:13.5px;font-weight:800;color:#0369a1;">Projected View — ${months[calMonth-1]} ${calYear} (Not Set)</div>
+          <div style="font-size:12px;color:#0284c7;margin-top:2px;">Showing projected schedule based on therapist default templates. No shifts have been committed for this month yet.</div>
+        </div>
+        <button class="btn btn-ghost" style="margin-left:auto;padding:8px 16px;font-size:13px;white-space:nowrap;" onclick="switchTab('default-templates')">✏️ Edit Default Schedule</button>
+      </div>`;
+    } else {
+      draftBannerEl.innerHTML = '';
+    }
+
+    document.getElementById('tierBanner').innerHTML =
+      months[calMonth-1] + ' ' + calYear + ' · ' + THERAPIST_NAMES[calTherapist] +
+      (isDraft ? ': <strong style="color:#92400e;">📝 Draft</strong>' :
+       isProjected ? ': <strong style="color:#0369a1;">🔮 Projected</strong>' :
+       ': <strong style="color:var(--text);">Tier 2 Default</strong>') +
+      ' — refer to table below for exceptions';
+
+    const grid = document.getElementById('calGrid');
+    const tbody = document.getElementById('tierDetailBody');
+    grid.innerHTML = '';
+    tbody.innerHTML = '';
+
+    // First day of month (0=Sun)
+    const firstDow = new Date(calYear, calMonth-1, 1).getDay();
+    // Shift so Mon=0: (dow + 6) % 7
+    const firstMon = (firstDow + 6) % 7;
+    const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+
+    // Empty cells before first
+    for (let i = 0; i < firstMon; i++) {
+      grid.innerHTML += '<div style="min-height:72px;"></div>';
+    }
+
+    const tierDetailRows = [];
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dow = DOW[(new Date(calYear, calMonth-1, d).getDay())]; // mon/tue/...
+      const isLeave = data.leave && data.leave.includes(d);
+      const override = data.overrides && data.overrides[d];
+      const wdData = data.weekdays?.[dow] || {type:'off'};
+      let type = isLeave ? 'leave' : (override ? override.type : wdData.type);
+      const am = isLeave ? null : (override ? override.am : wdData.am);
+      const pm = isLeave ? null : (override ? override.pm : wdData.pm);
+      const note = override ? override.note : '';
+
+      let bg='#e2e8f0', border='#cbd5e1', color='#475569', label='Off', badge='—';
+      if (type==='t1') { bg='#1e40af'; border='#1e3a8a'; color='white'; label='Date Override'; badge='T1'; }
+      else if (type==='t2') { bg='#0f766e'; border='#0d6660'; color='white'; label=''; badge='T2'; }
+      else if (type==='t3') { bg='#92400e'; border='#78350f'; color='white'; label='Global'; badge='T3'; }
+      else if (type==='leave') { bg='#b91c1c'; border='#991b1b'; color='white'; label='Leave'; badge='🚫'; }
+
+      const amLine = am ? `<div style="font-size:10px;opacity:.9;">AM ${am}</div>` : '';
+      const pmLine = pm ? `<div style="font-size:10px;opacity:.9;">PM ${pm}</div>` : '';
+      const labelLine = type !== 'off' ? `<div style="font-size:9px;font-weight:800;opacity:.85;">${badge}</div>` : '';
+
+      grid.innerHTML += `<div style="min-height:72px;padding:5px 7px;background:${bg};border:1px solid ${border};border-radius:8px;color:${color};">
+        <div style="font-size:12px;font-weight:700;">${d}</div>
+        ${labelLine}${amLine}${pmLine}
+      </div>`;
+
+      // Add tier detail rows for notable days
+      if (type==='leave' || type==='t1' || type==='t3') {
+        const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const dayName = dayNames[new Date(calYear, calMonth-1, d).getDay()];
+        const tierLabel = type==='leave'?'Leave':(type==='t1'?'Tier 1':'Tier 3');
+        const source = type==='leave'?'Approved Leave':(type==='t1'?note:'Global Settings');
+        const tierColor = type==='leave'?'var(--red)':(type==='t1'?'#1e40af':'#92400e');
+        tierDetailRows.push(`<tr>
+          <td style="padding:7px 10px;border-bottom:1px solid #f0fdf9;font-weight:600;">${dayName} ${d} ${months[calMonth-1]}</td>
+          <td style="padding:7px 10px;border-bottom:1px solid #f0fdf9;"><span style="color:${tierColor};font-weight:700;">${tierLabel}</span></td>
+          <td style="padding:7px 10px;border-bottom:1px solid #f0fdf9;font-size:12px;color:var(--muted);">${source}</td>
+          <td style="padding:7px 10px;border-bottom:1px solid #f0fdf9;">${am||'—'}</td>
+          <td style="padding:7px 10px;border-bottom:1px solid #f0fdf9;">${pm||'—'}</td>
+        </tr>`);
+      }
+    }
+
+    if (tierDetailRows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="padding:12px;text-align:center;color:var(--muted);font-size:13px;">All working days use <strong>Tier 2 Default Schedule</strong>. No overrides or leave this month.</td></tr>`;
+    } else {
+      // Add a summary row for Tier 2 days
+      tbody.innerHTML = tierDetailRows.join('') + `<tr style="background:#f0fdf9;">
+        <td style="padding:7px 10px;font-weight:600;">All other working days</td>
+        <td style="padding:7px 10px;"><span style="color:var(--primary);font-weight:700;">Tier 2</span></td>
+        <td style="padding:7px 10px;font-size:12px;color:var(--muted);">Therapist Default Schedule</td>
+        <td style="padding:7px 10px;">${Object.values(data.weekdays).find(v=>v.am)?.am||'—'}</td>
+        <td style="padding:7px 10px;">${Object.values(data.weekdays).find(v=>v.pm)?.pm||'—'}</td>
+      </tr>`;
+    }
+  }
+
+  function calPrev() {
+    calMonth--;
+    if (calMonth < 1) { calMonth = 12; calYear--; }
+    renderCalendar();
+  }
+  function calNext() {
+    calMonth++;
+    if (calMonth > 12) { calMonth = 1; calYear++; }
+    renderCalendar();
   }
 
   // ——————————————————————————————————
@@ -1078,6 +1548,16 @@
     }
     // Initialize lock state for the default month so inline styles are set correctly
     updateEditorLockState(currentMonth);
+    // Hash-based tab navigation from swimlane / external links
+    // Links use anchors like #tab-global or #tab-therapists — strip leading "tab-"
+    const rawHash = window.location.hash.replace('#', '');
+    const hash = rawHash.startsWith('tab-') ? rawHash.slice(4) : rawHash;
+    const validTabs = ['therapists', 'templates', 'default-templates', 'leave', 'global'];
+    if (hash && validTabs.includes(hash)) {
+      switchTab(hash);
+    }
+    // Initialize calendar for default therapist
+    renderCalendar('angela');
   });
   function confirmCommit() {
     closeCommitModal();
@@ -1230,6 +1710,43 @@
     showToast('✅ Global settings saved');
   }
 
+  // ——————————————————————————————————
+  // Default Templates Tab
+  // ——————————————————————————————————
+  function selectDefaultTmplTherapist(el, id) {
+    el.closest('.tab-panel').querySelectorAll('.therapist-item').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    ['angela','marcus','janice','wei'].forEach(t => {
+      const d = document.getElementById('dtemplate-'+t);
+      if (d) d.style.display = (t === id) ? '' : 'none';
+    });
+  }
+
+  function toggleDefaultEditForm(id) {
+    const form = document.getElementById('dtemplate-'+id+'-form');
+    if (form) form.style.display = (form.style.display === 'none') ? '' : 'none';
+  }
+
+  // ——————————————————————————————————
+  // Add Therapist Modal
+  // ——————————————————————————————————
+  function showAddTherapistModal() {
+    document.getElementById('addTherapistModal').classList.add('open');
+  }
+  function closeAddTherapistModal() {
+    document.getElementById('addTherapistModal').classList.remove('open');
+  }
+  function addSelectedTherapists() {
+    closeAddTherapistModal();
+    showToast('✅ Therapist(s) added to roster for May 2026');
+  }
+  function filterUserPool(query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll('#userPoolList label').forEach(function(row) {
+      row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
+
   // Toast helper
   function showToast(msg) {
     const t = document.createElement('div');
@@ -1365,7 +1882,67 @@
     </div>
   </div>
 </div>
-
+
+
+<!-- ============================== ADD THERAPIST MODAL ============================== -->
+<div class="modal-overlay" id="addTherapistModal" onclick="if(event.target===this)closeAddTherapistModal()">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title">Add Therapist from Users Pool</div>
+      <button class="modal-close" onclick="closeAddTherapistModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:14px;">
+        <input type="text" placeholder="🔍 Search users..." oninput="filterUserPool(this.value)" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Outfit',sans-serif;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <div id="userPoolList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+        <label style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fffe;border-radius:10px;border:1px solid var(--border);cursor:pointer;">
+          <input type="checkbox" value="sarah-wong">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Dr Sarah Wong</div>
+            <div style="font-size:12px;color:var(--muted);">Occupational Therapy · sarah.wong@scc.sg</div>
+          </div>
+        </label>
+        <label style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fffe;border-radius:10px;border:1px solid var(--border);cursor:pointer;">
+          <input type="checkbox" value="priya-nair">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Ms Priya Nair</div>
+            <div style="font-size:12px;color:var(--muted);">Physiotherapy · priya.nair@scc.sg</div>
+          </div>
+        </label>
+        <label style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fffe;border-radius:10px;border:1px solid var(--border);cursor:pointer;">
+          <input type="checkbox" value="david-tan">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Mr David Tan</div>
+            <div style="font-size:12px;color:var(--muted);">Speech Therapy · david.tan@scc.sg</div>
+          </div>
+        </label>
+        <label style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fffe;border-radius:10px;border:1px solid var(--border);cursor:pointer;">
+          <input type="checkbox" value="rachel-lim">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Nurse Rachel Lim</div>
+            <div style="font-size:12px;color:var(--muted);">Nursing · rachel.lim@scc.sg</div>
+          </div>
+        </label>
+        <label style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fffe;border-radius:10px;border:1px solid var(--border);cursor:pointer;">
+          <input type="checkbox" value="alex-kumar">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Dr Alex Kumar</div>
+            <div style="font-size:12px;color:var(--muted);">Occupational Therapy · alex.kumar@scc.sg</div>
+          </div>
+        </label>
+      </div>
+      <div style="font-size:12px;color:var(--muted);background:#f8fafc;border-radius:8px;padding:10px 14px;border:1px solid var(--border);">
+        ℹ️ Users are managed in the Users &amp; Roles module. Only users with Therapist role appear here.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeAddTherapistModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addSelectedTherapists()">Add Selected to Roster</button>
+    </div>
+  </div>
+</div>
+
 <!-- ============================== SAVE SCHEDULE MODAL ============================== -->
 <div class="modal-overlay" id="saveScheduleModal" onclick="if(event.target===this)closeSaveModal()">
   <div class="modal-box" style="max-width:520px;">

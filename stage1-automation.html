@@ -1,0 +1,498 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stage 1: Auto-fill Appointments — CARES Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { display: flex !important; min-height: 100vh; margin: 0; font-family: 'Outfit', Inter, ui-sans-serif; background: #f5f7fb; color: #111827; }
+
+    /* NAV SIDEBAR */
+    .nav-sidebar { width: 200px; min-width: 200px; background: #1a2e2c; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 200; display: flex; flex-direction: column; }
+    .nav-sidebar-profile { padding: 20px 14px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .nav-sidebar-avatar { width: 46px; height: 46px; border-radius: 50%; background: rgba(13,148,136,0.25); border: 2px solid rgba(13,148,136,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 9px; }
+    .nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
+    .nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; }
+    .nav-sidebar-nav { flex: 1; padding: 4px 0; }
+    .nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+
+    .nav-sidebar-link { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; color: rgba(255,255,255,0.68); text-decoration: none; font-size: 12px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
+    .nav-sidebar-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.95); }
+    .nav-sidebar-link.active { background: rgba(13,148,136,0.18); color: #5eead4; border-left-color: #0d9488; }
+    .nav-sidebar-link-inner { display: flex; align-items: center; gap: 8px; }
+    .nav-chevron { font-size: 10px; opacity: 0.35; }
+
+    /* MAIN */
+    .main-wrapper { margin-left: 200px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 0 20px; height: 46px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-hamburger { background: #0d9488; border: none; border-radius: 5px; color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; }
+    .topbar-logo { font-size: 22px; }
+    .topbar-session { font-size: 11.5px; color: #6b7280; }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .topbar-welcome { font-size: 11.5px; color: #9ca3af; }
+    .topbar-facility { border: 1px solid #d1d5db; border-radius: 6px; padding: 3px 8px; font-size: 11px; color: #374151; background: white; max-width: 230px; cursor: pointer; }
+    .topbar-notif { position: relative; background: none; border: none; cursor: pointer; font-size: 17px; padding: 0; }
+    .topbar-notif-badge { position: absolute; top: -4px; right: -5px; background: #f59e0b; color: white; border-radius: 10px; font-size: 9px; padding: 1px 4px; font-weight: 700; }
+    .topbar-logout { color: #6b7280; font-size: 11.5px; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+    .page-loaded-bar { background: #fff; border-bottom: 1px solid #f3f4f6; padding: 3px 20px; font-size: 11px; color: #9ca3af; }
+
+    /* PAGE CONTENT */
+    .page-content { padding: 24px; flex: 1; }
+    .page-header { margin-bottom: 20px; }
+    .page-title { font-size: 22px; font-weight: 800; color: #111827; margin: 0 0 4px; }
+    .page-sub { font-size: 13px; color: #6b7280; }
+
+    /* CONTEXT BANNER */
+    .context-banner { background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); border-radius: 14px; padding: 16px 22px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+    .context-banner-icon { font-size: 28px; }
+    .context-banner-text { flex: 1; }
+    .context-banner-title { color: #fff; font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+    .context-banner-sub { color: rgba(255,255,255,0.78); font-size: 12px; }
+    .context-banner-chips { display: flex; gap: 8px; margin-top: 8px; }
+    .chip { background: rgba(255,255,255,0.18); color: #fff; border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 600; }
+
+    /* SECTION */
+    .section-card { background: #fff; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 4px 16px rgba(15,23,42,0.06); margin-bottom: 24px; overflow: hidden; }
+    .section-header { padding: 18px 22px 14px; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
+    .section-title { font-size: 15px; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 8px; }
+    .section-meta { font-size: 12px; color: #6b7280; }
+
+    /* TABLE */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { background: #f9fafb; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 16px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+    .data-table td { padding: 13px 16px; font-size: 13px; color: #374151; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover { background: #fafafa; }
+
+    /* BADGES */
+    .badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
+    .badge-pending { background: #fef3c7; color: #d97706; }
+    .badge-filled { background: #dcfce7; color: #16a34a; }
+    .badge-failed { background: #fee2e2; color: #dc2626; }
+    .badge-running { background: #dbeafe; color: #1d4ed8; }
+
+    /* TOTALS ROW */
+    .totals-row { background: #f0fdf4 !important; font-weight: 700; }
+    .totals-row td { color: #16a34a !important; }
+
+    /* RUN BUTTON */
+    .run-btn-wrap { padding: 22px; border-top: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
+    .btn-primary { background: linear-gradient(135deg, #0d9488, #0891b2); color: #fff; border: none; border-radius: 10px; padding: 12px 28px; font-size: 14px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; transition: opacity 0.15s, transform 0.1s; }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-secondary { background: #fff; color: #374151; border: 1.5px solid #d1d5db; border-radius: 10px; padding: 10px 20px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+    .btn-secondary:hover { border-color: #0d9488; color: #0d9488; }
+    .btn-proceed { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none; border-radius: 10px; padding: 12px 28px; font-size: 14px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; transition: opacity 0.15s; text-decoration: none; }
+    .btn-proceed:hover { opacity: 0.88; }
+
+    /* PROGRESS BAR */
+    .progress-wrap { padding: 22px; display: none; }
+    .progress-label { font-size: 13px; color: #374151; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .progress-track { background: #e5e7eb; border-radius: 99px; height: 10px; overflow: hidden; }
+    .progress-fill { background: linear-gradient(90deg, #0d9488, #0891b2); height: 100%; width: 0%; border-radius: 99px; transition: width 0.05s linear; }
+
+    /* RESULTS SECTION */
+    #results-section { display: none; }
+    .results-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 22px; border-bottom: 1px solid #f3f4f6; }
+    .result-card { border-radius: 14px; padding: 18px 20px; display: flex; align-items: center; gap: 14px; }
+    .result-card.success { background: #f0fdf4; border: 1.5px solid #bbf7d0; }
+    .result-card.failure { background: #fff7ed; border: 1.5px solid #fed7aa; }
+    .result-card.total { background: #eff6ff; border: 1.5px solid #bfdbfe; }
+    .result-card-icon { font-size: 28px; }
+    .result-card-num { font-size: 28px; font-weight: 800; line-height: 1; }
+    .result-card.success .result-card-num { color: #16a34a; }
+    .result-card.failure .result-card-num { color: #d97706; }
+    .result-card.total .result-card-num { color: #2563eb; }
+    .result-card-label { font-size: 12px; color: #6b7280; margin-top: 2px; }
+
+    /* REASON CHIP */
+    .reason-chip { display: inline-block; background: #fee2e2; color: #dc2626; border-radius: 6px; padding: 2px 8px; font-size: 10.5px; font-weight: 600; }
+    .reason-chip.leave { background: #fff7ed; color: #c2410c; }
+    .reason-chip.taken { background: #f3e8ff; color: #7c3aed; }
+
+    /* PATIENT NAME */
+    .patient-name { font-weight: 600; color: #111827; }
+    .patient-room { font-size: 11px; color: #9ca3af; }
+    .service-tag { display: inline-block; background: #eff6ff; color: #1d4ed8; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+
+    .results-actions { padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f3f4f6; }
+    .results-actions-left { font-size: 13px; color: #6b7280; }
+
+    .note-row { background: #fffbeb; }
+    .note-row td { color: #92400e !important; font-size: 11.5px; font-style: italic; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #1a2e2c; color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; z-index: 999; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+  </style>
+</head>
+<body>
+
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-profile">
+    <div class="nav-sidebar-avatar">🤖</div>
+    <div class="nav-sidebar-name">Cares Admin<br>TETSUYU</div>
+    <div class="nav-sidebar-role">Enterprise Admin ▾</div>
+  </div>
+  <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
+    <a href="coordinator-dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
+    <a href="timeslot_scheduler_mockup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
+    <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
+    <a href="appointments.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
+    <a href="recurring-edit.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔄</span><span>Recurring</span></span><span class="nav-chevron">‹</span></a>
+    <a href="therapist-change.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔀</span><span>Change Therapist</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage1-automation.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>🤖</span><span>Auto-fill (Stage 1)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage2-manual.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>✏️</span><span>Manual Fill (Stage 2)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="conflicts.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚠️</span><span>Conflicts</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🗺️</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
+  </nav>
+</aside>
+
+<div class="main-wrapper">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-hamburger">☰</button>
+      <span class="topbar-logo">🏥</span>
+      <span class="topbar-session">Session logout in 1772 seconds</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-welcome">Welcome to CARES</span>
+      <select class="topbar-facility"><option>SCC @ Tampines</option></select>
+      <button class="topbar-notif">🔔<span class="topbar-notif-badge">5</span></button>
+      <a class="topbar-logout" href="#">↪ Log out</a>
+    </div>
+  </div>
+  <div class="page-loaded-bar">Page Loaded on: 25-Mar-2026 3:00 PM</div>
+
+  <div class="page-content">
+    <div class="page-header">
+      <div class="page-title">🤖 Stage 1 — Auto-fill Appointments</div>
+      <div class="page-sub">Automatically fill April 2026 slots based on recurring appointment series</div>
+    </div>
+
+    <!-- CONTEXT BANNER -->
+    <div class="context-banner">
+      <div class="context-banner-icon">📅</div>
+      <div class="context-banner-text">
+        <div class="context-banner-title">April 2026 shifts committed on 25 Mar 2026</div>
+        <div class="context-banner-sub">Monthly shift grid is finalised and ready for auto-fill processing</div>
+        <div class="context-banner-chips">
+          <span class="chip">152 slots created</span>
+          <span class="chip">6 recurring series</span>
+          <span class="chip">61 sessions to fill</span>
+          <span class="chip">Stage 1 ready to run</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION A: QUEUE -->
+    <div class="section-card" id="queue-section">
+      <div class="section-header">
+        <div class="section-title">📋 Recurring Series Queue <span style="background:#fef3c7;color:#d97706;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;margin-left:6px;">6 series pending</span></div>
+        <div class="section-meta">Auto-fill will populate slots for each series below</div>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Patient</th>
+            <th>AIC Service</th>
+            <th>Therapist</th>
+            <th>Schedule</th>
+            <th>Sessions to Fill</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:#9ca3af;font-weight:700;">1</td>
+            <td><div class="patient-name">Mdm Lim Siew Lan</div><div class="patient-room">Room C-12</div></td>
+            <td><span class="service-tag">DRP – OT</span></td>
+            <td>Dr Angela Lim</td>
+            <td><span style="font-size:12px;color:#374151;">Mon / Wed / Fri</span></td>
+            <td><strong>13</strong> sessions</td>
+            <td><span class="badge badge-pending">⏳ Pending</span></td>
+          </tr>
+          <tr>
+            <td style="color:#9ca3af;font-weight:700;">2</td>
+            <td><div class="patient-name">Mr Tan Ah Kow</div><div class="patient-room">Room C-08</div></td>
+            <td><span class="service-tag">DDC</span></td>
+            <td>Dr Wei Chen</td>
+            <td><span style="font-size:12px;color:#374151;">Mon – Fri</span></td>
+            <td><strong>21</strong> sessions</td>
+            <td><span class="badge badge-pending">⏳ Pending</span></td>
+          </tr>
+          <tr>
+            <td style="color:#9ca3af;font-weight:700;">3</td>
+            <td><div class="patient-name">Mdm Ng Bee Lian</div><div class="patient-room">Room C-15</div></td>
+            <td><span class="service-tag">IHC</span></td>
+            <td>Nurse Janice Tan</td>
+            <td><span style="font-size:12px;color:#374151;">Wed</span></td>
+            <td><strong>4</strong> sessions</td>
+            <td><span class="badge badge-pending">⏳ Pending</span></td>
+          </tr>
+          <tr>
+            <td style="color:#9ca3af;font-weight:700;">4</td>
+            <td><div class="patient-name">Mr Lee Chong Wei</div><div class="patient-room">Room C-03</div></td>
+            <td><span class="service-tag">DRP – Physio</span></td>
+            <td>Dr Marcus Lee</td>
+            <td><span style="font-size:12px;color:#374151;">Tue / Thu</span></td>
+            <td><strong>6</strong> sessions <span style="color:#d97706;font-size:11px;">(Apr 14–30 only)</span></td>
+            <td><span class="badge badge-pending">⏳ Pending</span></td>
+          </tr>
+          <tr>
+            <td style="color:#9ca3af;font-weight:700;">5</td>
+            <td><div class="patient-name">Mdm Chen Mei Ling</div><div class="patient-room">Room C-21</div></td>
+            <td><span class="service-tag">Home Therapy OT</span></td>
+            <td>Dr Angela Lim</td>
+            <td><span style="font-size:12px;color:#374151;">Tue / Thu</span></td>
+            <td><strong>9</strong> sessions</td>
+            <td><span class="badge badge-pending">⏳ Pending</span></td>
+          </tr>
+          <tr>
+            <td style="color:#9ca3af;font-weight:700;">6</td>
+            <td><div class="patient-name">Mr Wong Fook Seng</div><div class="patient-room">Room C-07</div></td>
+            <td><span class="service-tag">CREST</span></td>
+            <td>Nurse Janice Tan</td>
+            <td><span style="font-size:12px;color:#374151;">Mon / Thu</span></td>
+            <td><strong>8</strong> sessions</td>
+            <td><span class="badge badge-pending">⏳ Pending</span></td>
+          </tr>
+          <tr class="totals-row">
+            <td colspan="5" style="text-align:right;font-size:13px;">Total sessions to auto-fill:</td>
+            <td colspan="2"><strong>61 sessions</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- PROGRESS BAR (hidden until running) -->
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-label"><span id="progress-spin" style="display:inline-block;">⚙️</span> <span id="progress-text">Initialising automation engine...</span></div>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      </div>
+
+      <div class="run-btn-wrap">
+        <div style="font-size:12px;color:#6b7280;">⚠️ Ensure all therapist leaves and shift overrides are committed before running.</div>
+        <button class="btn-primary" id="run-btn" onclick="runAutomation()">🤖 Run Stage 1 Automation</button>
+      </div>
+    </div>
+
+    <!-- SECTION B: RESULTS (hidden initially) -->
+    <div class="section-card" id="results-section">
+      <div class="section-header">
+        <div class="section-title">📊 Stage 1 Results — April 2026 <span style="background:#dcfce7;color:#16a34a;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;margin-left:6px;">Run completed</span></div>
+        <div class="section-meta">Processed 25 Mar 2026 at 3:01 PM · Duration: 1.4s</div>
+      </div>
+
+      <div class="results-summary">
+        <div class="result-card total">
+          <div class="result-card-icon">📋</div>
+          <div>
+            <div class="result-card-num">61</div>
+            <div class="result-card-label">Total sessions processed</div>
+          </div>
+        </div>
+        <div class="result-card success">
+          <div class="result-card-icon">✅</div>
+          <div>
+            <div class="result-card-num">52</div>
+            <div class="result-card-label">Sessions filled successfully</div>
+          </div>
+        </div>
+        <div class="result-card failure">
+          <div class="result-card-icon">⚠️</div>
+          <div>
+            <div class="result-card-num">9</div>
+            <div class="result-card-label">Failed — require manual fill</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTS TABLE -->
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Patient</th>
+              <th>AIC Service</th>
+              <th>Therapist</th>
+              <th>Timeslot</th>
+              <th>Status</th>
+              <th>Reason / Note</th>
+            </tr>
+          </thead>
+          <tbody id="results-tbody">
+            <!-- Filled by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="results-actions">
+        <div class="results-actions-left">9 sessions require manual assignment in Stage 2</div>
+        <a href="stage2-manual.html" class="btn-proceed">Proceed to Stage 2 Manual Fill →</a>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+</div><!-- /main-wrapper -->
+
+<div class="toast" id="toast">✅ Stage 1 automation complete!</div>
+
+<script>
+  const resultData = [
+    // Mdm Lim Siew Lan — 13 sessions (Mon/Wed/Fri)
+    { date: "Wed 1 Apr", patient: "Mdm Lim Siew Lan", service: "DRP – OT", therapist: "Dr Angela Lim", slot: "09:00–10:00", status: "filled" },
+    { date: "Fri 3 Apr", patient: "Mdm Lim Siew Lan", service: "DRP – OT", therapist: "Dr Angela Lim", slot: "09:00–10:00", status: "filled" },
+    { date: "Mon 6 Apr", patient: "Mdm Lim Siew Lan", service: "DRP – OT", therapist: "Dr Angela Lim", slot: "09:00–10:00", status: "failed", reason: "no-slot" },
+    { date: "Wed 8 Apr", patient: "Mdm Lim Siew Lan", service: "DRP – OT", therapist: "Dr Angela Lim", slot: "09:00–10:00", status: "filled" },
+    { date: "Fri 10 Apr", patient: "Mdm Lim Siew Lan", service: "DRP – OT", therapist: "Dr Angela Lim", slot: "09:00–10:00", status: "filled" },
+    { date: "Mon 13 Apr", patient: "Mdm Lim Siew Lan", service: "DRP – OT", therapist: "Dr Angela Lim", slot: "09:00–10:00", status: "filled" },
+    { date: "Wed 15 Apr", patient: "Mdm Lim Siew Lan", service: "DRP – OT", therapist: "Dr Angela Lim", slot: "09:00–10:00", status: "filled" },
+    { date: "Fri 17 Apr", patient: "Mdm Lim Siew Lan", service: "DRP – OT", therapist: "Dr Angela Lim", slot: "09:00–10:00", status: "filled" },
+    { date: "Mon 20 Apr", patient: "Mdm Lim Siew Lan", service: "DRP – OT", therapist: "Dr Angela Lim", slot: "09:00–10:00", status: "filled" },
+    { date: "Wed 22 Apr", patient: "Mdm Lim Siew Lan", service: "DRP – OT", therapist: "Dr Angela Lim", slot: "09:00–10:00", status: "filled" },
+    { date: "Fri 24 Apr", patient: "Mdm Lim Siew Lan", service: "DRP – OT", therapist: "Dr Angela Lim", slot: "09:00–10:00", status: "filled" },
+    { date: "Mon 27 Apr", patient: "Mdm Lim Siew Lan", service: "DRP – OT", therapist: "Dr Angela Lim", slot: "09:00–10:00", status: "filled" },
+    { date: "Wed 29 Apr", patient: "Mdm Lim Siew Lan", service: "DRP – OT", therapist: "Dr Angela Lim", slot: "09:00–10:00", status: "filled" },
+    // Mr Tan Ah Kow — 21 sessions
+    { date: "Wed 1 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Thu 2 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Fri 3 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Mon 6 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "failed", reason: "taken" },
+    { date: "Tue 7 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Wed 8 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Thu 9 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Fri 10 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Mon 13 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Tue 14 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Wed 15 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Thu 16 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Fri 17 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Mon 20 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Tue 21 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Wed 22 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Thu 23 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Fri 24 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Mon 27 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Tue 28 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    { date: "Wed 29 Apr", patient: "Mr Tan Ah Kow", service: "DDC", therapist: "Dr Wei Chen", slot: "10:00–11:00", status: "filled" },
+    // Mdm Ng Bee Lian — 4 sessions (Wed only)
+    { date: "Wed 1 Apr", patient: "Mdm Ng Bee Lian", service: "IHC", therapist: "Nurse Janice Tan", slot: "11:00–12:00", status: "filled" },
+    { date: "Wed 8 Apr", patient: "Mdm Ng Bee Lian", service: "IHC", therapist: "Nurse Janice Tan", slot: "11:00–12:00", status: "filled" },
+    { date: "Wed 15 Apr", patient: "Mdm Ng Bee Lian", service: "IHC", therapist: "Nurse Janice Tan", slot: "11:00–12:00", status: "filled" },
+    { date: "Wed 22 Apr", patient: "Mdm Ng Bee Lian", service: "IHC", therapist: "Nurse Janice Tan", slot: "11:00–12:00", status: "filled" },
+    // Mr Lee Chong Wei — 6 sessions (Tue/Thu, Apr14–30 only, Marcus on leave Apr6–13)
+    { date: "Tue 14 Apr", patient: "Mr Lee Chong Wei", service: "DRP – Physio", therapist: "Dr Marcus Lee", slot: "14:00–15:00", status: "filled" },
+    { date: "Thu 16 Apr", patient: "Mr Lee Chong Wei", service: "DRP – Physio", therapist: "Dr Marcus Lee", slot: "14:00–15:00", status: "filled" },
+    { date: "Tue 7 Apr", patient: "Mr Lee Chong Wei", service: "DRP – Physio", therapist: "Dr Marcus Lee", slot: "14:00–15:00", status: "failed", reason: "leave" },
+    { date: "Thu 9 Apr", patient: "Mr Lee Chong Wei", service: "DRP – Physio", therapist: "Dr Marcus Lee", slot: "14:00–15:00", status: "failed", reason: "leave" },
+    { date: "Tue 21 Apr", patient: "Mr Lee Chong Wei", service: "DRP – Physio", therapist: "Dr Marcus Lee", slot: "14:00–15:00", status: "filled" },
+    { date: "Thu 23 Apr", patient: "Mr Lee Chong Wei", service: "DRP – Physio", therapist: "Dr Marcus Lee", slot: "14:00–15:00", status: "filled" },
+    // Mdm Chen Mei Ling — 9 sessions (Tue/Thu)
+    { date: "Tue 1 Apr", patient: "Mdm Chen Mei Ling", service: "Home Therapy OT", therapist: "Dr Angela Lim", slot: "15:00–16:00", status: "filled" },
+    { date: "Thu 3 Apr", patient: "Mdm Chen Mei Ling", service: "Home Therapy OT", therapist: "Dr Angela Lim", slot: "15:00–16:00", status: "filled" },
+    { date: "Tue 7 Apr", patient: "Mdm Chen Mei Ling", service: "Home Therapy OT", therapist: "Dr Angela Lim", slot: "15:00–16:00", status: "failed", reason: "no-slot" },
+    { date: "Thu 9 Apr", patient: "Mdm Chen Mei Ling", service: "Home Therapy OT", therapist: "Dr Angela Lim", slot: "15:00–16:00", status: "filled" },
+    { date: "Tue 14 Apr", patient: "Mdm Chen Mei Ling", service: "Home Therapy OT", therapist: "Dr Angela Lim", slot: "15:00–16:00", status: "filled" },
+    { date: "Thu 16 Apr", patient: "Mdm Chen Mei Ling", service: "Home Therapy OT", therapist: "Dr Angela Lim", slot: "15:00–16:00", status: "filled" },
+    { date: "Tue 21 Apr", patient: "Mdm Chen Mei Ling", service: "Home Therapy OT", therapist: "Dr Angela Lim", slot: "15:00–16:00", status: "filled" },
+    { date: "Thu 23 Apr", patient: "Mdm Chen Mei Ling", service: "Home Therapy OT", therapist: "Dr Angela Lim", slot: "15:00–16:00", status: "filled" },
+    { date: "Tue 28 Apr", patient: "Mdm Chen Mei Ling", service: "Home Therapy OT", therapist: "Dr Angela Lim", slot: "15:00–16:00", status: "filled" },
+    // Mr Wong Fook Seng — 8 sessions (Mon/Thu)
+    { date: "Thu 2 Apr", patient: "Mr Wong Fook Seng", service: "CREST", therapist: "Nurse Janice Tan", slot: "13:00–14:00", status: "filled" },
+    { date: "Mon 6 Apr", patient: "Mr Wong Fook Seng", service: "CREST", therapist: "Nurse Janice Tan", slot: "13:00–14:00", status: "failed", reason: "no-slot" },
+    { date: "Thu 9 Apr", patient: "Mr Wong Fook Seng", service: "CREST", therapist: "Nurse Janice Tan", slot: "13:00–14:00", status: "filled" },
+    { date: "Mon 13 Apr", patient: "Mr Wong Fook Seng", service: "CREST", therapist: "Nurse Janice Tan", slot: "13:00–14:00", status: "filled" },
+    { date: "Thu 16 Apr", patient: "Mr Wong Fook Seng", service: "CREST", therapist: "Nurse Janice Tan", slot: "13:00–14:00", status: "failed", reason: "taken" },
+    { date: "Mon 20 Apr", patient: "Mr Wong Fook Seng", service: "CREST", therapist: "Nurse Janice Tan", slot: "13:00–14:00", status: "filled" },
+    { date: "Thu 23 Apr", patient: "Mr Wong Fook Seng", service: "CREST", therapist: "Nurse Janice Tan", slot: "13:00–14:00", status: "filled" },
+    { date: "Mon 27 Apr", patient: "Mr Wong Fook Seng", service: "CREST", therapist: "Nurse Janice Tan", slot: "13:00–14:00", status: "filled" },
+  ];
+
+  const reasonLabels = {
+    "no-slot": "No available slot",
+    "leave": "Therapist on leave",
+    "taken": "Slot already taken"
+  };
+  const reasonClass = { "no-slot": "", "leave": "leave", "taken": "taken" };
+
+  function populateResultsTable() {
+    const tbody = document.getElementById("results-tbody");
+    tbody.innerHTML = "";
+    resultData.forEach((r, i) => {
+      const tr = document.createElement("tr");
+      const statusCell = r.status === "filled"
+        ? `<span class="badge badge-filled">✅ Filled</span>`
+        : `<span class="badge badge-failed">❌ Failed</span>`;
+      const reasonCell = r.status === "failed"
+        ? `<span class="reason-chip ${reasonClass[r.reason]}">${reasonLabels[r.reason]}</span>`
+        : `<span style="color:#9ca3af;font-size:12px;">—</span>`;
+      tr.innerHTML = `
+        <td style="color:#9ca3af;font-weight:700;font-size:12px;">${i+1}</td>
+        <td style="font-size:12px;white-space:nowrap;">${r.date}</td>
+        <td><div class="patient-name">${r.patient}</div></td>
+        <td><span class="service-tag">${r.service}</span></td>
+        <td style="font-size:12px;">${r.therapist}</td>
+        <td style="font-size:12px;">${r.slot}</td>
+        <td>${statusCell}</td>
+        <td>${reasonCell}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function runAutomation() {
+    const btn = document.getElementById("run-btn");
+    btn.disabled = true;
+    btn.innerHTML = "⚙️ Running...";
+
+    const progressWrap = document.getElementById("progress-wrap");
+    progressWrap.style.display = "block";
+
+    const fill = document.getElementById("progress-fill");
+    const text = document.getElementById("progress-text");
+    const msgs = [
+      "Connecting to slot database...",
+      "Loading recurring series...",
+      "Matching patients to open slots...",
+      "Checking therapist availability...",
+      "Filling confirmed matches...",
+      "Generating conflict report...",
+      "Finalising results..."
+    ];
+    let pct = 0;
+    let msgIdx = 0;
+
+    const interval = setInterval(() => {
+      pct += 2;
+      fill.style.width = pct + "%";
+      if (pct % 15 === 0 && msgIdx < msgs.length - 1) {
+        msgIdx++;
+        text.textContent = msgs[msgIdx];
+      }
+      if (pct >= 100) {
+        clearInterval(interval);
+        text.textContent = "✅ Automation complete — 61 sessions processed.";
+        setTimeout(showResults, 300);
+      }
+    }, 25);
+  }
+
+  function showResults() {
+    populateResultsTable();
+    document.getElementById("results-section").style.display = "block";
+    document.getElementById("results-section").scrollIntoView({ behavior: "smooth" });
+    const toast = document.getElementById("toast");
+    toast.style.display = "block";
+    setTimeout(() => { toast.style.display = "none"; }, 3500);
+  }
+</script>
+</body>
+</html>

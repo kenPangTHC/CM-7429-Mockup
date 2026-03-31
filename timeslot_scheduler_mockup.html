@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -785,6 +785,8 @@
   .nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
   .nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; cursor: pointer; }
   .nav-sidebar-nav { flex: 1; padding: 4px 0; }
+    .nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+
   .nav-sidebar-link {
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 12px; color: rgba(255,255,255,0.68);
@@ -837,13 +839,19 @@
     <div class="nav-sidebar-role">Enterprise Admin ▾</div>
   </div>
   <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
     <a href="coordinator-dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
     <a href="timeslot_scheduler_mockup.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
-    <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
     <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
     <a href="appointments.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
     <a href="recurring-edit.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔄</span><span>Recurring</span></span><span class="nav-chevron">‹</span></a>
     <a href="therapist-change.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔀</span><span>Change Therapist</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage1-automation.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🤖</span><span>Auto-fill (Stage 1)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage2-manual.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>✏️</span><span>Manual Fill (Stage 2)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="conflicts.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚠️</span><span>Conflicts</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🗺️</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
   </nav>
 </aside>
 <div class="main-wrapper">
@@ -1371,6 +1379,34 @@
           <div class="bsm-dropdown" id="bsmDropdown"></div>
         </div>
 
+        <!-- AIC Service (shown after patient selected) -->
+        <div id="bsmAicArea" style="display:none;">
+          <label class="bsm-label" style="margin-top:4px;">Patient AIC Service</label>
+          <select class="bsm-search" id="bsmAicSelect" style="padding-left:14px;height:40px;border-radius:10px;" onchange="selectBsmAicService(this.value)">
+            <option value="">— Select AIC service —</option>
+          </select>
+          <div id="bsmAicDays" style="display:none;margin-top:10px;margin-bottom:4px;">
+            <div style="font-size:11px;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">Service Attendance Days</div>
+            <div id="bsmDayPills" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            <div id="bsmAicDates" style="font-size:11px;color:#64748b;margin-top:6px;"></div>
+          </div>
+          <!-- Bill to AIC -->
+          <div id="bsmBillingArea" style="display:none;margin-top:10px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:#374151;">
+              <input type="checkbox" id="bsmBillAic" onchange="toggleBsmBilling(this.checked)"
+                style="width:16px;height:16px;accent-color:#0d9488;cursor:pointer;" />
+              Bill this session to AIC Service
+            </label>
+            <div id="bsmEpisodeArea" style="display:none;margin-top:8px;padding:10px 13px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;">
+              <div style="font-size:11px;font-weight:700;color:#065f46;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">AIC Episode Details</div>
+              <div style="font-size:12.5px;color:#374151;display:flex;flex-direction:column;gap:4px;">
+                <div><span style="color:#6b7280;">Episode No:</span> <strong id="bsmEpisodeNo">—</strong></div>
+                <div><span style="color:#6b7280;">Service:</span> <strong id="bsmEpisodeService">—</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Remarks -->
         <label class="bsm-label" style="margin-top:4px;">
           Remarks <span style="font-weight:400;color:#94a3b8;">(optional)</span>
@@ -1399,6 +1435,30 @@
 
   let bsmSelected = null;
   let bsmSlot = { date: 'Wed, 1 Apr 2026', time: '09:00', therapist: 'Ms Angela Lim' };
+
+  const BSM_AIC_SERVICES = {
+    lim:  [
+      { id:'drp-ot',  name:'Day Rehab Programme – OT',   days:[1,3,5], start:'2025-01-01', end:'2026-12-31' },
+      { id:'home-ot', name:'Home Therapy – OT',           days:[2,4],   start:'2025-06-01', end:'2026-06-30' },
+    ],
+    tan:  [ { id:'ddc',     name:'Dementia Day Care (DDC)',      days:[1,2,3,4,5], start:'2025-03-01', end:'2026-08-31' } ],
+    ng:   [
+      { id:'ihc',     name:'Integrated Home Care (IHC)', days:[3],     start:'2025-07-01', end:'2026-12-31' },
+      { id:'nursing', name:'Home Nursing',                days:[1,5],   start:'2025-07-01', end:'2026-12-31' },
+    ],
+    lee:  [
+      { id:'drp-pt',  name:'Day Rehab Programme – Physio',days:[2,4],  start:'2025-02-01', end:'2026-12-31' },
+      { id:'drp-ot',  name:'Day Rehab Programme – OT',    days:[1,3],  start:'2025-02-01', end:'2026-10-31' },
+    ],
+    chen: [
+      { id:'home-st', name:'Home Therapy – Speech',       days:[2,5],  start:'2025-04-01', end:'2026-12-31' },
+      { id:'crest',   name:'CREST Mental Health',         days:[1,4],  start:'2025-10-01', end:'2026-09-30' },
+    ],
+    wong: [
+      { id:'crest',   name:'CREST Mental Health',         days:[1,4],  start:'2025-09-01', end:'2026-08-31' },
+      { id:'nursing', name:'Home Nursing',                days:[3],    start:'2025-09-01', end:'2026-12-31' },
+    ],
+  };
 
   function renderBsmOptions(list) {
     const dd = document.getElementById('bsmDropdown');
@@ -1432,7 +1492,40 @@
     av.style.background = bsmSelected.color;
     document.getElementById('bsmSelectedPill').classList.add('show');
     document.getElementById('bsmSearchArea').style.display = 'none';
+    // Populate AIC services for this patient
+    const svcs = BSM_AIC_SERVICES[id] || [];
+    const sel = document.getElementById('bsmAicSelect');
+    sel.innerHTML = '<option value="">— Select AIC service —</option>' +
+      svcs.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    document.getElementById('bsmAicArea').style.display = '';
+    document.getElementById('bsmAicDays').style.display = 'none';
+    document.getElementById('bsmConfirmBtn').disabled = true; // need service selection too
+  }
+
+  function selectBsmAicService(id) {
+    if (!bsmSelected) return;
+    const svcs = BSM_AIC_SERVICES[bsmSelected.id] || [];
+    const svc = svcs.find(s => s.id === id);
+    const daysArea = document.getElementById('bsmAicDays');
+    if (!svc) { daysArea.style.display = 'none'; document.getElementById('bsmConfirmBtn').disabled = true; return; }
+    const names = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+    document.getElementById('bsmDayPills').innerHTML = names.map((d, i) => {
+      const on = svc.days.includes(i);
+      return `<span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-size:10.5px;font-weight:700;${on?'background:#0d9488;color:white;':'background:#f1f5f9;color:#94a3b8;'}">${d}</span>`;
+    }).join('');
+    document.getElementById('bsmAicDates').textContent = `${svc.start} – ${svc.end}`;
+    daysArea.style.display = '';
     document.getElementById('bsmConfirmBtn').disabled = false;
+    // Show billing area with episode details
+    document.getElementById('bsmBillingArea').style.display = '';
+    document.getElementById('bsmBillAic').checked = false;
+    document.getElementById('bsmEpisodeArea').style.display = 'none';
+    document.getElementById('bsmEpisodeNo').textContent = svc.episode || 'EP-2026-' + Math.floor(Math.random()*9000+1000);
+    document.getElementById('bsmEpisodeService').textContent = svc.name;
+  }
+
+  function toggleBsmBilling(checked) {
+    document.getElementById('bsmEpisodeArea').style.display = checked ? '' : 'none';
   }
 
   function clearBsmSelection() {
@@ -1441,6 +1534,10 @@
     document.getElementById('bsmSearchArea').style.display = '';
     document.getElementById('bsmSearchInput').value = '';
     renderBsmOptions(BSM_PATIENTS);
+    document.getElementById('bsmAicArea').style.display = 'none';
+    document.getElementById('bsmAicDays').style.display = 'none';
+    document.getElementById('bsmBillingArea').style.display = 'none';
+    document.getElementById('bsmAicSelect').value = '';
     document.getElementById('bsmConfirmBtn').disabled = true;
   }
 

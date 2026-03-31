@@ -207,6 +207,8 @@
   .nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
   .nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; cursor: pointer; }
   .nav-sidebar-nav { flex: 1; padding: 4px 0; }
+    .nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+
   .nav-sidebar-link {
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 12px; color: rgba(255,255,255,0.68);
@@ -259,13 +261,19 @@
     <div class="nav-sidebar-role">Enterprise Admin ▾</div>
   </div>
   <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
     <a href="coordinator-dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
     <a href="timeslot_scheduler_mockup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
-    <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
     <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
     <a href="appointments.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
     <a href="recurring-edit.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔄</span><span>Recurring</span></span><span class="nav-chevron">‹</span></a>
     <a href="therapist-change.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>🔀</span><span>Change Therapist</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage1-automation.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🤖</span><span>Auto-fill (Stage 1)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage2-manual.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>✏️</span><span>Manual Fill (Stage 2)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="conflicts.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚠️</span><span>Conflicts</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🗺️</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
   </nav>
 </aside>
 <div class="main-wrapper">
@@ -302,39 +310,11 @@
     <span class="badge badge-purple">🔄 Recurring</span>
   </div>
 
-  <!-- SCOPE SELECTOR -->
+  <!-- SCOPE NOTICE — single appointment only -->
   <div class="scope-bar">
-    <div>
-      <div class="scope-label">🎯 Apply change to:</div>
-    </div>
-    <div class="scope-options">
-      <span class="scope-pill" onclick="setScope(this,'this')">This session only (Mon, 6 Apr)</span>
-      <span class="scope-pill on" onclick="setScope(this,'following')">This &amp; following (8 sessions)</span>
-      <span class="scope-pill" onclick="setScope(this,'all')">All in series (12 sessions)</span>
-      <span class="scope-pill" onclick="setScope(this,'custom')">✎ Custom — select sessions</span>
-    </div>
-  </div>
-
-  <!-- CUSTOM SESSION PICKER (shown only when 'custom' scope selected) -->
-  <div id="customSessionPicker" style="display:none;">
-    <div style="background:white;border:1.5px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:0;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <div>
-          <div style="font-size:14px;font-weight:700;color:var(--text);">Select Sessions to Reassign</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:3px;">Tick the sessions you want to change. Unticked sessions stay with Dr Marcus Lee.</div>
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button onclick="selectAllSessions(true)" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:white;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">Select All</button>
-          <button onclick="selectAllSessions(false)" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:white;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">Clear All</button>
-        </div>
-      </div>
-      <div id="customSessionList" style="display:flex;flex-direction:column;gap:6px;">
-        <!-- Sessions filled here -->
-      </div>
-      <div style="margin-top:12px;padding:10px 14px;background:#f0fdf9;border-radius:10px;font-size:12.5px;display:flex;align-items:center;gap:8px;">
-        <span>✅</span>
-        <span id="customSessionSummary" style="color:var(--primary);font-weight:600;">2 sessions selected for reassignment</span>
-      </div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <span class="scope-pill on" style="cursor:default;">📅 This appointment only · Mon, 6 Apr 2026 · 09:00</span>
+      <span style="font-size:12.5px;color:var(--muted);">Only this single appointment will be reassigned. The rest of the recurring series remains unchanged.</span>
     </div>
   </div>
 
@@ -465,8 +445,8 @@
   <!-- ACTION BAR -->
   <div class="action-bar">
     <div class="action-bar-left">
-      <div class="action-bar-title" id="actionBarTitle">Reassign 8 sessions to Dr Angela Lim</div>
-      <div class="action-bar-meta" id="actionBarMeta">This and following sessions from Mon, 6 Apr 2026 · Recurring OT · Mdm Lim Siew Lan</div>
+      <div class="action-bar-title" id="actionBarTitle">Reassign 1 appointment to Dr Angela Lim</div>
+      <div class="action-bar-meta" id="actionBarMeta">This appointment only · Mon, 6 Apr 2026 · 09:00 · Recurring OT · Mdm Lim Siew Lan</div>
     </div>
     <div class="action-bar-right">
       <button class="btn btn-ghost" onclick="window.location='recurring-edit.html'">Cancel</button>
@@ -534,7 +514,7 @@
         </tbody>
       </table>
       <div class="impact-note">
-        🔄 Scope: <strong id="confirmScope">This and following events</strong> — from Mon, 6 Apr to Mon, 25 May 2026
+        📅 Scope: <strong>This appointment only</strong> — Mon, 6 Apr 2026 · 09:00 · Recurring series not affected.
       </div>
     </div>
     <div class="modal-footer">
@@ -549,13 +529,13 @@
   <div class="success-card">
     <div class="success-icon">✅</div>
     <h2>Change Applied!</h2>
-    <p id="successMsg">8 sessions successfully reassigned to Dr Angela Lim.</p>
+    <p id="successMsg">1 appointment successfully reassigned to Dr Angela Lim.</p>
     <div class="success-detail">
       <div class="success-row"><span class="sr-label">Patient</span><span class="sr-val">Mdm Lim Siew Lan</span></div>
       <div class="success-row"><span class="sr-label">From</span><span class="sr-val">Dr Marcus Lee</span></div>
       <div class="success-row"><span class="sr-label">To</span><span class="sr-val" id="successTo">Dr Angela Lim</span></div>
-      <div class="success-row"><span class="sr-label">Sessions</span><span class="sr-val" id="successSessions">8 sessions reassigned</span></div>
-      <div class="success-row"><span class="sr-label">Effective</span><span class="sr-val">Mon, 6 Apr 2026 onwards</span></div>
+      <div class="success-row"><span class="sr-label">Sessions</span><span class="sr-val" id="successSessions">1 appointment reassigned</span></div>
+      <div class="success-row"><span class="sr-label">Effective</span><span class="sr-val">Mon, 6 Apr 2026 · 09:00 only</span></div>
     </div>
     <div class="success-actions">
       <button class="btn btn-ghost" onclick="window.location='recurring-edit.html'">View Appointment</button>
@@ -691,24 +671,30 @@
   };
 
   let selectedT = 'angela';
-  let currentScope = 'following';
+  const currentScope = 'this';
 
-  const scopeLabels = {
-    'this':     'This session only (Mon, 6 Apr)',
-    'following':'This and following events',
-    'all':      'All events in series (12 sessions)',
-    'custom':   'Custom session selection'
-  };
+  function updateActionBar() {
+    const d = therapistData[selectedT];
+    document.getElementById('actionBarTitle').textContent = `Reassign 1 appointment to ${d.name}`;
+    document.getElementById('actionBarMeta').textContent = `This appointment only · Mon, 6 Apr 2026 · 09:00 · Recurring OT · Mdm Lim Siew Lan`;
+  }
 
-  function setScope(el, scope) {
-    currentScope = scope;
-    document.querySelectorAll('.scope-pill').forEach(p => p.classList.remove('on'));
-    el.classList.add('on');
-    const picker = document.getElementById('customSessionPicker');
-    if (picker) picker.style.display = scope === 'custom' ? 'block' : 'none';
-    if (scope === 'custom') renderSessionList();
-    renderComparison();
-    updateActionBar();
+  function showConfirmModal() {
+    const d = therapistData[selectedT];
+    document.getElementById('confirmNewTherapist').textContent = d.name;
+    document.getElementById('confirmNewSpec').textContent = d.spec;
+    document.getElementById('confirmNewRoom').textContent = d.room;
+    document.getElementById('confirmSessions').textContent = '1 appointment — confirmed';
+    document.getElementById('confirmModal').classList.add('show');
+  }
+
+  function applyChange() {
+    document.getElementById('confirmModal').classList.remove('show');
+    const d = therapistData[selectedT];
+    document.getElementById('successMsg').textContent = `1 appointment successfully reassigned to ${d.name}.`;
+    document.getElementById('successTo').textContent = d.name;
+    document.getElementById('successSessions').textContent = '1 appointment reassigned';
+    document.getElementById('successOverlay').classList.add('show');
   }
 
   function selectTherapist(id) {
@@ -731,36 +717,9 @@
     updateActionBar();
   }
 
-  function updateActionBar() {
-    const d = therapistData[selectedT];
-    let sCount;
-    if (currentScope === 'this')         sCount = '1 session';
-    else if (currentScope === 'following') sCount = '8 sessions';
-    else if (currentScope === 'all')       sCount = '12 sessions';
-    else                                   sCount = `${selectedSessions.size} selected session${selectedSessions.size!==1?'s':''}`;
-    document.getElementById('actionBarTitle').textContent = `Reassign ${sCount} to ${d.name}`;
-    document.getElementById('actionBarMeta').textContent = `${scopeLabels[currentScope]} · Recurring OT · Mdm Lim Siew Lan`;
-  }
-
-  function showConfirmModal() {
-    const d = therapistData[selectedT];
-    document.getElementById('confirmNewTherapist').textContent = d.name;
-    document.getElementById('confirmNewSpec').textContent = d.spec;
-    document.getElementById('confirmNewRoom').textContent = d.room;
-    document.getElementById('confirmSessions').textContent = d.sessions;
-    document.getElementById('confirmScope').textContent = scopeLabels[currentScope];
-    document.getElementById('confirmModal').classList.add('show');
-  }
-
-  function applyChange() {
-    document.getElementById('confirmModal').classList.remove('show');
-    const d = therapistData[selectedT];
-    const sCount = currentScope === 'this' ? '1 session' : currentScope === 'following' ? '8 sessions' : currentScope === 'all' ? '12 sessions' : `${selectedSessions.size} sessions`;
-    document.getElementById('successMsg').textContent = `${sCount} successfully reassigned to ${d.name}.`;
-    document.getElementById('successTo').textContent = d.name;
-    document.getElementById('successSessions').textContent = `${sCount} reassigned`;
-    document.getElementById('successOverlay').classList.add('show');
-  }
+  function updateActionBar_unused() { /* replaced above */ }
+  function showConfirmModal_unused() { /* replaced above */ }
+  function applyChange_unused() { /* replaced above */ }
 
   // Initialise comparison on page load
   renderComparison();

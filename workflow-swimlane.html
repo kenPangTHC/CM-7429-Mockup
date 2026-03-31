@@ -1,0 +1,755 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workflow Diagram — CARES Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { display: flex !important; min-height: 100vh; margin: 0; font-family: 'Outfit', Inter, ui-sans-serif; background: #f5f7fb; color: #111827; }
+
+    /* NAV SIDEBAR */
+    .nav-sidebar { width: 200px; min-width: 200px; background: #1a2e2c; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 200; display: flex; flex-direction: column; }
+    .nav-sidebar-profile { padding: 20px 14px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .nav-sidebar-avatar { width: 46px; height: 46px; border-radius: 50%; background: rgba(13,148,136,0.25); border: 2px solid rgba(13,148,136,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 9px; }
+    .nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
+    .nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; }
+    .nav-sidebar-nav { flex: 1; padding: 4px 0; }
+    .nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+
+    .nav-sidebar-link { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; color: rgba(255,255,255,0.68); text-decoration: none; font-size: 12px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
+    .nav-sidebar-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.95); }
+    .nav-sidebar-link.active { background: rgba(13,148,136,0.18); color: #5eead4; border-left-color: #0d9488; }
+    .nav-sidebar-link-inner { display: flex; align-items: center; gap: 8px; }
+    .nav-chevron { font-size: 10px; opacity: 0.35; }
+
+    /* MAIN */
+    .main-wrapper { margin-left: 200px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 0 20px; height: 46px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-hamburger { background: #0d9488; border: none; border-radius: 5px; color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; }
+    .topbar-logo { font-size: 22px; }
+    .topbar-session { font-size: 11.5px; color: #6b7280; }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .topbar-welcome { font-size: 11.5px; color: #9ca3af; }
+    .topbar-facility { border: 1px solid #d1d5db; border-radius: 6px; padding: 3px 8px; font-size: 11px; color: #374151; background: white; max-width: 230px; cursor: pointer; }
+    .topbar-notif { position: relative; background: none; border: none; cursor: pointer; font-size: 17px; padding: 0; }
+    .topbar-notif-badge { position: absolute; top: -4px; right: -5px; background: #f59e0b; color: white; border-radius: 10px; font-size: 9px; padding: 1px 4px; font-weight: 700; }
+    .topbar-logout { color: #6b7280; font-size: 11.5px; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+    .page-loaded-bar { background: #fff; border-bottom: 1px solid #f3f4f6; padding: 3px 20px; font-size: 11px; color: #9ca3af; }
+
+    /* PAGE CONTENT */
+    .page-content { padding: 24px; flex: 1; }
+    .page-header { margin-bottom: 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .page-title { font-size: 22px; font-weight: 800; color: #111827; margin: 0 0 4px; }
+    .page-sub { font-size: 13px; color: #6b7280; }
+
+    /* STATUS BADGE */
+    .status-badge { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 10px 18px; box-shadow: 0 2px 8px rgba(15,23,42,0.06); }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #2563eb; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; transform: scale(1); } 50% { opacity:0.6; transform: scale(1.15); } }
+    .status-text { font-size: 13px; font-weight: 700; color: #111827; }
+    .status-sub { font-size: 11px; color: #6b7280; margin-top: 1px; }
+
+    /* LEGEND */
+    .legend-bar { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #374151; font-weight: 500; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 4px; }
+    .ld-therapist { background: #0d9488; }
+    .ld-coord { background: #2563eb; }
+    .ld-system { background: #64748b; }
+    .ld-current { background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 4px; width: 12px; height: 12px; }
+    .ld-complete { background: #16a34a; }
+
+    /* SWIMLANE CONTAINER */
+    .swimlane-wrapper { overflow-x: auto; padding-bottom: 16px; }
+    .swimlane-grid { display: flex; flex-direction: column; gap: 0; min-width: 1200px; }
+
+    /* LANE */
+    .lane { display: flex; align-items: stretch; min-height: 210px; }
+    .lane-header { width: 140px; min-width: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 16px 10px; border-right: 2px solid rgba(255,255,255,0.12); position: relative; z-index: 2; }
+    .lane-header-icon { font-size: 26px; }
+    .lane-header-name { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; text-align: center; }
+    .lane-header-role { font-size: 10.5px; font-weight: 500; text-align: center; opacity: 0.75; }
+
+    /* LANE COLORS */
+    .lane-therapist { background: linear-gradient(90deg, #0f4f49 0%, #0a3d38 100%); }
+    .lane-therapist .lane-header { background: #0d9488; }
+    .lane-therapist .lane-header-name { color: #ccfbf1; }
+    .lane-therapist .lane-header-role { color: #5eead4; }
+    .lane-coord { background: linear-gradient(90deg, #1e3a5f 0%, #172d4e 100%); }
+    .lane-coord .lane-header { background: #1d4ed8; }
+    .lane-coord .lane-header-name { color: #bfdbfe; }
+    .lane-coord .lane-header-role { color: #93c5fd; }
+    .lane-system { background: linear-gradient(90deg, #1e2a3a 0%, #141f2e 100%); }
+    .lane-system .lane-header { background: #334155; }
+    .lane-system .lane-header-name { color: #cbd5e1; }
+    .lane-system .lane-header-role { color: #94a3b8; }
+
+    /* LANE BODY */
+    .lane-body { flex: 1; display: flex; align-items: center; padding: 20px 0 20px 20px; gap: 0; position: relative; }
+
+    /* STEP CARD */
+    .step-wrap { display: flex; align-items: center; position: relative; }
+    .step-card { width: 160px; min-width: 160px; border-radius: 14px; padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 5px; position: relative; cursor: default; transition: transform 0.15s, box-shadow 0.15s; }
+    .step-card:hover { transform: translateY(-2px); }
+
+    /* CARD THEMES */
+    .card-therapist { background: rgba(13,148,136,0.15); border: 1.5px solid rgba(13,148,136,0.35); }
+    .card-therapist:hover { box-shadow: 0 6px 20px rgba(13,148,136,0.22); }
+    .card-coord { background: rgba(37,99,235,0.15); border: 1.5px solid rgba(37,99,235,0.35); }
+    .card-coord:hover { box-shadow: 0 6px 20px rgba(37,99,235,0.22); }
+    .card-system { background: rgba(100,116,139,0.15); border: 1.5px solid rgba(100,116,139,0.3); }
+    .card-system:hover { box-shadow: 0 6px 20px rgba(100,116,139,0.18); }
+
+    /* CURRENT STEP HIGHLIGHT */
+    .card-current { border: 2px solid #f59e0b !important; background: rgba(245,158,11,0.18) !important; box-shadow: 0 0 0 3px rgba(245,158,11,0.18), 0 8px 24px rgba(245,158,11,0.25) !important; }
+    .card-current .step-num { background: #f59e0b !important; color: #fff !important; }
+    .current-glow { position: absolute; inset: -3px; border-radius: 16px; border: 2px solid rgba(245,158,11,0.4); animation: glow-pulse 2.5s infinite; pointer-events: none; }
+    @keyframes glow-pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+    /* COMPLETED STEP */
+    .card-complete { opacity: 0.72; }
+
+    .step-num-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; }
+    .step-num { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 800; }
+    .num-therapist { background: rgba(13,148,136,0.25); color: #5eead4; }
+    .num-coord { background: rgba(37,99,235,0.25); color: #93c5fd; }
+    .num-system { background: rgba(100,116,139,0.25); color: #94a3b8; }
+    .step-icon { font-size: 18px; }
+    .step-title { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.3; }
+    .step-desc { font-size: 10.5px; color: rgba(255,255,255,0.6); line-height: 1.5; }
+    .step-link { margin-top: 6px; display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700; border-radius: 6px; padding: 3px 9px; text-decoration: none; transition: opacity 0.15s; }
+    .link-therapist { background: rgba(13,148,136,0.25); color: #5eead4; }
+    .link-therapist:hover { background: rgba(13,148,136,0.45); color: #fff; }
+    .link-coord { background: rgba(37,99,235,0.25); color: #93c5fd; }
+    .link-coord:hover { background: rgba(37,99,235,0.45); color: #fff; }
+    .link-system { background: rgba(100,116,139,0.25); color: #94a3b8; }
+    .link-system:hover { background: rgba(100,116,139,0.45); color: #fff; }
+    .link-current { background: rgba(245,158,11,0.25); color: #fde68a; }
+    .link-current:hover { background: rgba(245,158,11,0.45); color: #fff; }
+
+    /* ARROW CONNECTOR */
+    .arrow { display: flex; align-items: center; padding: 0 6px; color: rgba(255,255,255,0.25); font-size: 14px; flex-shrink: 0; }
+
+    /* EMPTY CELL PLACEHOLDER */
+    .empty-step { width: 160px; min-width: 160px; }
+
+    /* CROSS-LANE ARROWS — SVG overlay */
+    .lane-connector-container { position: relative; height: 0; overflow: visible; }
+
+    /* LANE DIVIDER */
+    .lane-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 0; }
+
+    /* COMPLETION BADGE */
+    .done-badge { position: absolute; top: 8px; right: 8px; background: #16a34a; color: #fff; border-radius: 10px; font-size: 9px; font-weight: 800; padding: 2px 5px; }
+    .current-badge { position: absolute; top: 8px; right: 8px; background: #f59e0b; color: #fff; border-radius: 10px; font-size: 9px; font-weight: 800; padding: 2px 5px; animation: pulse 2s infinite; }
+
+    /* STEP POSITION GRID */
+    /* Steps positioned by column in each lane */
+    .step-ghost { width: 160px; min-width: 160px; }
+    .lane-body .spacer { width: 172px; min-width: 172px; flex-shrink: 0; }
+
+    /* DOWN ARROW between lanes */
+    .cross-arrow-section { position: relative; height: 36px; background: #0f1e1c; display: flex; align-items: center; overflow: visible; }
+    .cross-arrow-section svg { position: absolute; top: 0; left: 0; width: 100%; height: 36px; pointer-events: none; }
+
+    /* SCROLL HINT */
+    .scroll-hint { text-align: right; font-size: 11px; color: rgba(255,255,255,0.35); padding: 4px 16px 0; font-style: italic; }
+
+    /* STEP NUMBER LABELS above diagram */
+    .step-numbers-row { display: flex; align-items: center; padding: 6px 0 6px 160px; min-width: 1200px; border-bottom: 1px solid rgba(255,255,255,0.06); background: #0a1a18; }
+    .step-num-label { width: 160px; min-width: 160px; text-align: center; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.07em; }
+    .step-num-label.active { color: #f59e0b; }
+    .step-arrow-gap { width: 26px; min-width: 26px; }
+
+    /* OUTER WRAPPER */
+    .diagram-outer { background: #0a1a18; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255,255,255,0.07); box-shadow: 0 12px 30px rgba(0,0,0,0.25); }
+
+    .page-footer-note { margin-top: 18px; background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; padding: 14px 20px; display: flex; align-items: center; gap: 16px; }
+    .footer-note-text { font-size: 12px; color: #6b7280; flex: 1; }
+    .btn-stage2 { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none; border-radius: 10px; padding: 9px 20px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; transition: opacity 0.15s; }
+    .btn-stage2:hover { opacity: 0.88; }
+
+    /* === 5-LANE 12-STEP OVERRIDES === */
+    .swimlane-grid { min-width: 2200px; }
+    .step-numbers-row { min-width: 2200px; padding-left: 171px; }
+    .lane-header { width: 155px; min-width: 155px; }
+    .step-card { width: 155px; min-width: 155px; }
+    .empty-step { width: 155px; min-width: 155px; }
+    .step-ghost { width: 155px; min-width: 155px; }
+    .step-num-label { width: 155px; min-width: 155px; }
+    .step-arrow-gap { width: 16px; min-width: 16px; }
+    .arrow { width: 16px; min-width: 16px; padding: 0; justify-content: center; font-size: 11px; }
+    .lane-body .spacer { width: 171px; min-width: 171px; flex-shrink: 0; }
+    .lane-body { padding: 20px 0 20px 16px; }
+
+    /* PHASE HEADER ROW */
+    .phase-header-row { display: flex; align-items: stretch; min-width: 2200px; background: #071612; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .phase-header-spacer { width: 155px; min-width: 155px; flex-shrink: 0; border-right: 2px solid rgba(255,255,255,0.08); }
+    .phase-label { display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.5); padding: 8px 4px; border-right: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
+
+    /* NEW LANE COLORS */
+    .lane-manager { background: linear-gradient(90deg, #3d1f08 0%, #2c1606 100%); }
+    .lane-manager .lane-header { background: #b45309; }
+    .lane-manager .lane-header-name { color: #fef3c7; }
+    .lane-manager .lane-header-role { color: #fcd34d; }
+    .lane-patient { background: linear-gradient(90deg, #2e1065 0%, #200b4a 100%); }
+    .lane-patient .lane-header { background: #6d28d9; }
+    .lane-patient .lane-header-name { color: #ede9fe; }
+    .lane-patient .lane-header-role { color: #c4b5fd; }
+    .lane-billing { background: linear-gradient(90deg, #1a0f00 0%, #120a00 100%); }
+    .lane-billing .lane-header { background: #c2410c; }
+    .lane-billing .lane-header-name { color: #ffedd5; }
+    .lane-billing .lane-header-role { color: #fb923c; }
+    .card-manager { background: rgba(180,83,9,0.15); border: 1.5px solid rgba(180,83,9,0.4); }
+    .card-manager:hover { box-shadow: 0 6px 20px rgba(180,83,9,0.22); }
+    .num-manager { background: rgba(180,83,9,0.3); color: #fcd34d; }
+    .link-manager { background: rgba(180,83,9,0.25); color: #fcd34d; }
+    .link-manager:hover { background: rgba(180,83,9,0.45); color: #fff; }
+    .card-patient { background: rgba(124,58,237,0.15); border: 1.5px solid rgba(124,58,237,0.35); }
+    .card-patient:hover { box-shadow: 0 6px 20px rgba(124,58,237,0.22); }
+    .num-patient { background: rgba(124,58,237,0.3); color: #c4b5fd; }
+    .link-patient { background: rgba(124,58,237,0.25); color: #c4b5fd; }
+    .link-patient:hover { background: rgba(124,58,237,0.45); color: #fff; }
+    .card-billing { background: rgba(194,65,12,0.15); border: 1.5px solid rgba(194,65,12,0.4); }
+    .card-billing:hover { box-shadow: 0 6px 20px rgba(194,65,12,0.22); }
+    .num-billing { background: rgba(194,65,12,0.3); color: #fb923c; }
+    .link-billing { background: rgba(194,65,12,0.25); color: #fb923c; }
+    .link-billing:hover { background: rgba(194,65,12,0.45); color: #fff; }
+  </style>
+</head>
+<body>
+
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-profile">
+    <div class="nav-sidebar-avatar">🤖</div>
+    <div class="nav-sidebar-name">Cares Admin<br>TETSUYU</div>
+    <div class="nav-sidebar-role">Enterprise Admin ▾</div>
+  </div>
+  <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
+    <a href="coordinator-dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
+    <a href="timeslot_scheduler_mockup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
+    <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
+    <a href="appointments.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
+    <a href="recurring-edit.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔄</span><span>Recurring</span></span><span class="nav-chevron">‹</span></a>
+    <a href="therapist-change.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔀</span><span>Change Therapist</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage1-automation.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🤖</span><span>Auto-fill (Stage 1)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage2-manual.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>✏️</span><span>Manual Fill (Stage 2)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="conflicts.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚠️</span><span>Conflicts</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>🗺️</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
+  </nav>
+</aside>
+
+<div class="main-wrapper">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-hamburger">☰</button>
+      <span class="topbar-logo">🏥</span>
+      <span class="topbar-session">Session logout in 1772 seconds</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-welcome">Welcome to CARES</span>
+      <select class="topbar-facility"><option>SCC @ Tampines</option></select>
+      <button class="topbar-notif">🔔<span class="topbar-notif-badge">5</span></button>
+      <a class="topbar-logout" href="#">&#x21AA; Log out</a>
+    </div>
+  </div>
+  <div class="page-loaded-bar">Page Loaded on: 25-Mar-2026 3:00 PM</div>
+
+  <div class="page-content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">🗺️ Scheduling Workflow</div>
+        <div class="page-sub">End-to-end appointment scheduling — 5 roles · 12 steps · CARES Scheduler</div>
+      </div>
+    </div>
+
+    <!-- LEGEND BAR -->
+    <div class="legend-bar">
+      <span style="font-size:12px;font-weight:700;color:#374151;">Lane key:</span>
+      <div class="legend-item"><span class="legend-dot" style="background:#b45309;border-radius:4px;"></span> Center Manager</div>
+      <div class="legend-item"><span class="legend-dot ld-coord"></span> Care Coordinator</div>
+      <div class="legend-item"><span class="legend-dot ld-therapist"></span> Therapist</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7c3aed;border-radius:4px;"></span> Patient</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#ea580c;border-radius:4px;"></span> System / Billing</div>
+      <div style="width:1px;height:18px;background:#e5e7eb;margin:0 4px;"></div>
+      <div class="legend-item"><span class="legend-dot ld-complete"></span> ✓ Done</div>
+      <div style="margin-left:auto;font-size:12px;color:#6b7280;font-style:italic;">← scroll horizontally to see all 12 steps →</div>
+    </div>
+
+    <!-- DIAGRAM -->
+    <div class="swimlane-wrapper">
+      <div class="diagram-outer">
+        <div class="swimlane-grid">
+
+          <!-- PHASE HEADER ROW -->
+          <div class="phase-header-row">
+            <div class="phase-header-spacer"></div>
+            <div style="flex:1;display:flex;padding-left:16px;">
+              <div class="phase-label" style="width:497px;">📐 Initial Setup</div>
+              <div style="width:16px;flex-shrink:0;"></div>
+              <div class="phase-label" style="width:326px;">📋 Roster &amp; Scheduling</div>
+              <div style="width:16px;flex-shrink:0;"></div>
+              <div class="phase-label" style="width:155px;">⚠️ Conflict Mgmt</div>
+              <div style="width:16px;flex-shrink:0;"></div>
+              <div class="phase-label" style="width:326px;">📆 Monthly Review</div>
+              <div style="width:16px;flex-shrink:0;"></div>
+              <div class="phase-label" style="width:326px;">↔️ Rescheduling</div>
+              <div style="width:16px;flex-shrink:0;"></div>
+              <div class="phase-label" style="width:326px;">🩺 Session &amp; Billing</div>
+            </div>
+          </div>
+
+          <!-- STEP NUMBERS ROW -->
+          <div class="step-numbers-row">
+            <div class="step-num-label">Step 1</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 2</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 3</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 4</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 5</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 6</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 7</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 8</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 9</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 10</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 11</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 12</div>
+          </div>
+
+          <!-- ═══════════════════════════════════════════════════════ -->
+          <!-- LANE 1: CENTER MANAGER                                  -->
+          <!-- ═══════════════════════════════════════════════════════ -->
+          <div class="lane lane-manager">
+            <div class="lane-header">
+              <div class="lane-header-icon">🏢</div>
+              <div class="lane-header-name">Center Manager</div>
+              <div class="lane-header-role">Facility Admin</div>
+            </div>
+            <div class="lane-body">
+              <!-- Step 1 -->
+              <div class="step-wrap">
+                <div class="step-card card-manager card-complete">
+                  <span class="done-badge">✓ Done</span>
+                  <div class="step-num-row">
+                    <span class="step-num num-manager">1</span>
+                    <span class="step-icon">⚙️</span>
+                  </div>
+                  <div class="step-title">Global Config</div>
+                  <div class="step-desc">Set session duration, facility rules &amp; AIC service parameters</div>
+                  <a href="shift-setup.html#tab-global" class="step-link link-manager">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Step 2 -->
+              <div class="step-wrap">
+                <div class="step-card card-manager card-complete">
+                  <span class="done-badge">✓ Done</span>
+                  <div class="step-num-row">
+                    <span class="step-num num-manager">2</span>
+                    <span class="step-icon">👩‍⚕️</span>
+                  </div>
+                  <div class="step-title">Add Therapists</div>
+                  <div class="step-desc">Create profiles, set specialisations &amp; assign rooms</div>
+                  <a href="shift-setup.html#tab-therapists" class="step-link link-manager">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Step 3 -->
+              <div class="step-wrap">
+                <div class="step-card card-manager card-complete">
+                  <span class="done-badge">✓ Done</span>
+                  <div class="step-num-row">
+                    <span class="step-num num-manager">3</span>
+                    <span class="step-icon">🕐</span>
+                  </div>
+                  <div class="step-title">Define Time Slots</div>
+                  <div class="step-desc">Configure slot intervals (e.g. every 30 min), AM/PM shifts</div>
+                  <a href="shift-setup.html#tab-global" class="step-link link-manager">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Steps 4–12: spacers -->
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+            </div>
+          </div>
+
+          <!-- CROSS ARROW: Manager → System triggered at step 3 -->
+          <div class="cross-arrow-section" style="min-width:2200px;">
+            <svg viewBox="0 0 2200 36" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;width:2200px;height:36px;pointer-events:none;">
+              <path d="M 590 2 L 590 30" stroke="rgba(217,119,6,0.75)" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#mgr-dn)" fill="none"/>
+              <text x="596" y="22" fill="rgba(217,119,6,0.8)" font-size="9" font-family="Outfit,sans-serif">slots triggered ↓</text>
+              <defs>
+                <marker id="mgr-dn" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="rgba(217,119,6,0.75)"/></marker>
+              </defs>
+            </svg>
+          </div>
+
+          <div class="lane-divider"></div>
+
+          <!-- ═══════════════════════════════════════════════════════ -->
+          <!-- LANE 2: CARE COORDINATOR                                -->
+          <!-- ═══════════════════════════════════════════════════════ -->
+          <div class="lane lane-coord">
+            <div class="lane-header">
+              <div class="lane-header-icon">👩‍💼</div>
+              <div class="lane-header-name">Care Coord.</div>
+              <div class="lane-header-role">Coordinator</div>
+            </div>
+            <div class="lane-body">
+              <!-- Steps 1–4: spacers -->
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <!-- Step 5 -->
+              <div class="step-wrap">
+                <div class="step-card card-coord card-complete">
+                  <span class="done-badge">✓ Done</span>
+                  <div class="step-num-row">
+                    <span class="step-num num-coord">5</span>
+                    <span class="step-icon">📅</span>
+                  </div>
+                  <div class="step-title">Plan Patient Schedules</div>
+                  <div class="step-desc">Schedule patients based on AIC service days &amp; therapist availability</div>
+                  <a href="timeslot_scheduler_mockup.html" class="step-link link-coord">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Step 6 -->
+              <div class="step-wrap">
+                <div class="step-card card-coord card-complete">
+                  <span class="done-badge">✓ Done</span>
+                  <div class="step-num-row">
+                    <span class="step-num num-coord">6</span>
+                    <span class="step-icon">⚠️</span>
+                  </div>
+                  <div class="step-title">Address Conflicts</div>
+                  <div class="step-desc">Reassign therapist or time slot when conflict flagged by system</div>
+                  <a href="therapist-change.html" class="step-link link-coord">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Step 7 -->
+              <div class="step-wrap">
+                <div class="step-card card-coord card-complete">
+                  <span class="done-badge">✓ Done</span>
+                  <div class="step-num-row">
+                    <span class="step-num num-coord">7</span>
+                    <span class="step-icon">📆</span>
+                  </div>
+                  <div class="step-title">Month-End Check</div>
+                  <div class="step-desc">Confirm therapist roster is complete for the following month</div>
+                  <a href="shift-setup.html" class="step-link link-coord">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Step 8 -->
+              <div class="step-wrap">
+                <div class="step-card card-coord card-complete">
+                  <span class="done-badge">✓ Done</span>
+                  <div class="step-num-row">
+                    <span class="step-num num-coord">8</span>
+                    <span class="step-icon">🔄</span>
+                  </div>
+                  <div class="step-title">Adjust Schedules</div>
+                  <div class="step-desc">Rebook affected patients when therapist is unavailable next month</div>
+                  <a href="therapist-change.html" class="step-link link-coord">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Step 9 -->
+              <div class="step-wrap">
+                <div class="step-card card-coord">
+                  <div class="step-num-row">
+                    <span class="step-num num-coord">9</span>
+                    <span class="step-icon">↔️</span>
+                  </div>
+                  <div class="step-title">Reschedule Appt.</div>
+                  <div class="step-desc">Move to different therapist or available time slot</div>
+                  <a href="therapist-change.html" class="step-link link-coord">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Step 10 -->
+              <div class="step-wrap">
+                <div class="step-card card-coord">
+                  <div class="step-num-row">
+                    <span class="step-num num-coord">10</span>
+                    <span class="step-icon">✏️</span>
+                  </div>
+                  <div class="step-title">Cancel &amp; Rebook</div>
+                  <div class="step-desc">Process patient request: cancel existing slot, find &amp; confirm new one</div>
+                  <a href="therapist-change.html" class="step-link link-coord">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Steps 11–12: spacers -->
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+            </div>
+          </div>
+
+          <!-- CROSS ARROWS: Therapist↓ at step 4 · System→Coord↑ at step 6 · Patient→Coord↑ at step 10 -->
+          <div class="cross-arrow-section" style="min-width:2200px;">
+            <svg viewBox="0 0 2200 36" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;width:2200px;height:36px;pointer-events:none;">
+              <!-- Step 4: Therapist roster → continues down to System -->
+              <path d="M 761 2 L 761 30" stroke="rgba(13,148,136,0.6)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#th-dn)" fill="none"/>
+              <text x="767" y="22" fill="rgba(13,148,136,0.7)" font-size="9" font-family="Outfit,sans-serif">roster ↓</text>
+              <!-- Step 6: System flags propagate UP to Coord -->
+              <path d="M 1103 30 L 1103 2" stroke="rgba(194,65,12,0.8)" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#sys-up)" fill="none"/>
+              <text x="1109" y="14" fill="rgba(194,65,12,0.85)" font-size="9" font-family="Outfit,sans-serif">flags ↑</text>
+              <!-- Step 10: Patient call propagates UP to Coord -->
+              <path d="M 1787 30 L 1787 2" stroke="rgba(124,58,237,0.65)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#pt-up)" fill="none"/>
+              <text x="1793" y="14" fill="rgba(124,58,237,0.75)" font-size="9" font-family="Outfit,sans-serif">call ↑</text>
+              <defs>
+                <marker id="th-dn" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="rgba(13,148,136,0.6)"/></marker>
+                <marker id="sys-up" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="rgba(194,65,12,0.8)"/></marker>
+                <marker id="pt-up" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="rgba(124,58,237,0.65)"/></marker>
+              </defs>
+            </svg>
+          </div>
+
+          <div class="lane-divider"></div>
+
+          <!-- ═══════════════════════════════════════════════════════ -->
+          <!-- LANE 3: THERAPIST                                       -->
+          <!-- ═══════════════════════════════════════════════════════ -->
+          <div class="lane lane-therapist">
+            <div class="lane-header">
+              <div class="lane-header-icon">🩺</div>
+              <div class="lane-header-name">Therapist</div>
+              <div class="lane-header-role">Clinician</div>
+            </div>
+            <div class="lane-body">
+              <!-- Steps 1–3: spacers -->
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <!-- Step 4 -->
+              <div class="step-wrap">
+                <div class="step-card card-therapist card-complete">
+                  <span class="done-badge">✓ Done</span>
+                  <div class="step-num-row">
+                    <span class="step-num num-therapist">4</span>
+                    <span class="step-icon">📋</span>
+                  </div>
+                  <div class="step-title">Update Roster &amp; Leave</div>
+                  <div class="step-desc">Set weekly template, date overrides &amp; annual leave dates</div>
+                  <a href="shift-setup.html#tab-leave" class="step-link link-therapist">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Steps 5–10: spacers -->
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <!-- Step 11 -->
+              <div class="step-wrap">
+                <div class="step-card card-therapist">
+                  <div class="step-num-row">
+                    <span class="step-num num-therapist">11</span>
+                    <span class="step-icon">✅</span>
+                  </div>
+                  <div class="step-title">Conduct &amp; Complete Session</div>
+                  <div class="step-desc">Mark Done / DNA, add session notes &amp; outcomes</div>
+                  <a href="appointments.html" class="step-link link-therapist">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Step 12: spacer -->
+              <div class="spacer"></div>
+            </div>
+          </div>
+
+          <!-- CROSS ARROW: Therapist session → Patient at step 11 -->
+          <div class="cross-arrow-section" style="min-width:2200px;">
+            <svg viewBox="0 0 2200 36" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;width:2200px;height:36px;pointer-events:none;">
+              <path d="M 1958 2 L 1958 30" stroke="rgba(13,148,136,0.65)" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#th-pt-dn)" fill="none"/>
+              <text x="1964" y="22" fill="rgba(13,148,136,0.75)" font-size="9" font-family="Outfit,sans-serif">session ↓</text>
+              <defs>
+                <marker id="th-pt-dn" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="rgba(13,148,136,0.65)"/></marker>
+              </defs>
+            </svg>
+          </div>
+
+          <div class="lane-divider"></div>
+
+          <!-- ═══════════════════════════════════════════════════════ -->
+          <!-- LANE 4: PATIENT                                         -->
+          <!-- ═══════════════════════════════════════════════════════ -->
+          <div class="lane lane-patient">
+            <div class="lane-header">
+              <div class="lane-header-icon">🧑‍🦽</div>
+              <div class="lane-header-name">Patient</div>
+              <div class="lane-header-role">Service User</div>
+            </div>
+            <div class="lane-body">
+              <!-- Steps 1–9: spacers -->
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <!-- Step 10 -->
+              <div class="step-wrap">
+                <div class="step-card card-patient">
+                  <div class="step-num-row">
+                    <span class="step-num num-patient">10</span>
+                    <span class="step-icon">📞</span>
+                  </div>
+                  <div class="step-title">Calls to Request Change</div>
+                  <div class="step-desc">Patient contacts coordinator to reschedule or cancel appointment</div>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Step 11 -->
+              <div class="step-wrap">
+                <div class="step-card card-patient">
+                  <div class="step-num-row">
+                    <span class="step-num num-patient">11</span>
+                    <span class="step-icon">🪑</span>
+                  </div>
+                  <div class="step-title">Attends Therapy Session</div>
+                  <div class="step-desc">Patient attends scheduled session at the facility</div>
+                  <a href="appointments.html" class="step-link link-patient">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Step 12: spacer -->
+              <div class="spacer"></div>
+            </div>
+          </div>
+
+          <!-- CROSS ARROW: Session completion → Billing triggered at step 11 -->
+          <div class="cross-arrow-section" style="min-width:2200px;">
+            <svg viewBox="0 0 2200 36" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;width:2200px;height:36px;pointer-events:none;">
+              <path d="M 1958 2 L 1958 30" stroke="rgba(13,148,136,0.6)" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#sess-bill)" fill="none"/>
+              <text x="1964" y="22" fill="rgba(13,148,136,0.7)" font-size="9" font-family="Outfit,sans-serif">completion ↓</text>
+              <defs>
+                <marker id="sess-bill" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="rgba(13,148,136,0.6)"/></marker>
+              </defs>
+            </svg>
+          </div>
+
+          <div class="lane-divider"></div>
+
+          <!-- ═══════════════════════════════════════════════════════ -->
+          <!-- LANE 5: SYSTEM / BILLING                                -->
+          <!-- ═══════════════════════════════════════════════════════ -->
+          <div class="lane lane-billing">
+            <div class="lane-header">
+              <div class="lane-header-icon">🖥️</div>
+              <div class="lane-header-name">System / Billing</div>
+              <div class="lane-header-role">CARES Platform</div>
+            </div>
+            <div class="lane-body">
+              <!-- Steps 1–2: spacers -->
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <!-- Step 3 -->
+              <div class="step-wrap">
+                <div class="step-card card-billing card-complete">
+                  <span class="done-badge">✓ Done</span>
+                  <div class="step-num-row">
+                    <span class="step-num num-billing">3</span>
+                    <span class="step-icon">⚙️</span>
+                  </div>
+                  <div class="step-title">Auto-generate Slots</div>
+                  <div class="step-desc">Slots auto-generated from committed therapist shifts (triggered by COMMIT in Shifts)</div>
+                  <a href="shift-setup.html" class="step-link link-billing">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Step 4 -->
+              <div class="step-wrap">
+                <div class="step-card card-billing card-complete">
+                  <span class="done-badge">✓ Done</span>
+                  <div class="step-num-row">
+                    <span class="step-num num-billing">4</span>
+                    <span class="step-icon">🔍</span>
+                  </div>
+                  <div class="step-title">Detect Conflicts</div>
+                  <div class="step-desc">Check leave vs. committed appointments; flag all clashes</div>
+                  <a href="conflicts.html" class="step-link link-billing">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Step 5: spacer -->
+              <div class="spacer"></div>
+              <!-- Step 6 -->
+              <div class="step-wrap">
+                <div class="step-card card-billing card-complete">
+                  <span class="done-badge">✓ Done</span>
+                  <div class="step-num-row">
+                    <span class="step-num num-billing">6</span>
+                    <span class="step-icon">🚩</span>
+                  </div>
+                  <div class="step-title">Flag Conflicts</div>
+                  <div class="step-desc">Alert coordinator with conflict list; hold affected appointments</div>
+                  <a href="coordinator-dashboard.html" class="step-link link-billing">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+              <!-- Steps 7–11: spacers -->
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <!-- Step 12 -->
+              <div class="step-wrap">
+                <div class="step-card card-billing">
+                  <div class="step-num-row">
+                    <span class="step-num num-billing">12</span>
+                    <span class="step-icon">💳</span>
+                  </div>
+                  <div class="step-title">Trigger Billing</div>
+                  <div class="step-desc">Generate billing records per session or accumulated monthly for AIC claims</div>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SCROLL HINT -->
+          <div class="scroll-hint">5 lanes · 12 steps · scroll right to see full workflow →</div>
+
+        </div><!-- /swimlane-grid -->
+      </div><!-- /diagram-outer -->
+    </div><!-- /swimlane-wrapper -->
+
+    <!-- FOOTER NOTE -->
+    <div class="page-footer-note">
+      <span style="font-size:20px;">📋</span>
+      <div class="footer-note-text">
+        This diagram shows the end-to-end scheduling workflow across all roles. Use the <strong>Open ↗</strong> links on each step card to navigate to the relevant page in the app.
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+</div><!-- /main-wrapper -->
+
+</body>
+</html>

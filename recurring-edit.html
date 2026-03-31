@@ -196,6 +196,8 @@
   .nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
   .nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; cursor: pointer; }
   .nav-sidebar-nav { flex: 1; padding: 4px 0; }
+    .nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+
   .nav-sidebar-link {
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 12px; color: rgba(255,255,255,0.68);
@@ -248,13 +250,19 @@
     <div class="nav-sidebar-role">Enterprise Admin ▾</div>
   </div>
   <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
     <a href="coordinator-dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
     <a href="timeslot_scheduler_mockup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
-    <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
     <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
     <a href="appointments.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="shift-setup.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Shifts</span></span><span class="nav-chevron">‹</span></a>
     <a href="recurring-edit.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>🔄</span><span>Recurring</span></span><span class="nav-chevron">‹</span></a>
     <a href="therapist-change.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🔀</span><span>Change Therapist</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage1-automation.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🤖</span><span>Auto-fill (Stage 1)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage2-manual.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>✏️</span><span>Manual Fill (Stage 2)</span></span><span class="nav-chevron">‹</span></a>
+    <a href="conflicts.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚠️</span><span>Conflicts</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🗺️</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
   </nav>
 </aside>
 <div class="main-wrapper">
@@ -406,7 +414,7 @@
         <span class="action-arrow">›</span>
       </div>
 
-      <div class="action-item" style="background:#fffbeb;" onclick="window.location='therapist-change.html'">
+      <div class="action-item" style="background:#fffbeb;" onclick="showConflictPickerModal()">
         <div class="action-icon" style="background:var(--amber-bg);">⚠️</div>
         <div>
           <div class="action-title" style="color:#92400e;">Resolve Leave Conflict</div>
@@ -469,6 +477,27 @@
   </div>
 </div>
 
+<!-- CONFLICT PICKER MODAL -->
+<div class="modal-overlay" id="conflictPickerModal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <h3>Resolve Leave Conflict</h3>
+      <p>Dr Marcus Lee is on leave Apr 7–18. Select a session to reassign:</p>
+    </div>
+    <div class="modal-body">
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 14px;font-size:12.5px;color:#92400e;margin-bottom:14px;">
+        ⚠️ 2 sessions conflict with Dr Marcus Lee's approved leave (Apr 7–18, 2026)
+      </div>
+      <!-- Session list -->
+      <div id="conflictSessionList" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeConflictPicker()">Cancel</button>
+      <button class="btn btn-primary" id="conflictResolveBtn" disabled onclick="goToTherapistChange()">Reassign Selected →</button>
+    </div>
+  </div>
+</div>
+
 <script>
   let selectedScope = 'following';
 
@@ -502,6 +531,55 @@
 
   function closePanel(id) {
     document.getElementById(id).classList.remove('show');
+  }
+
+  // ── Conflict Picker Modal ──────────────────────────────
+  const conflictSessions = [
+    { id: 5, date: 'Mon, 7 Apr 2026', time: '09:00 – 09:30', therapist: 'Dr Marcus Lee', reason: 'Annual Leave' },
+    { id: 6, date: 'Mon, 14 Apr 2026', time: '09:00 – 09:30', therapist: 'Dr Marcus Lee', reason: 'Annual Leave' },
+  ];
+  let selectedConflictSession = null;
+
+  function showConflictPickerModal() {
+    selectedConflictSession = null;
+    document.getElementById('conflictResolveBtn').disabled = true;
+    const list = document.getElementById('conflictSessionList');
+    list.innerHTML = conflictSessions.map(s => `
+      <div class="conflict-session-row" id="csrow-${s.id}" onclick="selectConflictSession(${s.id})"
+        style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1.5px solid #e5e7eb;cursor:pointer;background:#fff;transition:all .15s;">
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:13px;color:#111827;">Session #${s.id} &nbsp;·&nbsp; ${s.date}</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:2px;">⏰ ${s.time} &nbsp;·&nbsp; <span style="color:#9d174d;">${s.therapist}</span></div>
+          <div style="font-size:11.5px;margin-top:4px;"><span style="background:#fff7ed;color:#c2410c;border-radius:5px;padding:2px 8px;font-weight:600;">🏖️ ${s.reason}</span></div>
+        </div>
+        <div class="conflict-radio" id="cradio-${s.id}" style="width:20px;height:20px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;"></div>
+      </div>
+    `).join('');
+    document.getElementById('conflictPickerModal').classList.add('show');
+  }
+
+  function selectConflictSession(id) {
+    selectedConflictSession = id;
+    conflictSessions.forEach(s => {
+      const row = document.getElementById('csrow-' + s.id);
+      const radio = document.getElementById('cradio-' + s.id);
+      const sel = s.id === id;
+      row.style.borderColor = sel ? '#f59e0b' : '#e5e7eb';
+      row.style.background  = sel ? '#fffbeb' : '#fff';
+      radio.style.borderColor    = sel ? '#f59e0b' : '#d1d5db';
+      radio.style.background     = sel ? '#f59e0b' : 'transparent';
+    });
+    document.getElementById('conflictResolveBtn').disabled = false;
+  }
+
+  function closeConflictPicker() {
+    document.getElementById('conflictPickerModal').classList.remove('show');
+  }
+
+  function goToTherapistChange() {
+    closeConflictPicker();
+    sessionStorage.setItem('changeContext', 'conflict-session-' + selectedConflictSession);
+    window.location = 'therapist-change.html';
   }
 
   function selectDeleteScope(el) {
