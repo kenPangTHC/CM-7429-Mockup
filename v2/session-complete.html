@@ -94,15 +94,14 @@ body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--te
 .outcome-card { border: 2px solid var(--border); border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: all 0.15s; display: flex; align-items: flex-start; gap: 12px; }
 .outcome-card:hover { border-color: var(--primary); background: var(--primary-light); }
 .outcome-card.selected-completed { border-color: var(--green); background: #f0fdf4; }
-.outcome-card.selected-partial { border-color: var(--amber); background: #fffbeb; }
+
 .outcome-card.selected-utc { border-color: var(--red); background: #fef2f2; }
 .outcome-radio { width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid var(--border); margin-top: 1px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
 .outcome-card.selected-completed .outcome-radio { border-color: var(--green); background: var(--green); }
-.outcome-card.selected-partial .outcome-radio { border-color: var(--amber); background: var(--amber); }
+
 .outcome-card.selected-utc .outcome-radio { border-color: var(--red); background: var(--red); }
 .outcome-radio-dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity 0.15s; }
 .outcome-card.selected-completed .outcome-radio-dot,
-.outcome-card.selected-partial .outcome-radio-dot,
 .outcome-card.selected-utc .outcome-radio-dot { opacity: 1; }
 .outcome-icon { font-size: 22px; flex-shrink: 0; }
 .outcome-text .outcome-title { font-size: 14px; font-weight: 700; color: var(--text); }
@@ -243,23 +242,15 @@ body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--te
                 <div class="outcome-radio"><div class="outcome-radio-dot"></div></div>
                 <div class="outcome-icon">✅</div>
                 <div class="outcome-text">
-                  <div class="outcome-title">Session Completed</div>
+                  <div class="outcome-title">Completed</div>
                   <div class="outcome-desc">Patient attended and completed the session fully</div>
-                </div>
-              </div>
-              <div class="outcome-card" id="oc-partial" onclick="selectOutcome('partial')">
-                <div class="outcome-radio"><div class="outcome-radio-dot"></div></div>
-                <div class="outcome-icon">⚠️</div>
-                <div class="outcome-text">
-                  <div class="outcome-title">Partially Completed</div>
-                  <div class="outcome-desc">Patient attended but could not complete the session fully</div>
                 </div>
               </div>
               <div class="outcome-card" id="oc-utc" onclick="selectOutcome('utc')">
                 <div class="outcome-radio"><div class="outcome-radio-dot"></div></div>
                 <div class="outcome-icon">🚫</div>
                 <div class="outcome-text">
-                  <div class="outcome-title">Unable to Complete</div>
+                  <div class="outcome-title">Not Completed</div>
                   <div class="outcome-desc">Patient did not attend or session could not proceed</div>
                 </div>
               </div>
@@ -363,9 +354,8 @@ let transportTaken = true;
 function selectOutcome(type) {
   selectedOutcome = type;
   document.getElementById('oc-completed').className = 'outcome-card';
-  document.getElementById('oc-partial').className = 'outcome-card';
   document.getElementById('oc-utc').className = 'outcome-card';
-  const map = { completed: 'selected-completed', partial: 'selected-partial', utc: 'selected-utc' };
+  const map = { completed: 'selected-completed', utc: 'selected-utc' };
   document.getElementById('oc-' + type).className = 'outcome-card ' + map[type];
   document.getElementById('utcDetailPanel').classList.toggle('visible', type === 'utc');
 }
