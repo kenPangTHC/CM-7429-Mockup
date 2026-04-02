@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Appointment — CARES Scheduler v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #0d9488;
+  --primary-dk: #0f766e;
+  --primary-xdk: #134e4a;
+  --primary-light: #f0fdf9;
+  --primary-mid: #ccfbf1;
+  --nav-bg: #1a2e2c;
+  --bg: #f0fdf9;
+  --text: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --radius: 16px;
+  --green: #10b981;
+  --blue: #3b82f6;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --purple: #8b5cf6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); display: flex !important; min-height: 100vh; }
+
+/* Sidebar */
+.nav-sidebar { width: 200px; min-width: 200px; background: #1a2e2c; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 200; display: flex; flex-direction: column; }
+.nav-sidebar-profile { padding: 20px 14px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.nav-sidebar-avatar { width: 46px; height: 46px; border-radius: 50%; background: rgba(13,148,136,0.25); border: 2px solid rgba(13,148,136,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 9px; }
+.nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
+.nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; cursor: pointer; }
+.nav-sidebar-nav { flex: 1; padding: 4px 0; }
+.nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+.nav-sidebar-link { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; color: rgba(255,255,255,0.68); text-decoration: none; font-size: 12px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
+.nav-sidebar-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.95); }
+.nav-sidebar-link.active { background: rgba(13,148,136,0.18); color: #5eead4; border-left-color: #0d9488; }
+.nav-sidebar-link-inner { display: flex; align-items: center; gap: 8px; }
+.nav-chevron { font-size: 10px; opacity: 0.35; }
+
+/* Main wrapper */
+.main-wrapper { margin-left: 200px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+/* Topbar */
+.topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar-hamburger { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--muted); }
+.topbar-logo { font-size: 20px; }
+.topbar-session { font-size: 13px; font-weight: 600; color: var(--text); }
+.topbar-right { display: flex; align-items: center; gap: 14px; }
+.topbar-welcome { font-size: 12.5px; color: var(--muted); }
+.topbar-facility { font-size: 12px; border: 1px solid var(--border); border-radius: 8px; padding: 4px 8px; color: var(--text); font-family: 'Outfit', sans-serif; background: #fff; cursor: pointer; }
+.topbar-notif { position: relative; background: none; border: none; font-size: 18px; cursor: pointer; }
+.topbar-notif-badge { position: absolute; top: -2px; right: -4px; background: var(--red); color: #fff; border-radius: 99px; font-size: 9px; font-weight: 700; padding: 0 4px; min-width: 16px; text-align: center; font-family: 'Outfit', sans-serif; }
+.topbar-logout { font-size: 12px; color: var(--muted); text-decoration: none; font-weight: 500; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); transition: all 0.15s; }
+.topbar-logout:hover { background: #fef2f2; color: var(--red); border-color: #fecaca; }
+
+/* Page content */
+.page-content { flex: 1; padding: 28px 28px 40px; }
+.page-header { margin-bottom: 24px; }
+.page-title { font-size: 22px; font-weight: 800; color: var(--text); }
+.page-subtitle { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+/* Two-col layout */
+.booking-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+
+/* Card */
+.card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-md); border: 1px solid var(--border); overflow: hidden; }
+.card-header { padding: 18px 22px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.card-header-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary-mid); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.card-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.card-body { padding: 20px 22px; }
+
+/* Form sections */
+.form-section { margin-bottom: 28px; }
+.form-section:last-child { margin-bottom: 0; }
+.section-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--primary); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--primary-mid); }
+
+/* Input styles */
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+.form-input { width: 100%; border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 13px; font-size: 13px; font-family: 'Outfit', sans-serif; color: var(--text); background: #fff; transition: border-color 0.15s; outline: none; }
+.form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,148,136,0.1); }
+.form-input::placeholder { color: #94a3b8; }
+select.form-input { cursor: pointer; }
+
+/* Search */
+.search-wrapper { position: relative; }
+.search-wrapper .form-input { padding-left: 36px; }
+.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 15px; pointer-events: none; }
+
+/* Patient list */
+.patient-list { border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; margin-top: 8px; }
+.patient-item { padding: 11px 14px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.12s; border-bottom: 1px solid var(--border); }
+.patient-item:last-child { border-bottom: none; }
+.patient-item:hover { background: var(--primary-light); }
+.patient-item.selected { background: var(--primary-mid); border-left: 3px solid var(--primary); }
+.patient-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--primary-mid); color: var(--primary-dk); font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.patient-info { flex: 1; }
+.patient-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.patient-meta { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.patient-aic { font-size: 10.5px; background: var(--primary-mid); color: var(--primary-dk); padding: 1px 7px; border-radius: 99px; font-weight: 600; margin-left: 6px; }
+
+/* Selected patient card */
+.selected-patient-card { background: var(--primary-light); border: 1.5px solid var(--primary-mid); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; }
+.selected-patient-card .patient-avatar { width: 42px; height: 42px; font-size: 15px; }
+.selected-patient-details { flex: 1; }
+.selected-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.selected-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.change-link { font-size: 12px; color: var(--primary); text-decoration: none; font-weight: 600; cursor: pointer; }
+
+/* Cinema-style therapist slot grid */
+.therapist-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.therapist-row { display: flex; align-items: flex-start; gap: 14px; padding: 12px 14px; border-radius: 12px; border: 2px solid var(--border); background: #fff; transition: all .15s; }
+.therapist-row:hover { border-color: var(--primary-mid); background: #fafffe; }
+.therapist-row.selected-row { border-color: var(--primary); background: var(--primary-light); }
+.th-avatar { width: 38px; height: 38px; min-width: 38px; border-radius: 50%; color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.th-info { min-width: 110px; padding-top: 2px; }
+.th-name { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; }
+.th-role { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; margin-top: 4px; display: inline-block; }
+.th-slots { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; align-content: flex-start; padding-top: 2px; }
+.slot-chip { padding: 5px 11px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: 2px solid transparent; transition: all .12s; white-space: nowrap; line-height: 1.4; }
+.slot-chip.avail { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+.slot-chip.avail:hover { background: #16a34a; color: #fff; border-color: #16a34a; }
+.slot-chip.limited { background: #fef9c3; color: #92400e; border-color: #fde68a; }
+.slot-chip.limited:hover { background: #d97706; color: #fff; border-color: #d97706; }
+.slot-chip.full { background: #f1f5f9; color: #94a3b8; border-color: #e2e8f0; cursor: not-allowed; text-decoration: line-through; }
+.slot-chip.sel { background: var(--primary); color: #fff; border-color: var(--primary-dk); box-shadow: 0 2px 8px rgba(13,148,136,.3); }
+.slot-legend { display: flex; gap: 14px; font-size: 11px; color: var(--muted); }
+.legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 3px; vertical-align: middle; }
+.selected-slot-banner { background: var(--primary); color: #fff; border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 600; display: none; margin-top: 10px; align-items: center; gap: 10px; }
+.selected-slot-banner.visible { display: flex; }
+
+/* Radio cards */
+.radio-group { display: flex; gap: 10px; flex-wrap: wrap; }
+.radio-card { flex: 1; min-width: 80px; border: 2px solid var(--border); border-radius: 10px; padding: 10px 12px; cursor: pointer; transition: all 0.15s; text-align: center; }
+.radio-card:hover { border-color: var(--primary); background: var(--primary-light); }
+.radio-card.selected { border-color: var(--primary); background: var(--primary-mid); }
+.radio-card input { display: none; }
+.radio-card-label { font-size: 13px; font-weight: 700; color: var(--text); display: block; }
+.radio-card-sub { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+
+/* Sub-radio */
+.sub-radio-group { display: flex; gap: 8px; margin-top: 12px; padding: 12px; background: var(--primary-light); border-radius: 10px; border: 1px solid var(--primary-mid); }
+.sub-radio-btn { flex: 1; border: 2px solid var(--border); border-radius: 8px; padding: 8px 10px; cursor: pointer; text-align: center; font-size: 12px; font-weight: 700; background: #fff; transition: all 0.15s; }
+.sub-radio-btn:hover { border-color: var(--primary); }
+.sub-radio-btn.selected { border-color: var(--primary); background: var(--primary); color: #fff; }
+.sub-radio-btn input { display: none; }
+
+/* Checkbox */
+.checkbox-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; }
+.checkbox-custom { width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--primary); background: var(--primary); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
+.checkbox-custom.unchecked { background: #fff; }
+.checkbox-custom-check { color: #fff; font-size: 12px; font-weight: 700; }
+.checkbox-label { font-size: 13px; font-weight: 500; cursor: pointer; }
+
+/* Recurrence toggle */
+.toggle-group { display: flex; background: var(--border); border-radius: 10px; padding: 3px; width: fit-content; gap: 2px; }
+.toggle-btn { padding: 7px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; background: none; font-family: 'Outfit', sans-serif; color: var(--muted); }
+.toggle-btn.active { background: #fff; color: var(--primary); box-shadow: var(--shadow); }
+
+/* Recurrence panel */
+.recurrence-panel { background: var(--primary-light); border: 1px solid var(--primary-mid); border-radius: 12px; padding: 16px; margin-top: 14px; display: none; }
+.recurrence-panel.visible { display: block; }
+.day-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.day-chip { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border); background: #fff; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.day-chip:hover { border-color: var(--primary); }
+.day-chip.sel { border-color: var(--primary); background: var(--primary); color: #fff; }
+.sessions-count { font-size: 12px; color: var(--muted); margin-top: 8px; padding: 8px 12px; background: #fff; border-radius: 8px; border: 1px solid var(--border); }
+
+/* Episode info */
+.episode-info { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 12px; display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.episode-badge { background: var(--primary-mid); color: var(--primary-dk); padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+
+/* Remarks */
+.form-textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 13px; font-size: 13px; font-family: 'Outfit', sans-serif; color: var(--text); resize: vertical; min-height: 80px; outline: none; transition: border-color 0.15s; }
+.form-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,148,136,0.1); }
+
+/* Summary panel */
+.summary-panel { position: sticky; top: 84px; }
+.summary-header { font-size: 15px; font-weight: 800; color: var(--text); }
+.summary-patient-chip { display: flex; align-items: center; gap: 10px; background: var(--primary-light); border: 1px solid var(--primary-mid); border-radius: 10px; padding: 10px 12px; margin: 12px 0; }
+.summary-patient-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+.summary-patient-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.summary-patient-meta { font-size: 11px; color: var(--muted); }
+.summary-rows { display: flex; flex-direction: column; gap: 9px; margin: 14px 0; }
+.summary-row { display: flex; justify-content: space-between; align-items: flex-start; font-size: 12.5px; }
+.summary-row-label { color: var(--muted); font-weight: 500; }
+.summary-row-value { font-weight: 700; color: var(--text); text-align: right; max-width: 170px; }
+.summary-service-badge { display: inline-block; background: var(--primary-mid); color: var(--primary-xdk); padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 20px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; border: none; font-family: 'Outfit', sans-serif; transition: all 0.15s; text-decoration: none; }
+.btn-primary { background: var(--primary); color: #fff; width: 100%; }
+.btn-primary:hover { background: var(--primary-dk); }
+.btn-ghost { background: none; color: var(--muted); border: 1.5px solid var(--border); }
+.btn-ghost:hover { color: var(--text); border-color: #94a3b8; }
+.reset-link { display: block; text-align: center; margin-top: 10px; font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; }
+
+/* Success banner */
+.success-banner { background: #dcfce7; border: 1.5px solid #86efac; border-radius: 12px; padding: 14px 16px; display: none; }
+.success-banner.visible { display: block; }
+.success-banner-title { font-size: 14px; font-weight: 700; color: #15803d; display: flex; align-items: center; gap: 8px; }
+.success-banner-detail { font-size: 12px; color: #166534; margin-top: 6px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-profile">
+    <div class="nav-sidebar-avatar">🤝</div>
+    <div class="nav-sidebar-name">Cares Admin<br>TETSUYU</div>
+    <div class="nav-sidebar-role">Care Coordinator ▾</div>
+  </div>
+  <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
+    <a href="dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
+    <a href="schedule.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
+    <a href="book-appointment.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
+    <a href="appointments.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="slot-config.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Slot Config</span></span><span class="nav-chevron">‹</span></a>
+    <a href="non-attendance.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🚫</span><span>Non-Attendance</span></span><span class="nav-chevron">‹</span></a>
+    <a href="reports.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📈</span><span>Reports</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📊</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
+  </nav>
+</aside>
+
+<div class="main-wrapper">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-hamburger">☰</button>
+      <span class="topbar-logo">🏥</span>
+      <span class="topbar-session">CARES Scheduler v2 · Thu, 2 Apr 2026</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-welcome">Welcome, Ms Sarah</span>
+      <select class="topbar-facility"><option>Tetsuyu Heritage Centre</option></select>
+      <button class="topbar-notif">🔔<span class="topbar-notif-badge">3</span></button>
+      <a href="#" class="topbar-logout">⏻ Logout</a>
+    </div>
+  </div>
+
+  <div class="page-content">
+    <div class="page-header">
+      <div class="page-title">➕ Book Appointment</div>
+      <div class="page-subtitle">Schedule a therapy session for a patient in an available slot</div>
+    </div>
+
+    <div class="booking-layout">
+      <!-- LEFT: Booking Form -->
+      <div class="booking-form">
+
+        <!-- Section 1: Patient -->
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header">
+            <div class="card-header-icon">👤</div>
+            <div class="card-title">Section 1 — Patient</div>
+          </div>
+          <div class="card-body">
+            <div class="form-section">
+              <div class="form-group">
+                <label class="form-label">Search Patient</label>
+                <div class="search-wrapper">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" class="form-input" id="patientSearch" placeholder="Search by name or NRIC..." oninput="filterPatients(this.value)">
+                </div>
+              </div>
+
+              <div id="patientList" class="patient-list">
+                <div class="patient-item" onclick="selectPatient(0)">
+                  <div class="patient-avatar">LS</div>
+                  <div class="patient-info">
+                    <div class="patient-name">Mdm Lim Siew Lan <span class="patient-aic">AIC#2024-0341</span></div>
+                    <div class="patient-meta">****034D · Block C, Room 12</div>
+                  </div>
+                </div>
+                <div class="patient-item" onclick="selectPatient(1)">
+                  <div class="patient-avatar">TB</div>
+                  <div class="patient-info">
+                    <div class="patient-name">Mr Tan Boon Kiat</div>
+                    <div class="patient-meta">****011B · Block C, Room 8</div>
+                  </div>
+                </div>
+                <div class="patient-item" onclick="selectPatient(2)">
+                  <div class="patient-avatar">CL</div>
+                  <div class="patient-info">
+                    <div class="patient-name">Mdm Chen Li <span class="patient-aic">AIC#2024-0512</span></div>
+                    <div class="patient-meta">****088F · Block A, Room 3</div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="selectedPatientCard" class="selected-patient-card" style="display:none; margin-top:12px;">
+                <div class="patient-avatar selected-patient-avatar" id="selAvatar" style="width:42px;height:42px;font-size:15px;background:var(--primary-mid);color:var(--primary-dk);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;"></div>
+                <div class="selected-patient-details" style="flex:1;">
+                  <div class="selected-name" id="selName"></div>
+                  <div class="selected-meta" id="selMeta"></div>
+                </div>
+                <span class="change-link" onclick="changePatient()">Change</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Appointment Slot -->
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header">
+            <div class="card-header-icon">📅</div>
+            <div class="card-title">Section 2 — Appointment Slot</div>
+          </div>
+          <div class="card-body">
+            <div class="form-section">
+              <div class="form-group">
+                <label class="form-label">Date</label>
+                <input type="date" class="form-input" value="2026-04-02" id="apptDate" onclick="this.showPicker()" onchange="renderTherapistGrid(); updateSummary();">
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:18px; margin-bottom:2px;">
+                <span class="form-label" style="margin-bottom:0;">Select Care Category &amp; Time Slot</span>
+                <div class="slot-legend">
+                  <span><span class="legend-dot" style="background:#16a34a;"></span>Available</span>
+                  <span><span class="legend-dot" style="background:#d97706;"></span>Last slot</span>
+                  <span><span class="legend-dot" style="background:#cbd5e1;"></span>Full</span>
+                </div>
+              </div>
+              <div class="therapist-grid" id="therapistGrid"><!-- rendered by JS --></div>
+
+              <div class="selected-slot-banner" id="selectedSlotBanner">
+                <span>✅</span>
+                <span id="selectedSlotText">—</span>
+                <span style="margin-left:auto; font-size:11px; opacity:.8; cursor:pointer;" onclick="clearSlotSelection()">✕ Clear</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Patient AIC Service -->
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header">
+            <div class="card-header-icon">🔗</div>
+            <div class="card-title">Section 3 — Patient AIC Service</div>
+          </div>
+          <div class="card-body">
+            <div class="form-section">
+              <div class="form-group">
+                <label class="form-label">AIC Service</label>
+                <select class="form-input" id="aicService" onchange="selectAicService(this.value)">
+                  <option value="">— Select AIC service —</option>
+                  <option value="drp-ot">Day Rehab Programme – OT &nbsp;(Ep: AIC-2026-0041) · 3×/wk</option>
+                  <option value="drp-pt">Day Rehab Programme – PT &nbsp;(Ep: AIC-2026-0038) · 3×/wk</option>
+                  <option value="home-ot">Home Therapy – OT &nbsp;(Ep: AIC-2026-0044) · 2×/wk</option>
+                </select>
+              </div>
+
+              <!-- Service attendance days (shown when AIC selected) -->
+              <div id="aicServiceDays" style="display:none; margin-top:12px; padding:12px 14px; background:#f8fafc; border-radius:10px; border:1px solid var(--border);">
+                <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; font-weight:700; margin-bottom:7px;">Service Attendance Days</div>
+                <div id="aicDayPills" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;"></div>
+                <div id="aicServiceDates" style="font-size:11px; color:var(--muted);"></div>
+              </div>
+
+              <!-- Bill to AIC Service -->
+              <div id="bookBillingArea" style="display:none; margin-top:14px;">
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer; padding:10px 13px; background:#fff; border:2px solid var(--border); border-radius:10px; transition:border-color .15s;" id="billAicLabel" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor=document.getElementById('bookBillAic').checked?'var(--primary)':'var(--border)'">
+                  <input type="checkbox" id="bookBillAic" onchange="toggleBookBilling(this.checked)" style="width:16px; height:16px; accent-color:var(--primary); cursor:pointer;">
+                  <span style="font-size:13px; font-weight:600; color:var(--text);">Bill this appointment to AIC Service</span>
+                </label>
+                <div id="bookEpisodeArea" style="display:none; margin-top:8px; padding:12px 14px; background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:10px;">
+                  <div style="font-size:11px; font-weight:700; color:#065f46; text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">AIC Episode Details</div>
+                  <div style="font-size:12.5px; color:var(--text); display:flex; flex-direction:column; gap:5px;">
+                    <div><span style="color:var(--muted);">Episode No:</span>&nbsp;<strong id="bookEpisodeNo">—</strong></div>
+                    <div><span style="color:var(--muted);">Service:</span>&nbsp;<strong id="bookEpisodeService">—</strong></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Transport -->
+              <div class="checkbox-row" style="margin-top:14px;">
+                <div class="checkbox-custom" id="transportCheck" onclick="toggleTransport()">
+                  <span class="checkbox-custom-check">✓</span>
+                </div>
+                <span class="checkbox-label" onclick="toggleTransport()">Transport taken</span>
+                <span id="transportNote" style="font-size:11px; color:var(--muted); margin-left:4px;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Recurrence -->
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header">
+            <div class="card-header-icon">🔄</div>
+            <div class="card-title">Section 4 — Recurrence</div>
+          </div>
+          <div class="card-body">
+            <div class="form-section">
+              <div class="toggle-group">
+                <button class="toggle-btn active" id="toggleOneTime" onclick="setRecurrence('one-time')">One-time</button>
+                <button class="toggle-btn" id="toggleRecurring" onclick="setRecurrence('recurring')">Recurring</button>
+              </div>
+
+              <div class="recurrence-panel" id="recurrencePanel">
+                <!-- Frequency + Interval -->
+                <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;margin-bottom:14px;">
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">Frequency</label>
+                    <select class="form-input" id="recFreq" onchange="onFreqChange(); calcSessions();">
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" id="intervalLabel">Every N weeks</label>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                      <span style="font-size:13px;color:var(--muted);">Every</span>
+                      <input type="number" id="recInterval" class="form-input" min="1" max="52" value="1" style="width:64px;padding:8px;" onchange="calcSessions()">
+                      <span style="font-size:13px;color:var(--muted);" id="intervalUnit">week(s)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Weekly: day-of-week chips (hidden when monthly) -->
+                <div id="weeklySection">
+                  <div class="form-group" style="margin-bottom:10px;">
+                    <label class="form-label">Day(s) of week</label>
+                    <div class="day-chips">
+                      <div class="day-chip" data-day="2"  onclick="toggleDay(this)">M</div>
+                      <div class="day-chip sel" data-day="4"  onclick="toggleDay(this)">T</div>
+                      <div class="day-chip" data-day="8"  onclick="toggleDay(this)">W</div>
+                      <div class="day-chip" data-day="16" onclick="toggleDay(this)">T</div>
+                      <div class="day-chip" data-day="32" onclick="toggleDay(this)">F</div>
+                      <div class="day-chip" data-day="64" onclick="toggleDay(this)">S</div>
+                      <div class="day-chip" data-day="1"  onclick="toggleDay(this)">S</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Monthly sub-options (shown only when monthly) -->
+                <div id="monthlySection" style="display:none; background:#f0f7ff; border:1px solid #bdd7f5; border-radius:8px; padding:12px; margin-bottom:12px;">
+                  <div style="font-size:12px; font-weight:600; color:var(--primary); margin-bottom:10px; text-transform:uppercase; letter-spacing:.5px;">Monthly Pattern</div>
+                  <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;font-size:14px;">
+                    <input type="radio" name="monthlyType" id="monthlyDayOfMonth" value="dayofmonth" checked onchange="onMonthlyTypeChange(); calcSessions();">
+                    On day
+                    <input type="number" id="monthlyDayNum" class="form-input" min="1" max="31" value="7" style="width:60px;display:inline-block;padding:4px 8px;margin:0 4px;" onchange="calcSessions()">
+                    of every month
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;">
+                    <input type="radio" name="monthlyType" id="monthlyNthWeekday" value="nthweekday" onchange="onMonthlyTypeChange(); calcSessions();">
+                    On the
+                    <select id="monthlyNth" class="form-input" style="width:auto;padding:4px 8px;display:inline-block;margin:0 4px;" onchange="calcSessions()" disabled>
+                      <option value="1">First</option>
+                      <option value="2">Second</option>
+                      <option value="3">Third</option>
+                      <option value="4">Fourth</option>
+                      <option value="5">Last</option>
+                    </select>
+                    <select id="monthlyWeekday" class="form-input" style="width:auto;padding:4px 8px;display:inline-block;margin:0 4px;" onchange="calcSessions()" disabled>
+                      <option value="2">Monday</option>
+                      <option value="4">Tuesday</option>
+                      <option value="8">Wednesday</option>
+                      <option value="16">Thursday</option>
+                      <option value="32">Friday</option>
+                      <option value="64">Saturday</option>
+                      <option value="1">Sunday</option>
+                    </select>
+                    of the month
+                  </label>
+                </div>
+
+                <!-- Date range -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;">
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" class="form-input" id="recStartDate" value="2026-04-07" onclick="this.showPicker()" onchange="calcSessions()">
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">End Date</label>
+                    <input type="date" class="form-input" id="recEndDate" value="2026-05-26" onclick="this.showPicker()" onchange="calcSessions()">
+                  </div>
+                </div>
+
+                <div class="sessions-count" id="sessionsCount" style="margin-top:10px;">📊 Estimated: <strong>8 sessions</strong> (Every Tuesday, Weekly)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4b: Recurring Slot Availability Preview -->
+        <div class="card" id="recurAvailCard" style="display:none; margin-bottom:20px; border:2px solid var(--primary-mid);">
+          <div class="card-header" style="background:var(--primary-light);">
+            <div class="card-header-icon">📊</div>
+            <div class="card-title" style="color:var(--primary-dk);">Slot Availability Across Recurrence</div>
+            <span style="font-size:11px;color:var(--primary);font-weight:600;margin-left:auto;" id="recurAvailCatLabel"></span>
+          </div>
+          <div class="card-body" style="padding:14px;">
+            <div id="recurAvailBody"></div>
+            <div style="margin-top:10px;font-size:11px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;">
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#dcfce7;border:1px solid #bbf7d0;margin-right:4px;vertical-align:middle;"></span>Available</span>
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#fef9c3;border:1px solid #fde68a;margin-right:4px;vertical-align:middle;"></span>Last slot</span>
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#fee2e2;border:1px solid #fecaca;margin-right:4px;vertical-align:middle;"></span>Full</span>
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#f1f5f9;border:1px solid #e2e8f0;margin-right:4px;vertical-align:middle;"></span>Not committed</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 5: Remarks -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-icon">📝</div>
+            <div class="card-title">Section 5 — Remarks</div>
+          </div>
+          <div class="card-body">
+            <div class="form-section">
+              <textarea class="form-textarea" placeholder="Optional notes for care staff or coordinator..."></textarea>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end booking-form -->
+
+      <!-- RIGHT: Summary Panel -->
+      <div class="summary-panel">
+        <div class="card">
+          <div class="card-body">
+            <div class="summary-header">📋 Booking Summary</div>
+
+            <div id="summaryPatientChip" class="summary-patient-chip" style="opacity:0.4;">
+              <div class="summary-patient-avatar" id="summaryAvatar" style="background:#94a3b8;">—</div>
+              <div>
+                <div class="summary-patient-name" id="summaryName" style="font-size:13px;font-weight:700;color:var(--text);">No patient selected</div>
+                <div class="summary-patient-meta" id="summarySubName" style="font-size:11px;color:var(--muted);"></div>
+              </div>
+            </div>
+
+            <div class="summary-rows">
+              <div class="summary-row">
+                <span class="summary-row-label">Date</span>
+                <span class="summary-row-value" id="sumDate">Thu, 2 Apr 2026</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-row-label">Time</span>
+                <span class="summary-row-value" id="sumTime">—</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-row-label">Category</span>
+                <span class="summary-row-value" id="sumTherapist">—</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-row-label">Service</span>
+                <span class="summary-row-value" id="sumService"><span style="color:var(--muted)">—</span></span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-row-label">Schedule</span>
+                <span class="summary-row-value" id="sumRecurrence">One-time</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-row-label">Transport</span>
+                <span class="summary-row-value" id="sumTransport">✅ Taken</span>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div id="successBanner" class="success-banner">
+              <div class="success-banner-title">✅ Appointment Booked!</div>
+              <div class="success-banner-detail" id="successDetail"></div>
+            </div>
+
+            <button class="btn btn-primary" onclick="confirmBooking()" id="confirmBtn">✅ Confirm Booking</button>
+            <div class="reset-link" onclick="resetForm()">↺ Reset Form</div>
+          </div>
+        </div>
+
+        <!-- Quick tips -->
+        <div class="card" style="margin-top:16px;">
+          <div class="card-body" style="padding:16px;">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">💡 Booking Tips</div>
+            <ul style="font-size:11.5px;color:var(--muted);line-height:1.7;padding-left:16px;">
+              <li>Slots with 0 remaining cannot be booked</li>
+              <li>AR service requires PT/OT sub-selection</li>
+              <li>Recurring sessions auto-create all appointments</li>
+              <li>Transport checkbox affects billing calculation</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end booking-layout -->
+  </div><!-- end page-content -->
+</div><!-- end main-wrapper -->
+
+<script>
+const patients = [
+  { initials: 'LS', name: 'Mdm Lim Siew Lan', nric: '****034D', room: 'Block C, Room 12', aic: 'AIC#2024-0341' },
+  { initials: 'TB', name: 'Mr Tan Boon Kiat', nric: '****011B', room: 'Block C, Room 8', aic: null },
+  { initials: 'CL', name: 'Mdm Chen Li', nric: '****088F', room: 'Block A, Room 3', aic: 'AIC#2024-0512' }
+];
+let selectedPatient = null;
+let selectedService = null;
+let selectedARSub = null;
+let transportTaken = true;
+let recurrenceMode = 'one-time';
+let selectedTherapistIdx = null;
+let selectedSlotTime = null;
+
+/* ── Therapist mock data ── */
+/* ── Slot categories (from slot-config) ── */
+const slotCategories = [
+  { key: 'PT',  label: 'Physiotherapy',        abbr: 'PT',  color: '#2563eb', badgeBg: '#dbeafe', badgeText: '#1d4ed8',
+    slots: [{t:'09:00–09:30',n:3},{t:'09:30–10:00',n:2},{t:'10:00–10:30',n:1},{t:'10:30–11:00',n:0},{t:'14:00–14:30',n:3},{t:'14:30–15:00',n:2}] },
+  { key: 'OT',  label: 'Occupational Therapy',  abbr: 'OT',  color: '#9333ea', badgeBg: '#f3e8ff', badgeText: '#7e22ce',
+    slots: [{t:'09:00–09:30',n:2},{t:'09:30–10:00',n:1},{t:'10:30–11:00',n:0},{t:'11:00–11:30',n:2},{t:'14:30–15:00',n:3}] },
+  { key: 'TA',  label: 'Therapy Aide',           abbr: 'TA',  color: '#b45309', badgeBg: '#fef3c7', badgeText: '#92400e',
+    slots: [{t:'09:00–09:30',n:4},{t:'09:30–10:00',n:4},{t:'10:00–10:30',n:2},{t:'10:30–11:00',n:2},{t:'14:00–14:30',n:4},{t:'14:30–15:00',n:3}] },
+  { key: 'CBN', label: 'Community-Based Nursing', abbr: 'CBN', color: '#059669', badgeBg: '#dcfce7', badgeText: '#15803d',
+    slots: [{t:'09:00–09:30',n:2},{t:'10:00–10:30',n:0},{t:'11:00–11:30',n:1},{t:'14:00–14:30',n:2}] },
+];
+
+function renderTherapistGrid() {
+  const grid = document.getElementById('therapistGrid');
+  grid.innerHTML = slotCategories.map((cat, i) => {
+    const chips = cat.slots.map(s => {
+      const cls  = s.n === 0 ? 'full' : s.n === 1 ? 'limited' : 'avail';
+      const click = s.n > 0 ? `onclick="selectSlot(${i},'${s.t}',${s.n})"` : '';
+      const cap  = s.n > 0 ? `<span style="font-size:9px;opacity:.65;margin-left:3px;">(${s.n})</span>` : '<span style="font-size:9px;margin-left:3px;">Full</span>';
+      const isSel = selectedTherapistIdx === i && selectedSlotTime === s.t;
+      return `<div class="slot-chip ${cls}${isSel?' sel':''}" ${click}>${s.t}${cap}</div>`;
+    }).join('');
+    const isSelRow = selectedTherapistIdx === i;
+    return `<div class="therapist-row${isSelRow?' selected-row':''}" id="thRow${i}">
+      <div class="th-avatar" style="background:${cat.color}; border-radius:10px; font-size:11px;">${cat.abbr}</div>
+      <div class="th-info">
+        <div class="th-name">${cat.label}</div>
+        <div class="th-role" style="background:${cat.badgeBg};color:${cat.badgeText};">${cat.key}</div>
+      </div>
+      <div class="th-slots">${chips}</div>
+    </div>`;
+  }).join('');
+}
+
+function selectSlot(idx, time, n) {
+  selectedTherapistIdx = idx;
+  selectedSlotTime = time;
+  renderTherapistGrid();
+  const cat = slotCategories[idx];
+  const banner = document.getElementById('selectedSlotBanner');
+  document.getElementById('selectedSlotText').textContent =
+    `${cat.label} (${cat.key})  ·  ${time}  ·  ${n} slot${n>1?'s':''} remaining`;
+  banner.classList.add('visible');
+  updateSummary();
+}
+
+function clearSlotSelection() {
+  selectedTherapistIdx = null;
+  selectedSlotTime = null;
+  renderTherapistGrid();
+  document.getElementById('selectedSlotBanner').classList.remove('visible');
+  updateSummary();
+}
+
+function filterPatients(val) {
+  const list = document.getElementById('patientList');
+  const items = list.querySelectorAll('.patient-item');
+  items.forEach((item, i) => {
+    const p = patients[i];
+    const match = !val || p.name.toLowerCase().includes(val.toLowerCase()) || p.nric.includes(val);
+    item.style.display = match ? '' : 'none';
+  });
+}
+
+function selectPatient(idx) {
+  selectedPatient = patients[idx];
+  document.getElementById('patientList').style.display = 'none';
+  document.getElementById('patientSearch').style.display = 'none';
+  const card = document.getElementById('selectedPatientCard');
+  card.style.display = 'flex';
+  document.getElementById('selAvatar').textContent = selectedPatient.initials;
+  document.getElementById('selName').textContent = selectedPatient.name;
+  document.getElementById('selMeta').textContent = selectedPatient.nric + ' · ' + selectedPatient.room + (selectedPatient.aic ? ' · ' + selectedPatient.aic : '');
+  updateSummary();
+  if (selectedPatient.aic) showAICEpisode();
+}
+
+function showAICEpisode() {
+  const ep = document.getElementById('aicEpisode');
+  ep.style.display = 'flex';
+  document.getElementById('episodeBadge').textContent = selectedPatient.aic;
+  const days = document.getElementById('serviceDays');
+  days.innerHTML = ['M','T','W','T','F'].map(d => `<div class="day-chip sel" style="width:26px;height:26px;font-size:10px;">${d}</div>`).join('');
+}
+
+function changePatient() {
+  selectedPatient = null;
+  document.getElementById('patientList').style.display = '';
+  document.getElementById('patientSearch').style.display = '';
+  document.getElementById('selectedPatientCard').style.display = 'none';
+  document.getElementById('aicEpisode').style.display = 'none';
+  updateSummary();
+}
+
+/* ── AIC Service ── */
+const aicData = {
+  'drp-ot':  { ep: 'AIC-2026-0041', svc: 'Day Rehab Programme – OT', days: ['M','T','W'] },
+  'drp-pt':  { ep: 'AIC-2026-0038', svc: 'Day Rehab Programme – PT', days: ['T','T','F'] },
+  'home-ot': { ep: 'AIC-2026-0044', svc: 'Home Therapy – OT',        days: ['W','F'] },
+};
+function selectAicService(val) {
+  const daysEl   = document.getElementById('aicServiceDays');
+  const billArea = document.getElementById('bookBillingArea');
+  if (!val) { daysEl.style.display = 'none'; billArea.style.display = 'none'; return; }
+  const d = aicData[val];
+  document.getElementById('aicDayPills').innerHTML =
+    d.days.map(dy => `<div class="day-chip sel" style="width:28px;height:28px;font-size:11px;">${dy}</div>`).join('');
+  document.getElementById('aicServiceDates').textContent = `Episode: ${d.ep}`;
+  daysEl.style.display = '';
+  billArea.style.display = '';
+  document.getElementById('bookEpisodeNo').textContent = d.ep;
+  document.getElementById('bookEpisodeService').textContent = d.svc;
+  // reset checkbox
+  document.getElementById('bookBillAic').checked = false;
+  document.getElementById('bookEpisodeArea').style.display = 'none';
+  document.getElementById('billAicLabel').style.borderColor = 'var(--border)';
+  updateSummary();
+}
+function toggleBookBilling(checked) {
+  document.getElementById('bookEpisodeArea').style.display = checked ? '' : 'none';
+  document.getElementById('billAicLabel').style.borderColor = checked ? 'var(--primary)' : 'var(--border)';
+  updateSummary();
+}
+
+function updateSlotInfo() { /* replaced by cinema grid */ }
+
+function selectService(svc) {
+  selectedService = svc;
+  ['AR','ME','CBN'].forEach(s => document.getElementById('svc'+s).classList.toggle('selected', s===svc));
+  document.getElementById('arSubSelect').style.display = svc === 'AR' ? 'flex' : 'none';
+  if (svc !== 'AR') { selectedARSub = null; ['PT','PTOT','OT'].forEach(s => document.getElementById('ar'+s).classList.remove('selected')); }
+  updateSummary();
+}
+
+function selectARSub(sub) {
+  selectedARSub = sub;
+  const map = {'PT':'arPT','PT+OT':'arPTOT','OT':'arOT'};
+  Object.values(map).forEach(id => document.getElementById(id).classList.remove('selected'));
+  document.getElementById(map[sub]).classList.add('selected');
+  updateSummary();
+}
+
+function toggleTransport() {
+  transportTaken = !transportTaken;
+  const check = document.getElementById('transportCheck');
+  check.classList.toggle('unchecked', !transportTaken);
+  check.innerHTML = transportTaken ? '<span class="checkbox-custom-check">✓</span>' : '';
+  document.getElementById('transportNote').textContent = transportTaken ? '' : '(Transport billing removed)';
+  document.getElementById('sumTransport').textContent = transportTaken ? '✅ Taken' : '❌ Not taken';
+}
+
+function setRecurrence(mode) {
+  recurrenceMode = mode;
+  document.getElementById('toggleOneTime').classList.toggle('active', mode==='one-time');
+  document.getElementById('toggleRecurring').classList.toggle('active', mode==='recurring');
+  document.getElementById('recurrencePanel').classList.toggle('visible', mode==='recurring');
+  document.getElementById('sumRecurrence').textContent = mode==='one-time' ? 'One-time' : 'Every Monday × 8 sessions';
+}
+
+function toggleDay(el) { el.classList.toggle('sel'); calcSessions(); }
+
+function onFreqChange() {
+  const freq = document.getElementById('recFreq').value;
+  const isMonthly = freq === 'monthly';
+  document.getElementById('weeklySection').style.display = isMonthly ? 'none' : '';
+  document.getElementById('monthlySection').style.display = isMonthly ? 'block' : 'none';
+  document.getElementById('intervalUnit').textContent = isMonthly ? 'month(s)' : 'week(s)';
+  document.getElementById('recInterval').max = isMonthly ? '24' : '52';
+  if (isMonthly) onMonthlyTypeChange();
+  calcSessions();
+}
+
+function onMonthlyTypeChange() {
+  const isNth = document.getElementById('monthlyNthWeekday').checked;
+  document.getElementById('monthlyDayNum').disabled = isNth;
+  document.getElementById('monthlyNth').disabled = !isNth;
+  document.getElementById('monthlyWeekday').disabled = !isNth;
+  calcSessions();
+}
+
+function calcSessions() {
+  const freq = document.getElementById('recFreq') ? document.getElementById('recFreq').value : 'weekly';
+  const interval = parseInt(document.getElementById('recInterval') ? document.getElementById('recInterval').value : '1') || 1;
+  const startVal = document.getElementById('recStartDate') ? document.getElementById('recStartDate').value : '';
+  const endVal   = document.getElementById('recEndDate')   ? document.getElementById('recEndDate').value   : '';
+  let label = 'Recurring';
+  let estimated = '—';
+
+  if (freq === 'monthly') {
+    const isNth = document.getElementById('monthlyNthWeekday') && document.getElementById('monthlyNthWeekday').checked;
+    if (isNth) {
+      const nth = document.getElementById('monthlyNth');
+      const wd  = document.getElementById('monthlyWeekday');
+      const nthLabel = nth ? nth.options[nth.selectedIndex].text : 'First';
+      const wdLabel  = wd  ? wd.options[wd.selectedIndex].text   : 'Tuesday';
+      label = interval === 1 ? `${nthLabel} ${wdLabel} of every month` : `${nthLabel} ${wdLabel} every ${interval} months`;
+    } else {
+      const day = document.getElementById('monthlyDayNum') ? document.getElementById('monthlyDayNum').value : '7';
+      label = interval === 1 ? `Day ${day} of every month` : `Day ${day} every ${interval} months`;
+    }
+    if (startVal && endVal) {
+      const ms = new Date(endVal) - new Date(startVal);
+      const months = ms / (1000 * 60 * 60 * 24 * 30.44);
+      estimated = Math.max(1, Math.floor(months / interval) + 1) + ' sessions';
+    }
+  } else {
+    const selChips = document.querySelectorAll('#weeklySection .day-chip.sel');
+    const days = Array.from(selChips).map(c => c.textContent.trim()).join(', ');
+    label = interval === 1 ? `Every week (${days || '—'})` : `Every ${interval} weeks (${days || '—'})`;
+    if (startVal && endVal && selChips.length > 0) {
+      const ms = new Date(endVal) - new Date(startVal);
+      const weeks = ms / (1000 * 60 * 60 * 24 * 7) / interval;
+      estimated = Math.round(Math.max(1, weeks) * selChips.length) + ' sessions';
+    }
+  }
+
+  document.getElementById('sessionsCount').innerHTML = `📊 Estimated: <strong>${estimated}</strong> (${label})`;
+  document.getElementById('sumRecurrence').textContent = `${label} × ${estimated}`;
+}
+
+function updateSummary() {
+  const chip = document.getElementById('summaryPatientChip');
+  if (selectedPatient) {
+    chip.style.opacity = '1';
+    document.getElementById('summaryAvatar').textContent = selectedPatient.initials;
+    document.getElementById('summaryAvatar').style.background = 'var(--primary)';
+    document.getElementById('summaryName').textContent = selectedPatient.name;
+    document.getElementById('summarySubName').textContent = selectedPatient.nric + ' · ' + selectedPatient.room;
+  } else {
+    chip.style.opacity = '0.4';
+    document.getElementById('summaryAvatar').textContent = '—';
+    document.getElementById('summaryAvatar').style.background = '#94a3b8';
+    document.getElementById('summaryName').textContent = 'No patient selected';
+    document.getElementById('summarySubName').textContent = '';
+  }
+  document.getElementById('sumTime').textContent = selectedSlotTime || '—';
+  document.getElementById('sumTherapist').textContent =
+    selectedTherapistIdx !== null
+      ? `${slotCategories[selectedTherapistIdx].label} (${slotCategories[selectedTherapistIdx].key})`
+      : '—';
+  const svcVal = document.getElementById('aicService') ? document.getElementById('aicService').value : '';
+  const billed = svcVal && document.getElementById('bookBillAic') && document.getElementById('bookBillAic').checked;
+  const svcLabel = svcVal ? (aicData[svcVal] ? aicData[svcVal].svc : svcVal) + (billed ? ' ✓Bill' : '') : '—';
+  document.getElementById('sumService').innerHTML = svcVal
+    ? `<span class="summary-service-badge">${svcLabel}</span>`
+    : '<span style="color:var(--muted)">—</span>';
+}
+
+function confirmBooking() {
+  if (!selectedPatient) { alert('Please select a patient first.'); return; }
+  if (selectedTherapistIdx === null || !selectedSlotTime) { alert('Please select a care category and time slot.'); return; }
+  const cat = slotCategories[selectedTherapistIdx];
+  const svcVal = document.getElementById('aicService').value;
+  const svc = svcVal ? (aicData[svcVal] ? aicData[svcVal].svc : svcVal) : 'No AIC Service';
+  const banner = document.getElementById('successBanner');
+  banner.classList.add('visible');
+  document.getElementById('successDetail').textContent =
+    `✅ Booked: ${selectedPatient.name} · Thu 2 Apr · ${selectedSlotTime} · ${cat.label} (${cat.key}) · ${svc}`;
+  document.getElementById('confirmBtn').textContent = '✅ Booked!';
+  document.getElementById('confirmBtn').style.background = 'var(--green)';
+}
+
+function resetForm() {
+  location.reload();
+}
+
+// Init — read query params from schedule page if present
+(function applyQueryParams() {
+  const p = new URLSearchParams(window.location.search);
+  const qDate = p.get('date');   // "2026-04-02"
+  const qCat  = p.get('cat');    // "PT" / "OT" / "TA" / "CBN"
+  const qTime = p.get('time');   // "09:00–09:30"
+
+  // Pre-fill date
+  if (qDate) {
+    const el = document.getElementById('apptDate');
+    if (el) el.value = qDate;
+  }
+
+  renderTherapistGrid();
+
+  // Pre-select the category row + slot pill
+  if (qCat && qTime) {
+    const idx = slotCategories.findIndex(c => c.key === qCat);
+    if (idx !== -1) {
+      // Find matching slot (normalize spaces/dashes)
+      const normalize = s => s.replace(/\s/g,'').replace(/–|-/g,'–');
+      const catSlots = slotCategories[idx].slots;
+      const slotMatch = catSlots.find(s => normalize(s.t) === normalize(qTime));
+      if (slotMatch && slotMatch.n > 0) {
+        selectSlot(idx, slotMatch.t, slotMatch.n);
+      } else if (slotMatch) {
+        // Slot full — pre-select row but show banner
+        selectedTherapistIdx = idx;
+        selectedSlotTime = slotMatch.t;
+        renderTherapistGrid();
+        const banner = document.getElementById('selectedSlotBanner');
+        document.getElementById('selectedSlotText').textContent =
+          `${slotCategories[idx].label} (${slotCategories[idx].key})  ·  ${slotMatch.t}  ·  Slot full`;
+        banner.classList.add('visible');
+        banner.style.background = '#fff1f2';
+        banner.style.borderColor = '#fecaca';
+        updateSummary();
+      }
+    }
+  }
+
+  // Show a subtle "pre-filled from schedule" indicator if any params present
+  if (qDate || qCat || qTime) {
+    const hdr = document.querySelector('.booking-form > .card:first-child .card-header');
+    if (hdr) {
+      const tag = document.createElement('span');
+      tag.style.cssText = 'font-size:10.5px;font-weight:700;background:#f0fdf9;color:#0f766e;border:1px solid #99f6e4;border-radius:6px;padding:2px 8px;margin-left:auto;';
+      tag.textContent = '📋 Pre-filled from Schedule';
+      hdr.appendChild(tag);
+    }
+  }
+})();
+</script>
+</body>
+</html>

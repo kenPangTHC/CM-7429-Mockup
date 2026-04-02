@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appointments — CARES Scheduler v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #0d9488;
+  --primary-dk: #0f766e;
+  --primary-xdk: #134e4a;
+  --primary-light: #f0fdf9;
+  --primary-mid: #ccfbf1;
+  --nav-bg: #1a2e2c;
+  --bg: #f0fdf9;
+  --text: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --radius: 16px;
+  --green: #10b981;
+  --blue: #3b82f6;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --purple: #8b5cf6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); display: flex !important; min-height: 100vh; }
+
+.nav-sidebar { width: 200px; min-width: 200px; background: #1a2e2c; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 200; display: flex; flex-direction: column; }
+.nav-sidebar-profile { padding: 20px 14px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.nav-sidebar-avatar { width: 46px; height: 46px; border-radius: 50%; background: rgba(13,148,136,0.25); border: 2px solid rgba(13,148,136,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 9px; }
+.nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
+.nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; cursor: pointer; }
+.nav-sidebar-nav { flex: 1; padding: 4px 0; }
+.nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+.nav-sidebar-link { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; color: rgba(255,255,255,0.68); text-decoration: none; font-size: 12px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
+.nav-sidebar-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.95); }
+.nav-sidebar-link.active { background: rgba(13,148,136,0.18); color: #5eead4; border-left-color: #0d9488; }
+.nav-sidebar-link-inner { display: flex; align-items: center; gap: 8px; }
+.nav-chevron { font-size: 10px; opacity: 0.35; }
+
+.main-wrapper { margin-left: 200px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+.topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar-hamburger { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--muted); }
+.topbar-logo { font-size: 20px; }
+.topbar-session { font-size: 13px; font-weight: 600; color: var(--text); }
+.topbar-right { display: flex; align-items: center; gap: 14px; }
+.topbar-welcome { font-size: 12.5px; color: var(--muted); }
+.topbar-facility { font-size: 12px; border: 1px solid var(--border); border-radius: 8px; padding: 4px 8px; color: var(--text); font-family: 'Outfit', sans-serif; background: #fff; cursor: pointer; }
+.topbar-notif { position: relative; background: none; border: none; font-size: 18px; cursor: pointer; }
+.topbar-notif-badge { position: absolute; top: -2px; right: -4px; background: var(--red); color: #fff; border-radius: 99px; font-size: 9px; font-weight: 700; padding: 0 4px; min-width: 16px; text-align: center; font-family: 'Outfit', sans-serif; }
+.topbar-logout { font-size: 12px; color: var(--muted); text-decoration: none; font-weight: 500; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); transition: all 0.15s; }
+.topbar-logout:hover { background: #fef2f2; color: var(--red); border-color: #fecaca; }
+
+.page-content { flex: 1; padding: 28px 28px 40px; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.page-title { font-size: 22px; font-weight: 800; color: var(--text); }
+.page-subtitle { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+/* Filter bar */
+.filter-bar { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; box-shadow: var(--shadow); }
+.filter-input { border: 1.5px solid var(--border); border-radius: 8px; padding: 7px 11px; font-size: 12.5px; font-family: 'Outfit', sans-serif; color: var(--text); outline: none; background: #fff; transition: border-color 0.15s; }
+.filter-input:focus { border-color: var(--primary); }
+.filter-input::placeholder { color: #94a3b8; }
+.filter-label { font-size: 11.5px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+.filter-sep { width: 1px; height: 24px; background: var(--border); }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; border: none; font-family: 'Outfit', sans-serif; transition: all 0.15s; text-decoration: none; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dk); }
+.btn-ghost { background: none; color: var(--text); border: 1.5px solid var(--border); }
+.btn-ghost:hover { border-color: #94a3b8; }
+.btn-sm { padding: 5px 11px; font-size: 11.5px; border-radius: 6px; }
+
+/* Table */
+.table-card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-md); border: 1px solid var(--border); overflow: hidden; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead { background: #f8fafc; }
+th { padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 13px 14px; font-size: 13px; color: var(--text); border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafafa; }
+
+.status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 99px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+.status-completed { background: #dcfce7; color: #15803d; }
+.status-upcoming { background: #dbeafe; color: #1d4ed8; }
+.status-utc { background: #fef3c7; color: #92400e; }
+.status-cancelled { background: #fee2e2; color: #b91c1c; }
+
+.svc-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.svc-ar { background: var(--primary-mid); color: var(--primary-xdk); }
+.svc-me { background: #ede9fe; color: #5b21b6; }
+.svc-cbn { background: #fef9c3; color: #854d0e; }
+
+.cat-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; background: #f1f5f9; color: var(--muted); }
+
+.transport-icon { font-size: 16px; }
+
+.action-btns { display: flex; gap: 6px; flex-wrap: nowrap; }
+.btn-view { background: #f1f5f9; color: var(--muted); border: none; }
+.btn-view:hover { background: #e2e8f0; color: var(--text); }
+.btn-done { background: #dcfce7; color: #15803d; border: none; }
+.btn-done:hover { background: #bbf7d0; }
+.btn-utc { background: #fef3c7; color: #92400e; border: none; }
+.btn-utc:hover { background: #fde68a; }
+.btn-notes { background: #ede9fe; color: #5b21b6; border: none; }
+.btn-notes:hover { background: #ddd6fe; }
+.btn-edit-reason { background: #ffedd5; color: #9a3412; border: none; }
+.btn-edit-reason:hover { background: #fed7aa; }
+
+/* Pagination */
+.pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-top: 1px solid var(--border); }
+.pagination-info { font-size: 12.5px; color: var(--muted); }
+.pagination-nav { display: flex; gap: 6px; align-items: center; }
+.page-btn { width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--border); background: #fff; cursor: pointer; font-size: 12px; font-family: 'Outfit', sans-serif; font-weight: 600; color: var(--text); display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.page-btn:hover { border-color: var(--primary); color: var(--primary); }
+.page-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* UTC Modal overlay */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal { background: #fff; border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,0.18); padding: 0; width: 460px; max-width: 95vw; transform: scale(0.95); transition: transform 0.2s; overflow: hidden; }
+.modal-overlay.open .modal { transform: scale(1); }
+.modal-header { padding: 20px 22px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 16px; font-weight: 800; color: var(--text); }
+.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); line-height: 1; }
+.modal-body { padding: 20px 22px; }
+.modal-patient-info { background: #fef3c7; border: 1px solid #fde68a; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; color: #92400e; font-weight: 600; }
+.modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+.form-input { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 13px; font-family: 'Outfit', sans-serif; color: var(--text); outline: none; transition: border-color 0.15s; }
+.form-input:focus { border-color: var(--primary); }
+.form-textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 13px; font-family: 'Outfit', sans-serif; resize: vertical; min-height: 80px; outline: none; }
+.form-textarea:focus { border-color: var(--primary); }
+</style>
+</head>
+<body>
+
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-profile">
+    <div class="nav-sidebar-avatar">🤝</div>
+    <div class="nav-sidebar-name">Cares Admin<br>TETSUYU</div>
+    <div class="nav-sidebar-role">Care Coordinator ▾</div>
+  </div>
+  <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
+    <a href="dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
+    <a href="schedule.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
+    <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
+    <a href="appointments.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="slot-config.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Slot Config</span></span><span class="nav-chevron">‹</span></a>
+    <a href="non-attendance.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🚫</span><span>Non-Attendance</span></span><span class="nav-chevron">‹</span></a>
+    <a href="reports.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📈</span><span>Reports</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📊</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
+  </nav>
+</aside>
+
+<div class="main-wrapper">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-hamburger">☰</button>
+      <span class="topbar-logo">🏥</span>
+      <span class="topbar-session">CARES Scheduler v2 · Thu, 2 Apr 2026</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-welcome">Welcome, Ms Sarah</span>
+      <select class="topbar-facility"><option>Tetsuyu Heritage Centre</option></select>
+      <button class="topbar-notif">🔔<span class="topbar-notif-badge">3</span></button>
+      <a href="#" class="topbar-logout">⏻ Logout</a>
+    </div>
+  </div>
+
+  <div class="page-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">📋 Appointments</div>
+        <div class="page-subtitle">View, manage, and complete scheduled therapy sessions</div>
+      </div>
+      <a href="book-appointment.html" class="btn btn-primary">➕ Book New</a>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <span class="filter-label">Date</span>
+      <input type="date" class="filter-input" value="2026-04-02" onclick="this.showPicker()">
+      <div class="filter-sep"></div>
+      <span class="filter-label">Status</span>
+      <select class="filter-input">
+        <option>All</option>
+        <option>Upcoming</option>
+        <option>Completed</option>
+        <option>Unable to Complete</option>
+        <option>Cancelled</option>
+      </select>
+      <div class="filter-sep"></div>
+      <span class="filter-label">Service</span>
+      <select class="filter-input">
+        <option>All</option>
+        <option>AR</option>
+        <option>ME</option>
+        <option>CBN</option>
+      </select>
+      <div class="filter-sep"></div>
+      <input type="text" class="filter-input" placeholder="🔍  Search patient name..." style="min-width:180px;">
+      <div style="margin-left:auto;">
+        <button class="btn btn-ghost">📥 Export</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-wrap">
+        <table id="apptTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Patient</th>
+              <th>Date &amp; Time</th>
+              <th>Service</th>
+              <th>Care Category</th>
+              <th>Status</th>
+              <th>Transport</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr id="row1">
+              <td style="color:var(--muted);font-size:12px;">1</td>
+              <td><div style="font-weight:600;">Mdm Lim Siew Lan</div><div style="font-size:11px;color:var(--muted);">Block C, Rm 12</div></td>
+              <td><div style="font-weight:600;">Thu 2 Apr</div><div style="font-size:11px;color:var(--muted);">09:00 – 09:30</div></td>
+              <td><span class="svc-badge svc-ar">AR (PT)</span></td>
+              <td><span class="cat-badge">PT</span></td>
+              <td><span class="status-badge status-completed">✅ Completed</span></td>
+              <td><span class="transport-icon">✅</span></td>
+              <td><div class="action-btns">
+                <button class="btn btn-sm btn-view">View</button>
+                <button class="btn btn-sm btn-notes" onclick="window.location='session-complete.html'">Notes</button>
+              </div></td>
+            </tr>
+            <tr id="row2">
+              <td style="color:var(--muted);font-size:12px;">2</td>
+              <td><div style="font-weight:600;">Mr Tan Boon Kiat</div><div style="font-size:11px;color:var(--muted);">Block C, Rm 8</div></td>
+              <td><div style="font-weight:600;">Thu 2 Apr</div><div style="font-size:11px;color:var(--muted);">09:30 – 10:00</div></td>
+              <td><span class="svc-badge svc-ar">AR (OT)</span></td>
+              <td><span class="cat-badge">OT</span></td>
+              <td><span class="status-badge status-completed">✅ Completed</span></td>
+              <td><span class="transport-icon">✅</span></td>
+              <td><div class="action-btns">
+                <button class="btn btn-sm btn-view">View</button>
+                <button class="btn btn-sm btn-notes" onclick="window.location='session-complete.html'">Notes</button>
+              </div></td>
+            </tr>
+            <tr id="row3">
+              <td style="color:var(--muted);font-size:12px;">3</td>
+              <td><div style="font-weight:600;">Mdm Chen Li</div><div style="font-size:11px;color:var(--muted);">Block A, Rm 3</div></td>
+              <td><div style="font-weight:600;">Thu 2 Apr</div><div style="font-size:11px;color:var(--muted);">10:00 – 10:30</div></td>
+              <td><span class="svc-badge svc-me">ME</span></td>
+              <td><span class="cat-badge">PT+OT</span></td>
+              <td><span class="status-badge status-utc" id="status3">🚫 Unable to Complete</span></td>
+              <td><span class="transport-icon">✅</span></td>
+              <td><div class="action-btns">
+                <button class="btn btn-sm btn-view">View</button>
+                <button class="btn btn-sm btn-edit-reason" onclick="openUTCModal(3, 'Mdm Chen Li', 'Thu 2 Apr', '10:00–10:30', 'Absent')">Edit Reason</button>
+              </div></td>
+            </tr>
+            <tr id="row4">
+              <td style="color:var(--muted);font-size:12px;">4</td>
+              <td><div style="font-weight:600;">Mr Rajan Pillai</div><div style="font-size:11px;color:var(--muted);">Block B, Rm 5</div></td>
+              <td><div style="font-weight:600;">Thu 2 Apr</div><div style="font-size:11px;color:var(--muted);">14:00 – 14:30</div></td>
+              <td><span class="svc-badge svc-cbn">CBN</span></td>
+              <td><span class="cat-badge">CBN</span></td>
+              <td><span class="status-badge status-upcoming" id="status4">⏳ Upcoming</span></td>
+              <td><span class="transport-icon">✅</span></td>
+              <td><div class="action-btns">
+                <button class="btn btn-sm btn-done" onclick="markDone(4)">✅ Mark Done</button>
+                <button class="btn btn-sm btn-utc" onclick="openUTCModal(4, 'Mr Rajan Pillai', 'Thu 2 Apr', '14:00–14:30', '')">🚫 UTC</button>
+              </div></td>
+            </tr>
+            <tr id="row5">
+              <td style="color:var(--muted);font-size:12px;">5</td>
+              <td><div style="font-weight:600;">Mdm Wong Ah Kow</div><div style="font-size:11px;color:var(--muted);">Block A, Rm 7</div></td>
+              <td><div style="font-weight:600;">Thu 2 Apr</div><div style="font-size:11px;color:var(--muted);">14:30 – 15:00</div></td>
+              <td><span class="svc-badge svc-ar">AR (PT)</span></td>
+              <td><span class="cat-badge">PT</span></td>
+              <td><span class="status-badge status-upcoming" id="status5">⏳ Upcoming</span></td>
+              <td><span class="transport-icon">❌</span></td>
+              <td><div class="action-btns">
+                <button class="btn btn-sm btn-done" onclick="markDone(5)">✅ Mark Done</button>
+                <button class="btn btn-sm btn-utc" onclick="openUTCModal(5, 'Mdm Wong Ah Kow', 'Thu 2 Apr', '14:30–15:00', '')">🚫 UTC</button>
+              </div></td>
+            </tr>
+            <tr id="row6">
+              <td style="color:var(--muted);font-size:12px;">6</td>
+              <td><div style="font-weight:600;">Mdm Lim Siew Lan</div><div style="font-size:11px;color:var(--muted);">Block C, Rm 12</div></td>
+              <td><div style="font-weight:600;">Tue 7 Apr</div><div style="font-size:11px;color:var(--muted);">09:00 – 09:30</div></td>
+              <td><span class="svc-badge svc-ar">AR (PT)</span></td>
+              <td><span class="cat-badge">PT</span></td>
+              <td><span class="status-badge status-upcoming" id="status6">⏳ Upcoming</span></td>
+              <td><span style="font-size:13px;color:var(--muted);">—</span></td>
+              <td><div class="action-btns">
+                <button class="btn btn-sm btn-done" onclick="markDone(6)">✅ Mark Done</button>
+                <button class="btn btn-sm btn-utc" onclick="openUTCModal(6, 'Mdm Lim Siew Lan', 'Tue 7 Apr', '09:00–09:30', '')">🚫 UTC</button>
+              </div></td>
+            </tr>
+            <tr id="row7">
+              <td style="color:var(--muted);font-size:12px;">7</td>
+              <td><div style="font-weight:600;">Mr Ahmad Bin Ali</div><div style="font-size:11px;color:var(--muted);">Block D, Rm 2</div></td>
+              <td><div style="font-weight:600;">Tue 7 Apr</div><div style="font-size:11px;color:var(--muted);">09:30 – 10:00</div></td>
+              <td><span class="svc-badge svc-ar">AR (OT)</span></td>
+              <td><span class="cat-badge">OT</span></td>
+              <td><span class="status-badge status-upcoming" id="status7">⏳ Upcoming</span></td>
+              <td><span style="font-size:13px;color:var(--muted);">—</span></td>
+              <td><div class="action-btns">
+                <button class="btn btn-sm btn-done" onclick="markDone(7)">✅ Mark Done</button>
+                <button class="btn btn-sm btn-utc" onclick="openUTCModal(7, 'Mr Ahmad Bin Ali', 'Tue 7 Apr', '09:30–10:00', '')">🚫 UTC</button>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <div class="pagination-info">Showing 7 of 24 appointments · Page 1 of 4</div>
+        <div class="pagination-nav">
+          <button class="page-btn" disabled style="opacity:0.4;">‹</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn">4</button>
+          <button class="page-btn">›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UTC Modal -->
+<div class="modal-overlay" id="utcModal" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🚫 Mark Unable to Complete</div>
+      <button class="modal-close" onclick="closeUTCModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-patient-info" id="modalPatientInfo"></div>
+      <div class="form-group">
+        <label class="form-label">Reason</label>
+        <select class="form-input" id="utcReason">
+          <option value="">— Select a reason —</option>
+          <option>Absent</option>
+          <option>Patient Unwell</option>
+          <option>No Transport</option>
+          <option>Late Arrival</option>
+          <option>Patient Refused</option>
+          <option>Equipment Issue</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Remarks</label>
+        <textarea class="form-textarea" id="utcRemarks" placeholder="Add any additional remarks..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeUTCModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmUTC()">✅ Confirm UTC</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentUTCRow = null;
+
+function openUTCModal(rowId, patient, date, time, existingReason) {
+  currentUTCRow = rowId;
+  document.getElementById('modalPatientInfo').innerHTML =
+    `<strong>${patient}</strong><br>📅 ${date} · ${time}`;
+  const sel = document.getElementById('utcReason');
+  sel.value = existingReason || '';
+  document.getElementById('utcRemarks').value = '';
+  document.getElementById('utcModal').classList.add('open');
+}
+
+function closeUTCModal() {
+  document.getElementById('utcModal').classList.remove('open');
+  currentUTCRow = null;
+}
+
+function closeModalOnOverlay(e) {
+  if (e.target === document.getElementById('utcModal')) closeUTCModal();
+}
+
+function confirmUTC() {
+  const reason = document.getElementById('utcReason').value;
+  if (!reason) { alert('Please select a reason.'); return; }
+  if (currentUTCRow) {
+    const statusEl = document.getElementById('status' + currentUTCRow);
+    if (statusEl) {
+      statusEl.className = 'status-badge status-utc';
+      statusEl.textContent = '🚫 Unable to Complete';
+    }
+    // Replace action buttons
+    const row = document.getElementById('row' + currentUTCRow);
+    if (row) {
+      const actCell = row.querySelector('.action-btns');
+      actCell.innerHTML = `<button class="btn btn-sm btn-view">View</button><button class="btn btn-sm btn-edit-reason" onclick="openUTCModal(${currentUTCRow}, '', '', '', '${reason}')">Edit Reason</button>`;
+    }
+  }
+  closeUTCModal();
+}
+
+function markDone(rowId) {
+  window.location.href = 'session-complete.html';
+}
+</script>
+</body>
+</html>

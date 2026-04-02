@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — CARES Scheduler v2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0d9488; --primary-dk: #0f766e; --primary-xdk: #134e4a;
+      --primary-light: #f0fdf9; --primary-mid: #ccfbf1;
+      --nav-bg: #1a2e2c; --bg: #f0fdf9; --text: #1e293b;
+      --muted: #64748b; --border: #e2e8f0;
+      --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08); --radius: 16px;
+      --green: #10b981; --blue: #3b82f6; --amber: #f59e0b; --red: #ef4444; --purple: #8b5cf6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); display: flex !important; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    .nav-sidebar { width: 200px; min-width: 200px; background: #1a2e2c; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 200; display: flex; flex-direction: column; }
+    .nav-sidebar-profile { padding: 20px 14px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .nav-sidebar-avatar { width: 46px; height: 46px; border-radius: 50%; background: rgba(13,148,136,0.25); border: 2px solid rgba(13,148,136,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 9px; }
+    .nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
+    .nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; cursor: pointer; }
+    .nav-sidebar-nav { flex: 1; padding: 4px 0; }
+    .nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+    .nav-sidebar-link { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; color: rgba(255,255,255,0.68); text-decoration: none; font-size: 12px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
+    .nav-sidebar-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.95); }
+    .nav-sidebar-link.active { background: rgba(13,148,136,0.18); color: #5eead4; border-left-color: #0d9488; }
+    .nav-sidebar-link-inner { display: flex; align-items: center; gap: 8px; }
+    .nav-chevron { font-size: 10px; opacity: 0.35; }
+
+    /* ── Main wrapper ── */
+    .main-wrapper { margin-left: 200px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; min-width: 0; }
+
+    /* ── Topbar ── */
+    .topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 0 24px; height: 54px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-hamburger { background: none; border: none; font-size: 16px; cursor: pointer; color: var(--muted); padding: 4px; }
+    .topbar-logo { font-size: 18px; }
+    .topbar-session { font-size: 13px; font-weight: 600; color: var(--primary-xdk); }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .topbar-welcome { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .topbar-facility { font-size: 12px; border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; color: var(--text); background: var(--primary-light); cursor: pointer; font-family: 'Outfit', sans-serif; }
+    .topbar-notif { background: none; border: none; font-size: 16px; cursor: pointer; position: relative; padding: 6px; }
+    .topbar-notif-badge { position: absolute; top: 0; right: 0; background: var(--red); color: #fff; font-size: 8px; font-weight: 700; border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; }
+    .topbar-logout { font-size: 12px; color: var(--muted); text-decoration: none; font-weight: 500; transition: color 0.15s; }
+    .topbar-logout:hover { color: var(--red); }
+
+    /* ── Page ── */
+    .page-content { padding: 22px 24px 32px; flex: 1; }
+
+    /* ── Welcome Banner ── */
+    .welcome-banner { background: linear-gradient(135deg, #0d9488 0%, #134e4a 100%); border-radius: var(--radius); padding: 26px 28px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; color: #fff; position: relative; overflow: hidden; }
+    .welcome-banner::before { content: ''; position: absolute; right: -30px; top: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.04); border-radius: 50%; pointer-events: none; }
+    .welcome-banner::after { content: ''; position: absolute; right: 80px; bottom: -60px; width: 140px; height: 140px; background: rgba(255,255,255,0.03); border-radius: 50%; pointer-events: none; }
+    .welcome-title { font-size: 22px; font-weight: 800; margin-bottom: 5px; }
+    .welcome-sub { font-size: 13px; opacity: 0.78; }
+    .welcome-stats { display: flex; gap: 10px; position: relative; z-index: 1; }
+    .welcome-stat { background: rgba(255,255,255,0.14); backdrop-filter: blur(6px); border-radius: 12px; padding: 12px 18px; text-align: center; border: 1px solid rgba(255,255,255,0.15); }
+    .welcome-stat-val { font-size: 22px; font-weight: 800; display: block; line-height: 1; }
+    .welcome-stat-lbl { font-size: 10px; opacity: 0.82; font-weight: 500; display: block; margin-top: 4px; white-space: nowrap; }
+
+    /* ── KPI Row ── */
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+    .kpi-card { background: #fff; border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; align-items: center; gap: 14px; transition: transform 0.15s, box-shadow 0.15s; }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .kpi-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .kpi-icon.teal { background: rgba(13,148,136,0.1); }
+    .kpi-icon.green { background: rgba(16,185,129,0.1); }
+    .kpi-icon.amber { background: rgba(245,158,11,0.1); }
+    .kpi-icon.blue { background: rgba(59,130,246,0.1); }
+    .kpi-val { font-size: 26px; font-weight: 800; line-height: 1; }
+    .kpi-val-frac { font-size: 14px; font-weight: 500; color: var(--muted); }
+    .kpi-label { font-size: 11px; color: var(--muted); margin-top: 3px; font-weight: 500; }
+    .kpi-link { font-size: 10.5px; color: var(--amber); margin-top: 4px; text-decoration: none; font-weight: 700; display: block; }
+    .kpi-link:hover { text-decoration: underline; }
+
+    /* ── Grid ── */
+    .main-grid { display: grid; grid-template-columns: 1fr 308px; gap: 18px; align-items: start; }
+    .left-col, .right-col { display: flex; flex-direction: column; gap: 18px; }
+
+    /* ── Panel ── */
+    .panel { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 700; }
+    .panel-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .panel-body { padding: 14px 20px; }
+    .panel-footer { padding: 11px 20px; border-top: 1px solid var(--border); text-align: right; }
+    .panel-link { font-size: 12px; color: var(--primary); text-decoration: none; font-weight: 600; }
+    .panel-link:hover { color: var(--primary-dk); text-decoration: underline; }
+
+    /* ── Slot Board ── */
+    .slot-row { display: grid; grid-template-columns: 96px 80px 1fr; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+    .slot-row:last-child { border-bottom: none; }
+    .slot-time { font-size: 10.5px; font-weight: 700; color: var(--text); }
+    .slot-cap { font-size: 9.5px; color: var(--muted); font-weight: 600; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; white-space: nowrap; display: inline-block; }
+    .slot-chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .slot-chip { border-radius: 8px; padding: 4px 9px; font-size: 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .slot-chip.booked { background: rgba(13,148,136,0.09); color: var(--primary-dk); border: 1px solid rgba(13,148,136,0.2); }
+    .slot-chip.available { background: rgba(16,185,129,0.07); color: #059669; border: 1px solid rgba(16,185,129,0.25); cursor: pointer; text-decoration: none; transition: all 0.15s; }
+    .slot-chip.available:hover { background: rgba(16,185,129,0.14); border-color: rgba(16,185,129,0.45); }
+    .slot-chip.blocked { background: rgba(100,116,139,0.08); color: var(--muted); border: 1px solid rgba(100,116,139,0.18); }
+
+    /* ── Badges ── */
+    .badge { font-size: 8.5px; font-weight: 800; border-radius: 4px; padding: 1px 5px; display: inline-block; vertical-align: middle; }
+    .badge-ar { background: rgba(13,148,136,0.13); color: var(--primary-dk); }
+    .badge-me { background: rgba(59,130,246,0.13); color: #2563eb; }
+    .badge-cbn { background: rgba(139,92,246,0.13); color: #7c3aed; }
+    .badge-ta { background: rgba(245,158,11,0.13); color: #d97706; }
+
+    /* ── Appointments ── */
+    .appt-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+    .appt-row:last-child { border-bottom: none; }
+    .appt-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary-mid); color: var(--primary-dk); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; letter-spacing: 0; }
+    .appt-name { font-size: 12.5px; font-weight: 600; }
+    .appt-meta { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+    .appt-right { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .status-badge { font-size: 9.5px; font-weight: 700; border-radius: 5px; padding: 2px 7px; }
+    .status-confirmed { background: rgba(16,185,129,0.1); color: #059669; }
+    .status-pending { background: rgba(245,158,11,0.1); color: #d97706; }
+
+    /* ── Quick Actions ── */
+    .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .quick-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 14px 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; text-decoration: none; color: var(--text); font-size: 11px; font-weight: 600; transition: all 0.15s; cursor: pointer; }
+    .quick-btn:hover { background: var(--primary-mid); border-color: rgba(13,148,136,0.3); color: var(--primary-dk); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .quick-btn-icon { font-size: 22px; line-height: 1; }
+
+    /* ── Donut ── */
+    .donut-wrap { display: flex; align-items: center; gap: 20px; padding: 4px 0; }
+    .donut-chart { width: 90px; height: 90px; border-radius: 50%; flex-shrink: 0; position: relative;
+      background: conic-gradient(var(--primary) 0deg 129deg, var(--blue) 129deg 232deg, var(--purple) 232deg 309deg, var(--amber) 309deg 360deg); }
+    .donut-hole { position: absolute; inset: 15px; background: #fff; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .donut-legend { display: flex; flex-direction: column; gap: 7px; flex: 1; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 11.5px; }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .legend-label { color: var(--muted); flex: 1; font-weight: 500; }
+    .legend-val { font-weight: 800; color: var(--text); }
+
+    /* ── Activity ── */
+    .activity-item { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .activity-body { flex: 1; min-width: 0; }
+    .activity-text { font-size: 11.5px; line-height: 1.5; }
+    .activity-name { font-weight: 700; }
+    .activity-time { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- ══ Sidebar ══ -->
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-profile">
+    <div class="nav-sidebar-avatar">🤝</div>
+    <div class="nav-sidebar-name">Cares Admin<br>TETSUYU</div>
+    <div class="nav-sidebar-role">Care Coordinator ▾</div>
+  </div>
+  <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
+    <a href="dashboard.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
+    <a href="schedule.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
+    <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
+    <a href="appointments.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="slot-config.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Slot Config</span></span><span class="nav-chevron">‹</span></a>
+    <a href="non-attendance.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🚫</span><span>Non-Attendance</span></span><span class="nav-chevron">‹</span></a>
+    <a href="reports.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📈</span><span>Reports</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📊</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
+  </nav>
+</aside>
+
+<!-- ══ Main ══ -->
+<div class="main-wrapper">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-hamburger">☰</button>
+      <span class="topbar-logo">🏥</span>
+      <span class="topbar-session">CARES Scheduler v2 · Thu, 2 Apr 2026</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-welcome">Welcome, Ms Sarah</span>
+      <select class="topbar-facility"><option>Tetsuyu Heritage Centre</option></select>
+      <button class="topbar-notif">🔔<span class="topbar-notif-badge">3</span></button>
+      <a href="#" class="topbar-logout">⏻ Logout</a>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+      <div>
+        <div class="welcome-title">Good morning, Sarah 👋</div>
+        <div class="welcome-sub">Thursday, 2 April 2026 · Tetsuyu Heritage Centre</div>
+      </div>
+      <div class="welcome-stats">
+        <div class="welcome-stat">
+          <span class="welcome-stat-val">14</span>
+          <span class="welcome-stat-lbl">Today's Bookings</span>
+        </div>
+        <div class="welcome-stat">
+          <span class="welcome-stat-val">6</span>
+          <span class="welcome-stat-lbl">Available Slots</span>
+        </div>
+        <div class="welcome-stat">
+          <span class="welcome-stat-val">8</span>
+          <span class="welcome-stat-lbl">Completed</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-icon teal">🗓</div>
+        <div>
+          <div class="kpi-val">14</div>
+          <div class="kpi-label">Today's Bookings</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon green">✅</div>
+        <div>
+          <div class="kpi-val">8 <span class="kpi-val-frac">/ 14</span></div>
+          <div class="kpi-label">Completed Sessions</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon amber">⚠️</div>
+        <div>
+          <div class="kpi-val">1</div>
+          <div class="kpi-label">Unable to Complete</div>
+          <a href="non-attendance.html" class="kpi-link">View details →</a>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon blue">🟢</div>
+        <div>
+          <div class="kpi-val">6</div>
+          <div class="kpi-label">Open Slots Today</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+
+      <!-- ── Left Column ── -->
+      <div class="left-col">
+
+        <!-- Today's Slot Board -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">📊 Today's Slot Board</div>
+              <div class="panel-sub">Thu, 2 Apr 2026 · Live capacity view</div>
+            </div>
+            <a href="schedule.html" style="font-size:11.5px;color:var(--primary);text-decoration:none;font-weight:600;">Full Schedule →</a>
+          </div>
+          <div class="panel-body">
+            <div class="slot-row">
+              <div class="slot-time">09:00 – 09:30</div>
+              <span class="slot-cap">2 slots · PT</span>
+              <div class="slot-chips">
+                <div class="slot-chip booked">Mdm Lim S.L. <span class="badge badge-ar">AR-PT</span></div>
+                <a href="schedule.html" class="slot-chip available">＋ Available</a>
+              </div>
+            </div>
+            <div class="slot-row">
+              <div class="slot-time">09:30 – 10:00</div>
+              <span class="slot-cap">3 slots · OT</span>
+              <div class="slot-chips">
+                <div class="slot-chip booked">Mr Tan B.K. <span class="badge badge-ar">AR-OT</span></div>
+                <div class="slot-chip booked">Mdm Chen Li <span class="badge badge-ar">AR-OT</span></div>
+                <a href="schedule.html" class="slot-chip available">＋ Available</a>
+              </div>
+            </div>
+            <div class="slot-row">
+              <div class="slot-time">10:00 – 10:30</div>
+              <span class="slot-cap">2 slots · PT+OT</span>
+              <div class="slot-chips">
+                <div class="slot-chip booked">Mdm Wong A.K. <span class="badge badge-me">ME</span></div>
+                <a href="schedule.html" class="slot-chip available">＋ Available</a>
+              </div>
+            </div>
+            <div class="slot-row">
+              <div class="slot-time">10:30 – 11:00</div>
+              <span class="slot-cap">3 slots · CBN</span>
+              <div class="slot-chips">
+                <div class="slot-chip blocked">🚫 Blocked</div>
+                <div class="slot-chip booked">Mr Rajan P. <span class="badge badge-cbn">CBN</span></div>
+                <a href="schedule.html" class="slot-chip available">＋ Available</a>
+              </div>
+            </div>
+            <div class="slot-row">
+              <div class="slot-time">14:00 – 14:30</div>
+              <span class="slot-cap">2 slots · PT</span>
+              <div class="slot-chips">
+                <div class="slot-chip booked">Mdm Lim S.L. <span class="badge badge-ar">AR-PT</span></div>
+                <a href="schedule.html" class="slot-chip available">＋ Available</a>
+              </div>
+            </div>
+            <div class="slot-row">
+              <div class="slot-time">14:30 – 15:00</div>
+              <span class="slot-cap">3 slots · OT</span>
+              <div class="slot-chips">
+                <div class="slot-chip booked">Mr Ahmad B.A. <span class="badge badge-ar">AR-OT</span></div>
+                <div class="slot-chip booked">Mdm Ng B.L. <span class="badge badge-me">ME</span></div>
+                <a href="schedule.html" class="slot-chip available">＋ Available</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming Appointments -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">📅 Upcoming Appointments</div>
+              <div class="panel-sub">Next 5 sessions beyond today</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="appt-row">
+              <div class="appt-avatar">LK</div>
+              <div>
+                <div class="appt-name">Mdm Lim Kian Huat</div>
+                <div class="appt-meta">Fri, 3 Apr · 09:00 – 09:30</div>
+              </div>
+              <div class="appt-right">
+                <span class="badge badge-ar">AR-PT</span>
+                <span class="status-badge status-confirmed">Confirmed</span>
+              </div>
+            </div>
+            <div class="appt-row">
+              <div class="appt-avatar">TH</div>
+              <div>
+                <div class="appt-name">Mr Tan Hock Seng</div>
+                <div class="appt-meta">Fri, 3 Apr · 09:30 – 10:00</div>
+              </div>
+              <div class="appt-right">
+                <span class="badge badge-me">ME</span>
+                <span class="status-badge status-confirmed">Confirmed</span>
+              </div>
+            </div>
+            <div class="appt-row">
+              <div class="appt-avatar">WC</div>
+              <div>
+                <div class="appt-name">Mdm Wong Chui Lin</div>
+                <div class="appt-meta">Mon, 7 Apr · 10:00 – 10:30</div>
+              </div>
+              <div class="appt-right">
+                <span class="badge badge-cbn">CBN</span>
+                <span class="status-badge status-pending">Pending</span>
+              </div>
+            </div>
+            <div class="appt-row">
+              <div class="appt-avatar">RP</div>
+              <div>
+                <div class="appt-name">Mr Rajan Pillai</div>
+                <div class="appt-meta">Mon, 7 Apr · 14:00 – 14:30</div>
+              </div>
+              <div class="appt-right">
+                <span class="badge badge-cbn">CBN</span>
+                <span class="status-badge status-confirmed">Confirmed</span>
+              </div>
+            </div>
+            <div class="appt-row">
+              <div class="appt-avatar">NB</div>
+              <div>
+                <div class="appt-name">Mdm Ng Bee Lian</div>
+                <div class="appt-meta">Tue, 8 Apr · 09:30 – 10:00</div>
+              </div>
+              <div class="appt-right">
+                <span class="badge badge-ar">AR-OT</span>
+                <span class="status-badge status-confirmed">Confirmed</span>
+              </div>
+            </div>
+          </div>
+          <div class="panel-footer">
+            <a href="appointments.html" class="panel-link">View All Appointments →</a>
+          </div>
+        </div>
+
+      </div><!-- /left-col -->
+
+      <!-- ── Right Column ── -->
+      <div class="right-col">
+
+        <!-- Quick Actions -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">⚡ Quick Actions</div>
+          </div>
+          <div class="panel-body">
+            <div class="quick-grid">
+              <a href="book-appointment.html" class="quick-btn"><span class="quick-btn-icon">📅</span><span>Book Session</span></a>
+              <a href="schedule.html" class="quick-btn"><span class="quick-btn-icon">🚫</span><span>Block Slot</span></a>
+              <a href="appointments.html" class="quick-btn"><span class="quick-btn-icon">📋</span><span>Appointments</span></a>
+              <a href="slot-config.html" class="quick-btn"><span class="quick-btn-icon">⚙️</span><span>Slot Config</span></a>
+              <a href="reports.html" class="quick-btn"><span class="quick-btn-icon">📈</span><span>Reports</span></a>
+              <a href="non-attendance.html" class="quick-btn"><span class="quick-btn-icon">🚫</span><span>Non-Attendance</span></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Session Breakdown Donut -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">🍩 Session Breakdown</div>
+            <span style="font-size:10.5px;color:var(--muted);font-weight:500;">Today · 14 total</span>
+          </div>
+          <div class="panel-body">
+            <div class="donut-wrap">
+              <div class="donut-chart">
+                <div class="donut-hole">
+                  <span style="font-size:18px;font-weight:800;line-height:1;">14</span>
+                  <span style="font-size:9px;color:var(--muted);font-weight:500;">total</span>
+                </div>
+              </div>
+              <div class="donut-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--primary)"></div><span class="legend-label">PT</span><span class="legend-val">5</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div><span class="legend-label">OT</span><span class="legend-val">4</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div><span class="legend-label">CBN</span><span class="legend-val">3</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div><span class="legend-label">TA</span><span class="legend-val">2</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">🕐 Recent Activity</div>
+          </div>
+          <div class="panel-body">
+            <div class="activity-item">
+              <div class="activity-icon">✅</div>
+              <div class="activity-body">
+                <div class="activity-text"><span class="activity-name">Mdm Lim Siew Lan</span> — Session completed (PT)</div>
+                <div class="activity-time">09:30 · 25 min ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon">➕</div>
+              <div class="activity-body">
+                <div class="activity-text"><span class="activity-name">Mr Tan Boon Kiat</span> — Booked for 9 Apr (OT)</div>
+                <div class="activity-time">09:15 · 40 min ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon">🚫</div>
+              <div class="activity-body">
+                <div class="activity-text">14:00–14:30 slot blocked — Staff meeting</div>
+                <div class="activity-time">08:45 · 1h 10m ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon">✅</div>
+              <div class="activity-body">
+                <div class="activity-text"><span class="activity-name">Mr Rajan Pillai</span> — Session completed (CBN)</div>
+                <div class="activity-time">08:30 · 1h 25m ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon">⚠️</div>
+              <div class="activity-body">
+                <div class="activity-text"><span class="activity-name">Mdm Chen Li</span> — Unable to Complete</div>
+                <div class="activity-time">08:00 · 1h 55m ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /right-col -->
+    </div><!-- /main-grid -->
+  </div><!-- /page-content -->
+</div><!-- /main-wrapper -->
+</body>
+</html>

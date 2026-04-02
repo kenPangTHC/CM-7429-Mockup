@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schedule — CARES Scheduler v2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0d9488; --primary-dk: #0f766e; --primary-xdk: #134e4a;
+      --primary-light: #f0fdf9; --primary-mid: #ccfbf1;
+      --nav-bg: #1a2e2c; --bg: #f0fdf9; --text: #1e293b;
+      --muted: #64748b; --border: #e2e8f0;
+      --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08); --radius: 16px;
+      --green: #10b981; --blue: #3b82f6; --amber: #f59e0b; --red: #ef4444; --purple: #8b5cf6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); display: flex !important; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    .nav-sidebar { width: 200px; min-width: 200px; background: #1a2e2c; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 200; display: flex; flex-direction: column; }
+    .nav-sidebar-profile { padding: 20px 14px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .nav-sidebar-avatar { width: 46px; height: 46px; border-radius: 50%; background: rgba(13,148,136,0.25); border: 2px solid rgba(13,148,136,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 9px; }
+    .nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
+    .nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; cursor: pointer; }
+    .nav-sidebar-nav { flex: 1; padding: 4px 0; }
+    .nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+    .nav-sidebar-link { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; color: rgba(255,255,255,0.68); text-decoration: none; font-size: 12px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
+    .nav-sidebar-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.95); }
+    .nav-sidebar-link.active { background: rgba(13,148,136,0.18); color: #5eead4; border-left-color: #0d9488; }
+    .nav-sidebar-link-inner { display: flex; align-items: center; gap: 8px; }
+    .nav-chevron { font-size: 10px; opacity: 0.35; }
+
+    /* ── Main ── */
+    .main-wrapper { margin-left: 200px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; min-width: 0; }
+    .topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 0 24px; height: 54px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-hamburger { background: none; border: none; font-size: 16px; cursor: pointer; color: var(--muted); padding: 4px; }
+    .topbar-logo { font-size: 18px; }
+    .topbar-session { font-size: 13px; font-weight: 600; color: var(--primary-xdk); }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .topbar-welcome { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .topbar-facility { font-size: 12px; border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; color: var(--text); background: var(--primary-light); cursor: pointer; font-family: 'Outfit', sans-serif; }
+    .topbar-notif { background: none; border: none; font-size: 16px; cursor: pointer; position: relative; padding: 6px; }
+    .topbar-notif-badge { position: absolute; top: 0; right: 0; background: var(--red); color: #fff; font-size: 8px; font-weight: 700; border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; }
+    .topbar-logout { font-size: 12px; color: var(--muted); text-decoration: none; font-weight: 500; }
+    .topbar-logout:hover { color: var(--red); }
+    .page-content { padding: 22px 24px 32px; flex: 1; }
+
+    /* ── Page header ── */
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .page-title { font-size: 20px; font-weight: 800; }
+
+    /* ── Date nav ── */
+    .date-nav { display: flex; align-items: center; gap: 8px; }
+    .date-nav-btn { background: #fff; border: 1px solid var(--border); border-radius: 9px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--muted); transition: all 0.15s; }
+    .date-nav-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .date-display { background: #fff; border: 1px solid var(--border); border-radius: 9px; padding: 6px 16px; font-size: 13px; font-weight: 700; color: var(--text); cursor: pointer; transition: all 0.15s; }
+    .date-display:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* ── Controls row ── */
+    .controls-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .view-toggle { display: flex; background: #fff; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; }
+    .view-btn { padding: 6px 14px; font-family: 'Outfit', sans-serif; font-size: 12.5px; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--muted); transition: all 0.15s; }
+    .view-btn.active { background: var(--primary); color: #fff; }
+    .view-btn:hover:not(.active) { background: var(--bg); color: var(--text); }
+    .filter-select { font-family: 'Outfit', sans-serif; font-size: 12.5px; font-weight: 600; border: 1px solid var(--border); border-radius: 9px; padding: 6px 12px; background: #fff; color: var(--text); cursor: pointer; outline: none; transition: border-color 0.15s; }
+    .filter-select:focus { border-color: var(--primary); }
+    .spacer { flex: 1; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 9px; font-family: 'Outfit', sans-serif; font-size: 12.5px; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dk); }
+    .btn-amber { background: var(--amber); color: #fff; }
+    .btn-amber:hover { background: #d97706; }
+    .btn-ghost { background: #fff; color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--bg); border-color: var(--primary); color: var(--primary); }
+    .btn-red { background: var(--red); color: #fff; }
+    .btn-red:hover { background: #b91c1c; }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-green:hover { background: #059669; }
+    .btn-sm { padding: 5px 12px; font-size: 11.5px; }
+
+    /* ── Legend ── */
+    .legend-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: var(--muted); }
+    .legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
+
+    /* ── Schedule grid ── */
+    .schedule-grid { display: flex; flex-direction: column; gap: 10px; }
+
+    .period-row { background: #fff; border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; transition: box-shadow 0.15s; }
+    .period-row:hover { box-shadow: var(--shadow-md); }
+    .period-inner { display: grid; grid-template-columns: 160px 1fr auto; align-items: stretch; min-height: 74px; }
+
+    /* Left: time + category */
+    .period-left { padding: 14px 16px; border-right: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; gap: 7px; background: var(--bg); min-width: 160px; }
+    .period-time { font-size: 12px; font-weight: 800; color: var(--text); }
+    .period-time-sub { font-size: 10px; color: var(--muted); font-weight: 500; }
+    .cat-chip { display: inline-block; font-size: 10px; font-weight: 800; border-radius: 6px; padding: 3px 8px; letter-spacing: 0.02em; }
+    .cat-pt { background: rgba(13,148,136,0.12); color: var(--primary-dk); }
+    .cat-ot { background: rgba(59,130,246,0.12); color: #2563eb; }
+    .cat-ptot { background: rgba(13,148,136,0.08); color: var(--primary-dk); border: 1px solid rgba(13,148,136,0.2); }
+    .cat-cbn { background: rgba(139,92,246,0.12); color: #7c3aed; }
+    .cat-ta { background: rgba(245,158,11,0.12); color: #d97706; }
+
+    /* Center: slot cards */
+    .period-slots { display: flex; align-items: center; gap: 10px; padding: 14px 16px; flex-wrap: wrap; flex: 1; }
+
+    .slot-card { border-radius: 10px; padding: 9px 12px; font-size: 11.5px; font-weight: 600; cursor: pointer; transition: all 0.18s; border: 1.5px solid transparent; min-width: 130px; position: relative; }
+    .slot-card.open { background: rgba(16,185,129,0.07); border-color: rgba(16,185,129,0.3); color: #059669; display: flex; align-items: center; gap: 6px; justify-content: center; min-height: 46px; }
+    .slot-card.open:hover { background: rgba(16,185,129,0.14); border-color: var(--green); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(16,185,129,0.2); }
+    .slot-card.booked { background: rgba(13,148,136,0.08); border-color: rgba(13,148,136,0.25); color: var(--primary-dk); }
+    .slot-card.booked:hover { background: rgba(13,148,136,0.15); border-color: var(--primary); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(13,148,136,0.18); }
+    .slot-card.booked.selected { background: rgba(13,148,136,0.18); border-color: var(--primary); box-shadow: 0 0 0 2px rgba(13,148,136,0.25); }
+    .slot-card.blocked { background: rgba(100,116,139,0.07); border-color: rgba(100,116,139,0.2); color: var(--muted); cursor: default; display: flex; align-items: center; gap: 6px; }
+    .slot-card.blocked:hover { background: rgba(100,116,139,0.1); }
+
+    .slot-patient { font-weight: 700; font-size: 12px; display: block; }
+    .slot-service { margin-top: 3px; display: flex; align-items: center; gap: 5px; }
+    .slot-transport { font-size: 10px; color: var(--muted); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+    .slot-transport input { accent-color: var(--primary); width: 12px; height: 12px; cursor: pointer; }
+
+    .badge { font-size: 8.5px; font-weight: 800; border-radius: 4px; padding: 1px 5px; display: inline-block; }
+    .badge-ar { background: rgba(13,148,136,0.13); color: var(--primary-dk); }
+    .badge-me { background: rgba(59,130,246,0.13); color: #2563eb; }
+    .badge-cbn { background: rgba(139,92,246,0.13); color: #7c3aed; }
+
+    /* Right: period actions */
+    .period-actions { padding: 12px 14px; border-left: 1px solid var(--border); display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 8px; background: var(--bg); }
+    .period-action-btn { font-size: 11px; font-weight: 700; border: none; background: transparent; cursor: pointer; font-family: 'Outfit', sans-serif; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; transition: all 0.15s; color: var(--muted); }
+    .period-action-btn:hover { background: var(--primary-mid); color: var(--primary-dk); }
+    .period-action-btn.amber:hover { background: rgba(245,158,11,0.12); color: #d97706; }
+    .period-action-btn.red:hover { background: rgba(239,68,68,0.1); color: var(--red); }
+
+    /* ── Slot Popover ── */
+    #slot-popover {
+      display: none; position: fixed; z-index: 500;
+      background: #fff; border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+      width: 290px; padding: 0; overflow: hidden;
+    }
+    .popover-header { padding: 14px 16px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; }
+    .popover-name { font-size: 15px; font-weight: 800; }
+    .popover-nric { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 500; }
+    .popover-close { background: none; border: none; font-size: 16px; cursor: pointer; color: var(--muted); line-height: 1; padding: 2px; }
+    .popover-close:hover { color: var(--text); }
+    .popover-body { padding: 12px 16px; }
+    .popover-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 4px 0; }
+    .popover-label { color: var(--muted); font-weight: 500; }
+    .popover-val { font-weight: 700; color: var(--text); }
+    .popover-transport { display: flex; align-items: center; justify-content: space-between; font-size: 12px; padding: 8px 0 4px; border-top: 1px solid var(--border); margin-top: 6px; }
+    .popover-transport label { display: flex; align-items: center; gap: 7px; cursor: pointer; font-weight: 500; }
+    .popover-transport input { accent-color: var(--primary); width: 14px; height: 14px; }
+    .popover-actions { padding: 10px 16px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 7px; }
+    .popover-action-row { display: flex; gap: 8px; }
+
+    /* ── Block Modal ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.45); backdrop-filter: blur(2px); z-index: 600; display: none; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: var(--radius); box-shadow: 0 16px 48px rgba(0,0,0,0.18); width: 420px; max-width: 95vw; overflow: hidden; animation: modalIn 0.18s ease; }
+    @keyframes modalIn { from { transform: translateY(-12px) scale(0.97); opacity: 0; } to { transform: none; opacity: 1; } }
+    .modal-header { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 16px; font-weight: 800; }
+    .modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--muted); line-height: 1; }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    .form-input, .form-select, .form-textarea {
+      font-family: 'Outfit', sans-serif; font-size: 13px; border: 1px solid var(--border); border-radius: 9px; padding: 9px 12px;
+      outline: none; color: var(--text); background: #fff; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,148,136,0.12); }
+    .form-textarea { resize: vertical; min-height: 70px; }
+    .form-hint { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .slots-check-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    .slot-check-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 6px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.12s; background: #fff; }
+    .slot-check-item:hover { border-color: var(--amber); background: rgba(245,158,11,0.06); }
+    .slot-check-item input { accent-color: var(--amber); width: 14px; height: 14px; }
+    .slot-check-item.all-slots { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); color: #d97706; font-weight: 700; }
+    .modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; background: var(--bg); }
+
+    /* ── Unable-to-complete dropdown ── */
+    #utc-select { font-family: 'Outfit', sans-serif; font-size: 12px; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; width: 100%; margin-top: 6px; outline: none; display: none; }
+    #utc-select:focus { border-color: var(--red); }
+  </style>
+</head>
+<body>
+
+<!-- ══ Sidebar ══ -->
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-profile">
+    <div class="nav-sidebar-avatar">🤝</div>
+    <div class="nav-sidebar-name">Cares Admin<br>TETSUYU</div>
+    <div class="nav-sidebar-role">Care Coordinator ▾</div>
+  </div>
+  <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
+    <a href="dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
+    <a href="schedule.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
+    <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
+    <a href="appointments.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="slot-config.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Slot Config</span></span><span class="nav-chevron">‹</span></a>
+    <a href="non-attendance.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🚫</span><span>Non-Attendance</span></span><span class="nav-chevron">‹</span></a>
+    <a href="reports.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📈</span><span>Reports</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📊</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
+  </nav>
+</aside>
+
+<!-- ══ Main ══ -->
+<div class="main-wrapper">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-hamburger">☰</button>
+      <span class="topbar-logo">🏥</span>
+      <span class="topbar-session">CARES Scheduler v2 · Thu, 2 Apr 2026</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-welcome">Welcome, Ms Sarah</span>
+      <select class="topbar-facility"><option>Tetsuyu Heritage Centre</option></select>
+      <button class="topbar-notif">🔔<span class="topbar-notif-badge">3</span></button>
+      <a href="#" class="topbar-logout">⏻ Logout</a>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- Page header + date nav -->
+    <div class="page-header">
+      <div class="page-title">📅 Schedule</div>
+      <div class="date-nav">
+        <button class="date-nav-btn" onclick="changeDate(-1)" title="Previous day">&#8249;</button>
+        <div class="date-display" id="date-display" onclick="this.focus()">Thu, 2 Apr 2026</div>
+        <button class="date-nav-btn" onclick="changeDate(1)" title="Next day">&#8250;</button>
+      </div>
+    </div>
+
+    <!-- Controls row -->
+    <div class="controls-row">
+      <div class="view-toggle">
+        <button class="view-btn active">Day</button>
+        <button class="view-btn" onclick="alert('Week view coming soon.')">Week</button>
+      </div>
+      <select class="filter-select" id="cat-filter" onchange="filterCategory(this.value)">
+        <option value="all">All Categories</option>
+        <option value="PT">PT only</option>
+        <option value="OT">OT only</option>
+        <option value="CBN">CBN only</option>
+        <option value="TA">TA only</option>
+      </select>
+      <div class="spacer"></div>
+      <button class="btn btn-amber" onclick="openBlockModal()">🚫 Block Slot</button>
+      <a href="book-appointment.html" class="btn btn-primary">➕ Book Appointment</a>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-swatch" style="background:rgba(16,185,129,0.4);border:1.5px solid rgba(16,185,129,0.5);"></div> Available</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:rgba(13,148,136,0.35);border:1.5px solid rgba(13,148,136,0.4);"></div> Booked</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:rgba(100,116,139,0.25);border:1.5px solid rgba(100,116,139,0.3);"></div> Blocked</div>
+      <div class="legend-item" style="font-style:italic;color:var(--muted);font-size:11px;">Click a booked slot for actions</div>
+    </div>
+
+    <!-- ══ Schedule Grid ══ -->
+    <div class="schedule-grid" id="schedule-grid">
+
+      <!-- Period 1: 09:00-09:30, PT, 2 slots -->
+      <div class="period-row" data-cat="PT">
+        <div class="period-inner">
+          <div class="period-left">
+            <div>
+              <div class="period-time">09:00 – 09:30</div>
+              <div class="period-time-sub">30 min session</div>
+            </div>
+            <span class="cat-chip cat-pt">PT</span>
+          </div>
+          <div class="period-slots">
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mdm Lim Siew Lan', nric:'****1234', service:'AR-PT', serviceClass:'badge-ar', time:'09:00 – 09:30', date:'Thu, 2 Apr 2026', transport:true, status:'Confirmed'})">
+              <span class="slot-patient">Mdm Lim Siew Lan</span>
+              <div class="slot-service"><span class="badge badge-ar">AR-PT</span> <span style="font-size:10px;color:var(--muted);font-weight:500;">Confirmed</span></div>
+              <div class="slot-transport"><input type="checkbox" checked onclick="event.stopPropagation()"> Transport taken</div>
+            </div>
+            <div class="slot-card open" onclick="bookSlot(this, '09:00 – 09:30')">
+              <span>＋</span><span>Available</span>
+            </div>
+          </div>
+          <div class="period-actions">
+            <button class="period-action-btn amber" onclick="openBlockModal('09:00 – 09:30')">🚫 Block</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Period 2: 09:30-10:00, OT, 3 slots -->
+      <div class="period-row" data-cat="OT">
+        <div class="period-inner">
+          <div class="period-left">
+            <div>
+              <div class="period-time">09:30 – 10:00</div>
+              <div class="period-time-sub">30 min session</div>
+            </div>
+            <span class="cat-chip cat-ot">OT</span>
+          </div>
+          <div class="period-slots">
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mr Tan Boon Kiat', nric:'****5678', service:'AR-OT', serviceClass:'badge-ar', time:'09:30 – 10:00', date:'Thu, 2 Apr 2026', transport:true, status:'Confirmed'})">
+              <span class="slot-patient">Mr Tan Boon Kiat</span>
+              <div class="slot-service"><span class="badge badge-ar">AR-OT</span> <span style="font-size:10px;color:var(--muted);font-weight:500;">Confirmed</span></div>
+              <div class="slot-transport"><input type="checkbox" checked onclick="event.stopPropagation()"> Transport taken</div>
+            </div>
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mdm Chen Li', nric:'****9012', service:'AR-OT', serviceClass:'badge-ar', time:'09:30 – 10:00', date:'Thu, 2 Apr 2026', transport:false, status:'Confirmed'})">
+              <span class="slot-patient">Mdm Chen Li</span>
+              <div class="slot-service"><span class="badge badge-ar">AR-OT</span> <span style="font-size:10px;color:var(--muted);font-weight:500;">Confirmed</span></div>
+              <div class="slot-transport"><input type="checkbox" onclick="event.stopPropagation()"> Transport taken</div>
+            </div>
+            <div class="slot-card open" onclick="bookSlot(this, '09:30 – 10:00')">
+              <span>＋</span><span>Available</span>
+            </div>
+          </div>
+          <div class="period-actions">
+            <button class="period-action-btn amber" onclick="openBlockModal('09:30 – 10:00')">🚫 Block</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Period 3: 10:00-10:30, PT+OT, 2 slots -->
+      <div class="period-row" data-cat="PT+OT">
+        <div class="period-inner">
+          <div class="period-left">
+            <div>
+              <div class="period-time">10:00 – 10:30</div>
+              <div class="period-time-sub">30 min session</div>
+            </div>
+            <span class="cat-chip cat-ptot">PT+OT</span>
+          </div>
+          <div class="period-slots">
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mdm Wong Ah Kow', nric:'****3456', service:'ME', serviceClass:'badge-me', time:'10:00 – 10:30', date:'Thu, 2 Apr 2026', transport:true, status:'Confirmed'})">
+              <span class="slot-patient">Mdm Wong Ah Kow</span>
+              <div class="slot-service"><span class="badge badge-me">ME</span> <span style="font-size:10px;color:var(--muted);font-weight:500;">Confirmed</span></div>
+              <div class="slot-transport"><input type="checkbox" checked onclick="event.stopPropagation()"> Transport taken</div>
+            </div>
+            <div class="slot-card open" onclick="bookSlot(this, '10:00 – 10:30')">
+              <span>＋</span><span>Available</span>
+            </div>
+          </div>
+          <div class="period-actions">
+            <button class="period-action-btn amber" onclick="openBlockModal('10:00 – 10:30')">🚫 Block</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Period 4: 10:30-11:00, CBN, 3 slots (1 blocked) -->
+      <div class="period-row" data-cat="CBN">
+        <div class="period-inner">
+          <div class="period-left">
+            <div>
+              <div class="period-time">10:30 – 11:00</div>
+              <div class="period-time-sub">30 min session</div>
+            </div>
+            <span class="cat-chip cat-cbn">CBN</span>
+          </div>
+          <div class="period-slots">
+            <div class="slot-card blocked">
+              <span>🚫</span>
+              <div>
+                <div style="font-weight:700;font-size:11.5px;">Blocked</div>
+                <div style="font-size:10.5px;color:var(--muted);margin-top:2px;">Staff meeting</div>
+              </div>
+            </div>
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mr Rajan Pillai', nric:'****7890', service:'CBN', serviceClass:'badge-cbn', time:'10:30 – 11:00', date:'Thu, 2 Apr 2026', transport:true, status:'Confirmed'})">
+              <span class="slot-patient">Mr Rajan Pillai</span>
+              <div class="slot-service"><span class="badge badge-cbn">CBN</span> <span style="font-size:10px;color:var(--muted);font-weight:500;">Confirmed</span></div>
+              <div class="slot-transport"><input type="checkbox" checked onclick="event.stopPropagation()"> Transport taken</div>
+            </div>
+            <div class="slot-card open" onclick="bookSlot(this, '10:30 – 11:00')">
+              <span>＋</span><span>Available</span>
+            </div>
+          </div>
+          <div class="period-actions">
+            <button class="period-action-btn red" onclick="unblockPeriod(this)">✓ Unblock</button>
+            <button class="period-action-btn amber" onclick="openBlockModal('10:30 – 11:00')">🚫 Block more</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Period 5: 14:00-14:30, PT, 2 slots -->
+      <div class="period-row" data-cat="PT">
+        <div class="period-inner">
+          <div class="period-left">
+            <div>
+              <div class="period-time">14:00 – 14:30</div>
+              <div class="period-time-sub">30 min session</div>
+            </div>
+            <span class="cat-chip cat-pt">PT</span>
+          </div>
+          <div class="period-slots">
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mdm Lim Siew Lan', nric:'****1234', service:'AR-PT', serviceClass:'badge-ar', time:'14:00 – 14:30', date:'Thu, 2 Apr 2026', transport:true, status:'Completed'})">
+              <span class="slot-patient">Mdm Lim Siew Lan</span>
+              <div class="slot-service"><span class="badge badge-ar">AR-PT</span> <span style="font-size:10px;color:var(--green);font-weight:600;">✓ Completed</span></div>
+              <div class="slot-transport"><input type="checkbox" checked onclick="event.stopPropagation()"> Transport taken</div>
+            </div>
+            <div class="slot-card open" onclick="bookSlot(this, '14:00 – 14:30')">
+              <span>＋</span><span>Available</span>
+            </div>
+          </div>
+          <div class="period-actions">
+            <button class="period-action-btn amber" onclick="openBlockModal('14:00 – 14:30')">🚫 Block</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Period 6: 14:30-15:00, OT, 3 slots -->
+      <div class="period-row" data-cat="OT">
+        <div class="period-inner">
+          <div class="period-left">
+            <div>
+              <div class="period-time">14:30 – 15:00</div>
+              <div class="period-time-sub">30 min session</div>
+            </div>
+            <span class="cat-chip cat-ot">OT</span>
+          </div>
+          <div class="period-slots">
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mr Ahmad Bin Ali', nric:'****2345', service:'AR-OT', serviceClass:'badge-ar', time:'14:30 – 15:00', date:'Thu, 2 Apr 2026', transport:true, status:'Confirmed'})">
+              <span class="slot-patient">Mr Ahmad Bin Ali</span>
+              <div class="slot-service"><span class="badge badge-ar">AR-OT</span> <span style="font-size:10px;color:var(--muted);font-weight:500;">Confirmed</span></div>
+              <div class="slot-transport"><input type="checkbox" checked onclick="event.stopPropagation()"> Transport taken</div>
+            </div>
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mdm Ng Bee Lian', nric:'****6789', service:'ME', serviceClass:'badge-me', time:'14:30 – 15:00', date:'Thu, 2 Apr 2026', transport:false, status:'Confirmed'})">
+              <span class="slot-patient">Mdm Ng Bee Lian</span>
+              <div class="slot-service"><span class="badge badge-me">ME</span> <span style="font-size:10px;color:var(--muted);font-weight:500;">Confirmed</span></div>
+              <div class="slot-transport"><input type="checkbox" onclick="event.stopPropagation()"> Transport taken</div>
+            </div>
+            <div class="slot-card open" onclick="bookSlot(this, '14:30 – 15:00')">
+              <span>＋</span><span>Available</span>
+            </div>
+          </div>
+          <div class="period-actions">
+            <button class="period-action-btn amber" onclick="openBlockModal('14:30 – 15:00')">🚫 Block</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /schedule-grid -->
+  </div><!-- /page-content -->
+</div><!-- /main-wrapper -->
+
+<!-- ══ Slot Popover ══ -->
+<div id="slot-popover">
+  <div class="popover-header">
+    <div>
+      <div class="popover-name" id="pop-name">Patient Name</div>
+      <div class="popover-nric" id="pop-nric">NRIC: ****0000</div>
+    </div>
+    <button class="popover-close" onclick="closePopover()">✕</button>
+  </div>
+  <div class="popover-body">
+    <div class="popover-row">
+      <span class="popover-label">Service</span>
+      <span class="popover-val" id="pop-service">—</span>
+    </div>
+    <div class="popover-row">
+      <span class="popover-label">Date</span>
+      <span class="popover-val" id="pop-date">—</span>
+    </div>
+    <div class="popover-row">
+      <span class="popover-label">Time</span>
+      <span class="popover-val" id="pop-time">—</span>
+    </div>
+    <div class="popover-row">
+      <span class="popover-label">Status</span>
+      <span class="popover-val" id="pop-status">—</span>
+    </div>
+    <div class="popover-transport">
+      <label><input type="checkbox" id="pop-transport" checked> Transport taken</label>
+      <span style="font-size:10.5px;color:var(--muted);">Uncheck if not taken</span>
+    </div>
+    <div style="margin-top:10px;">
+      <select id="utc-select" onchange="utcSelected(this.value)">
+        <option value="">— Select reason —</option>
+        <option>Patient unwell / hospitalised</option>
+        <option>Patient refused session</option>
+        <option>Staff unavailable</option>
+        <option>Equipment failure</option>
+        <option>Patient transport issue</option>
+        <option>Other (add note)</option>
+      </select>
+    </div>
+  </div>
+  <div class="popover-actions">
+    <div class="popover-action-row">
+      <button class="btn btn-green btn-sm" style="flex:1;" onclick="markComplete()">✅ Mark Complete</button>
+      <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="toggleUTC()">⚠️ Unable to Complete</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="width:100%;color:var(--red);border-color:rgba(239,68,68,0.3);" onclick="cancelBooking()">✕ Cancel Booking</button>
+  </div>
+</div>
+
+<!-- ══ Block Modal ══ -->
+<div class="modal-overlay" id="block-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🚫 Block Slot(s)</div>
+      <button class="modal-close" onclick="closeBlockModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Time Period</label>
+        <select class="form-select" id="block-period">
+          <option>09:00 – 09:30 (PT · 2 slots)</option>
+          <option>09:30 – 10:00 (OT · 3 slots)</option>
+          <option>10:00 – 10:30 (PT+OT · 2 slots)</option>
+          <option>10:30 – 11:00 (CBN · 3 slots)</option>
+          <option>14:00 – 14:30 (PT · 2 slots)</option>
+          <option>14:30 – 15:00 (OT · 3 slots)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Slots to Block</label>
+        <div class="slots-check-group">
+          <label class="slot-check-item all-slots">
+            <input type="checkbox" id="block-all" onchange="toggleAllSlots(this)"> All slots in period
+          </label>
+          <label class="slot-check-item"><input type="checkbox" class="slot-cb"> Slot 1</label>
+          <label class="slot-check-item"><input type="checkbox" class="slot-cb"> Slot 2</label>
+          <label class="slot-check-item"><input type="checkbox" class="slot-cb"> Slot 3</label>
+        </div>
+        <div class="form-hint">Blocked slots cannot be booked. Any existing bookings must be cancelled first.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Reason <span style="font-weight:400;text-transform:none;font-size:11px;">(optional)</span></label>
+        <textarea class="form-textarea" placeholder="e.g. Staff meeting, Equipment maintenance, Centre closure…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeBlockModal()">Cancel</button>
+      <button class="btn btn-amber" onclick="confirmBlock()">🚫 Confirm Block</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ── Date navigation ── */
+  const dates = [
+    'Wed, 1 Apr 2026','Thu, 2 Apr 2026','Fri, 3 Apr 2026',
+    'Mon, 7 Apr 2026','Tue, 8 Apr 2026','Wed, 9 Apr 2026'
+  ];
+  const isoDates = [
+    '2026-04-01','2026-04-02','2026-04-03',
+    '2026-04-07','2026-04-08','2026-04-09'
+  ];
+  let dateIdx = 1;
+  function changeDate(dir) {
+    dateIdx = Math.max(0, Math.min(dates.length - 1, dateIdx + dir));
+    document.getElementById('date-display').textContent = dates[dateIdx];
+    closePopover();
+  }
+
+  /* ── Category filter ── */
+  function filterCategory(val) {
+    document.querySelectorAll('.period-row').forEach(row => {
+      const cat = row.dataset.cat || '';
+      if (val === 'all' || cat === val || cat.includes(val)) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+
+  /* ── Popover ── */
+  let activeCard = null;
+  function showPopover(el, data) {
+    closePopover();
+    activeCard = el;
+    el.classList.add('selected');
+
+    document.getElementById('pop-name').textContent = data.name;
+    document.getElementById('pop-nric').textContent = 'NRIC: ' + data.nric;
+    document.getElementById('pop-service').innerHTML = `<span class="badge ${data.serviceClass}">${data.service}</span>`;
+    document.getElementById('pop-date').textContent = data.date;
+    document.getElementById('pop-time').textContent = data.time;
+    const statusEl = document.getElementById('pop-status');
+    if (data.status === 'Completed') {
+      statusEl.innerHTML = '<span style="color:var(--green);font-weight:700;">✓ Completed</span>';
+    } else {
+      statusEl.innerHTML = '<span style="color:var(--muted);">' + data.status + '</span>';
+    }
+    document.getElementById('pop-transport').checked = data.transport;
+    document.getElementById('utc-select').style.display = 'none';
+    document.getElementById('utc-select').value = '';
+
+    const popover = document.getElementById('slot-popover');
+    popover.style.display = 'block';
+
+    // Position near clicked card
+    const rect = el.getBoundingClientRect();
+    const pw = 290, ph = 320;
+    let left = rect.left + window.scrollX;
+    let top = rect.bottom + window.scrollY + 8;
+    if (left + pw > window.innerWidth - 16) left = window.innerWidth - pw - 16;
+    if (top + ph > window.scrollY + window.innerHeight - 16) top = rect.top + window.scrollY - ph - 8;
+    popover.style.left = Math.max(8, left) + 'px';
+    popover.style.top = Math.max(60, top) + 'px';
+  }
+
+  function closePopover() {
+    document.getElementById('slot-popover').style.display = 'none';
+    if (activeCard) { activeCard.classList.remove('selected'); activeCard = null; }
+    document.getElementById('utc-select').style.display = 'none';
+  }
+
+  // Close on outside click
+  document.addEventListener('click', function(e) {
+    const pop = document.getElementById('slot-popover');
+    if (pop.style.display === 'block' && !pop.contains(e.target) && !e.target.closest('.slot-card')) {
+      closePopover();
+    }
+  });
+
+  function markComplete() {
+    if (activeCard) {
+      const name = document.getElementById('pop-name').textContent;
+      activeCard.querySelector('.slot-service').innerHTML = '<span class="badge badge-ar">' + document.getElementById('pop-service').querySelector('.badge').textContent + '</span> <span style="font-size:10px;color:var(--green);font-weight:600;">✓ Completed</span>';
+      closePopover();
+      showToast('✅ Session marked complete for ' + name);
+    }
+  }
+
+  function toggleUTC() {
+    const sel = document.getElementById('utc-select');
+    sel.style.display = sel.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function utcSelected(val) {
+    if (!val) return;
+    const name = document.getElementById('pop-name').textContent;
+    if (confirm('Mark session as "Unable to Complete" for ' + name + '?\nReason: ' + val)) {
+      if (activeCard) {
+        activeCard.querySelector('.slot-service').innerHTML = '<span style="font-size:10px;color:var(--red);font-weight:700;">⚠️ Unable to Complete</span>';
+      }
+      closePopover();
+      showToast('⚠️ Marked Unable to Complete — ' + name);
+    }
+  }
+
+  function cancelBooking() {
+    const name = document.getElementById('pop-name').textContent;
+    if (confirm('Cancel booking for ' + name + '? This slot will become available.')) {
+      if (activeCard) {
+        const parent = activeCard.parentNode;
+        activeCard.outerHTML = '<div class="slot-card open" onclick="bookSlot(this, \'—\')"><span>＋</span><span>Available</span></div>';
+      }
+      closePopover();
+      showToast('✕ Booking cancelled for ' + name);
+    }
+  }
+
+  /* ── Book slot shortcut ── */
+  function bookSlot(el, time) {
+    // Walk up to the period-row to get the care category
+    const row = el.closest('.period-row');
+    const cat  = row ? (row.dataset.cat || '') : '';
+    // Use the ISO date directly from the dates array
+    const isoDate = isoDates[dateIdx] || '';
+    // Encode and navigate
+    const params = new URLSearchParams({ cat, time, date: isoDate }).toString();
+    window.location.href = 'book-appointment.html?' + params;
+  }
+
+  /* ── Block modal ── */
+  function openBlockModal(period) {
+    closePopover();
+    if (period) {
+      const sel = document.getElementById('block-period');
+      for (let i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].text.startsWith(period)) { sel.selectedIndex = i; break; }
+      }
+    }
+    document.getElementById('block-modal').classList.add('open');
+  }
+
+  function closeBlockModal() {
+    document.getElementById('block-modal').classList.remove('open');
+  }
+
+  function toggleAllSlots(cb) {
+    document.querySelectorAll('.slot-cb').forEach(c => { c.checked = cb.checked; c.disabled = cb.checked; });
+  }
+
+  function confirmBlock() {
+    const period = document.getElementById('block-period').value.split(' (')[0];
+    closeBlockModal();
+    showToast('🚫 Slot(s) blocked for ' + period);
+  }
+
+  /* ── Unblock ── */
+  function unblockPeriod(btn) {
+    if (confirm('Unblock this slot?')) {
+      btn.closest('.period-row').querySelector('.slot-card.blocked').remove();
+      btn.remove();
+      showToast('✓ Slot unblocked');
+    }
+  }
+
+  /* ── Toast notification ── */
+  function showToast(msg) {
+    let t = document.getElementById('toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'toast';
+      t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1e293b;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:999;transition:opacity 0.3s;font-family:Outfit,sans-serif;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2800);
+  }
+</script>
+</body>
+</html>

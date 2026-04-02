@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports — CARES Scheduler v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #0d9488;
+  --primary-dk: #0f766e;
+  --primary-xdk: #134e4a;
+  --primary-light: #f0fdf9;
+  --primary-mid: #ccfbf1;
+  --nav-bg: #1a2e2c;
+  --bg: #f0fdf9;
+  --text: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --radius: 16px;
+  --green: #10b981;
+  --blue: #3b82f6;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --purple: #8b5cf6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); display: flex !important; min-height: 100vh; }
+
+.nav-sidebar { width: 200px; min-width: 200px; background: #1a2e2c; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 200; display: flex; flex-direction: column; }
+.nav-sidebar-profile { padding: 20px 14px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.nav-sidebar-avatar { width: 46px; height: 46px; border-radius: 50%; background: rgba(13,148,136,0.25); border: 2px solid rgba(13,148,136,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 9px; }
+.nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
+.nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; cursor: pointer; }
+.nav-sidebar-nav { flex: 1; padding: 4px 0; }
+.nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+.nav-sidebar-link { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; color: rgba(255,255,255,0.68); text-decoration: none; font-size: 12px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
+.nav-sidebar-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.95); }
+.nav-sidebar-link.active { background: rgba(13,148,136,0.18); color: #5eead4; border-left-color: #0d9488; }
+.nav-sidebar-link-inner { display: flex; align-items: center; gap: 8px; }
+.nav-chevron { font-size: 10px; opacity: 0.35; }
+
+.main-wrapper { margin-left: 200px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar-hamburger { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--muted); }
+.topbar-logo { font-size: 20px; }
+.topbar-session { font-size: 13px; font-weight: 600; color: var(--text); }
+.topbar-right { display: flex; align-items: center; gap: 14px; }
+.topbar-welcome { font-size: 12.5px; color: var(--muted); }
+.topbar-facility { font-size: 12px; border: 1px solid var(--border); border-radius: 8px; padding: 4px 8px; color: var(--text); font-family: 'Outfit', sans-serif; background: #fff; cursor: pointer; }
+.topbar-notif { position: relative; background: none; border: none; font-size: 18px; cursor: pointer; }
+.topbar-notif-badge { position: absolute; top: -2px; right: -4px; background: var(--red); color: #fff; border-radius: 99px; font-size: 9px; font-weight: 700; padding: 0 4px; min-width: 16px; text-align: center; font-family: 'Outfit', sans-serif; }
+.topbar-logout { font-size: 12px; color: var(--muted); text-decoration: none; font-weight: 500; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); transition: all 0.15s; }
+.topbar-logout:hover { background: #fef2f2; color: var(--red); border-color: #fecaca; }
+
+.page-content { flex: 1; padding: 28px 28px 60px; }
+.page-title { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 22px; }
+
+/* Report type selector */
+.report-type-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.report-type-card { border: 2px solid var(--border); border-radius: 14px; padding: 18px 16px; cursor: pointer; transition: all 0.15s; background: #fff; box-shadow: var(--shadow); }
+.report-type-card:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.report-type-card.selected { border-color: var(--primary); background: var(--primary-mid); box-shadow: 0 4px 16px rgba(13,148,136,0.2); }
+.report-type-icon { font-size: 26px; margin-bottom: 10px; }
+.report-type-title { font-size: 13.5px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+.report-type-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.report-type-card.selected .report-type-desc { color: var(--primary-dk); }
+
+/* Filter section */
+.filter-section { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); padding: 20px 22px; margin-bottom: 20px; box-shadow: var(--shadow); }
+.filter-section-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.filter-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.filter-label { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+.filter-input { border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: 'Outfit', sans-serif; color: var(--text); outline: none; background: #fff; transition: border-color 0.15s; }
+.filter-input:focus { border-color: var(--primary); }
+
+.checkbox-inline { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+.checkbox-inline input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+.filter-sep { width: 1px; height: 24px; background: var(--border); }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; font-family: 'Outfit', sans-serif; transition: all 0.15s; text-decoration: none; white-space: nowrap; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dk); }
+.btn-ghost { background: none; color: var(--text); border: 1.5px solid var(--border); }
+.btn-ghost:hover { border-color: #94a3b8; }
+
+/* Preview panel */
+.preview-panel { display: none; }
+.preview-panel.visible { display: block; }
+
+.preview-card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-md); border: 1px solid var(--border); overflow: hidden; margin-bottom: 18px; }
+.preview-card-header { padding: 16px 20px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.preview-card-title { font-size: 15px; font-weight: 800; color: var(--text); }
+.preview-card-meta { font-size: 12px; color: var(--muted); }
+.preview-card-body { padding: 20px; }
+
+/* Summary stats */
+.summary-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+.summary-stat { background: var(--primary-light); border: 1px solid var(--primary-mid); border-radius: 12px; padding: 16px 18px; }
+.summary-stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 6px; }
+.summary-stat-value { font-size: 28px; font-weight: 800; color: var(--text); line-height: 1; }
+.summary-stat-value.green { color: var(--green); }
+.summary-stat-value.amber { color: var(--amber); }
+.summary-stat-value.red { color: var(--red); }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead { background: #f8fafc; }
+th { padding: 11px 14px; text-align: left; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 12px 14px; font-size: 13px; color: var(--text); border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafafa; }
+.num-cell { font-weight: 700; text-align: center; }
+.num-completed { color: var(--green); }
+.num-utc { color: var(--amber); }
+.num-cancelled { color: var(--red); }
+
+/* Mini bar */
+.fill-bar { height: 6px; background: var(--border); border-radius: 99px; margin-top: 4px; overflow: hidden; }
+.fill-bar-inner { height: 100%; border-radius: 99px; background: var(--primary); transition: width 0.4s; }
+
+/* Export section */
+.export-section { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); padding: 20px 22px; box-shadow: var(--shadow); }
+.export-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+.export-btns { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.export-success { font-size: 13px; color: var(--green); font-weight: 600; display: none; align-items: center; gap: 8px; padding: 8px 14px; background: #dcfce7; border-radius: 8px; border: 1px solid #86efac; }
+.export-success.visible { display: flex; }
+
+/* Loading shimmer */
+.loading-state { display: none; }
+.loading-state.visible { display: block; }
+.shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px; }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+</style>
+</head>
+<body>
+
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-profile">
+    <div class="nav-sidebar-avatar">🤝</div>
+    <div class="nav-sidebar-name">Cares Admin<br>TETSUYU</div>
+    <div class="nav-sidebar-role">Care Coordinator ▾</div>
+  </div>
+  <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
+    <a href="dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
+    <a href="schedule.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
+    <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
+    <a href="appointments.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="slot-config.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Slot Config</span></span><span class="nav-chevron">‹</span></a>
+    <a href="non-attendance.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🚫</span><span>Non-Attendance</span></span><span class="nav-chevron">‹</span></a>
+    <a href="reports.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>📈</span><span>Reports</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📊</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
+  </nav>
+</aside>
+
+<div class="main-wrapper">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-hamburger">☰</button>
+      <span class="topbar-logo">🏥</span>
+      <span class="topbar-session">CARES Scheduler v2 · Thu, 2 Apr 2026</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-welcome">Welcome, Ms Sarah</span>
+      <select class="topbar-facility"><option>Tetsuyu Heritage Centre</option></select>
+      <button class="topbar-notif">🔔<span class="topbar-notif-badge">3</span></button>
+      <a href="#" class="topbar-logout">⏻ Logout</a>
+    </div>
+  </div>
+
+  <div class="page-content">
+    <div class="page-title">📈 Reports</div>
+
+    <!-- Report Type Selector -->
+    <div class="report-type-grid">
+      <div class="report-type-card selected" id="rt-session" onclick="selectReport('session')">
+        <div class="report-type-icon">📋</div>
+        <div class="report-type-title">Session Summary</div>
+        <div class="report-type-desc">Total sessions, completion rates by service type and period</div>
+      </div>
+      <div class="report-type-card" id="rt-nonatt" onclick="selectReport('nonatt')">
+        <div class="report-type-icon">🚫</div>
+        <div class="report-type-title">Non-Attendance</div>
+        <div class="report-type-desc">All Unable to Complete sessions with reasons and trends</div>
+      </div>
+      <div class="report-type-card" id="rt-billing" onclick="selectReport('billing')">
+        <div class="report-type-icon">💰</div>
+        <div class="report-type-title">Billing Summary</div>
+        <div class="report-type-desc">Billed sessions by service (AR/ME/CBN), transport charges</div>
+      </div>
+      <div class="report-type-card" id="rt-slot" onclick="selectReport('slot')">
+        <div class="report-type-icon">🗓</div>
+        <div class="report-type-title">Slot Utilisation</div>
+        <div class="report-type-desc">Slot fill rate by time period and day of week</div>
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <div class="filter-section-title">🔧 Report Filters — <span id="reportTypeLabel" style="color:var(--primary);">Session Summary</span></div>
+      <div class="filter-row">
+        <span class="filter-label">From</span>
+        <input type="date" class="filter-input" value="2026-04-01" onclick="this.showPicker()">
+        <span class="filter-label">To</span>
+        <input type="date" class="filter-input" value="2026-04-30" onclick="this.showPicker()">
+        <div class="filter-sep"></div>
+        <span class="filter-label">Service</span>
+        <label class="checkbox-inline"><input type="checkbox" checked> All</label>
+        <label class="checkbox-inline"><input type="checkbox" checked> AR</label>
+        <label class="checkbox-inline"><input type="checkbox" checked> ME</label>
+        <label class="checkbox-inline"><input type="checkbox" checked> CBN</label>
+        <div style="margin-left:auto;">
+          <button class="btn btn-primary" onclick="generatePreview()">🔍 Generate Preview</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading shimmer -->
+    <div class="loading-state" id="loadingState">
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+        <div class="shimmer" style="height:80px;border-radius:14px;"></div>
+        <div class="shimmer" style="height:200px;border-radius:14px;"></div>
+      </div>
+    </div>
+
+    <!-- Preview Panel -->
+    <div class="preview-panel" id="previewPanel">
+
+      <!-- Summary Stats -->
+      <div class="preview-card">
+        <div class="preview-card-header">
+          <div class="preview-card-title" id="previewTitle">📋 Session Summary — April 2026</div>
+          <div class="preview-card-meta">Tetsuyu Heritage Centre · 01 Apr – 30 Apr 2026</div>
+        </div>
+        <div class="preview-card-body">
+          <div class="summary-stats" id="summaryStats">
+            <div class="summary-stat">
+              <div class="summary-stat-label">Total Sessions</div>
+              <div class="summary-stat-value">52</div>
+            </div>
+            <div class="summary-stat">
+              <div class="summary-stat-label">Completed</div>
+              <div class="summary-stat-value green">44</div>
+            </div>
+            <div class="summary-stat">
+              <div class="summary-stat-label">Unable to Complete</div>
+              <div class="summary-stat-value amber">4</div>
+            </div>
+            <div class="summary-stat">
+              <div class="summary-stat-label">Cancelled</div>
+              <div class="summary-stat-value red">4</div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="previewTable">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Total Slots</th>
+                  <th>Booked</th>
+                  <th>Completed</th>
+                  <th>UTC</th>
+                  <th>Cancelled</th>
+                  <th>Fill Rate</th>
+                </tr>
+              </thead>
+              <tbody id="previewTableBody">
+                <tr>
+                  <td><strong>Thu 2 Apr</strong></td>
+                  <td class="num-cell">12</td>
+                  <td class="num-cell">10</td>
+                  <td class="num-cell num-completed">8</td>
+                  <td class="num-cell num-utc">1</td>
+                  <td class="num-cell num-cancelled">1</td>
+                  <td><div>83%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:83%;"></div></div></td>
+                </tr>
+                <tr>
+                  <td><strong>Fri 3 Apr</strong></td>
+                  <td class="num-cell">12</td>
+                  <td class="num-cell">9</td>
+                  <td class="num-cell num-completed">9</td>
+                  <td class="num-cell num-utc">0</td>
+                  <td class="num-cell num-cancelled">0</td>
+                  <td><div>75%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:75%;"></div></div></td>
+                </tr>
+                <tr>
+                  <td><strong>Mon 7 Apr</strong></td>
+                  <td class="num-cell">12</td>
+                  <td class="num-cell">11</td>
+                  <td class="num-cell num-completed">10</td>
+                  <td class="num-cell num-utc">1</td>
+                  <td class="num-cell num-cancelled">0</td>
+                  <td><div>92%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:92%;"></div></div></td>
+                </tr>
+                <tr>
+                  <td><strong>Tue 8 Apr</strong></td>
+                  <td class="num-cell">12</td>
+                  <td class="num-cell">10</td>
+                  <td class="num-cell num-completed">9</td>
+                  <td class="num-cell num-utc">1</td>
+                  <td class="num-cell num-cancelled">0</td>
+                  <td><div>83%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:83%;"></div></div></td>
+                </tr>
+                <tr>
+                  <td><strong>Thu 9 Apr</strong></td>
+                  <td class="num-cell">12</td>
+                  <td class="num-cell">8</td>
+                  <td class="num-cell num-completed">7</td>
+                  <td class="num-cell num-utc">1</td>
+                  <td class="num-cell num-cancelled">0</td>
+                  <td><div>67%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:67%;"></div></div></td>
+                </tr>
+                <tr style="background:#f8fafc;font-weight:700;">
+                  <td style="color:var(--muted);font-size:12px;">... (14 more days)</td>
+                  <td class="num-cell" style="color:var(--muted);">—</td>
+                  <td class="num-cell" style="color:var(--muted);">—</td>
+                  <td class="num-cell" style="color:var(--muted);">—</td>
+                  <td class="num-cell" style="color:var(--muted);">—</td>
+                  <td class="num-cell" style="color:var(--muted);">—</td>
+                  <td style="color:var(--muted);font-size:11px;">See full export</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Export Section -->
+      <div class="export-section">
+        <div class="export-title">📥 Export Report</div>
+        <div class="export-btns">
+          <button class="btn btn-primary" onclick="exportReport('csv')">📥 Export as CSV</button>
+          <button class="btn btn-ghost" onclick="exportReport('pdf')">📄 Export as PDF</button>
+          <div class="export-success" id="exportSuccess">
+            <span>✅</span>
+            <span id="exportMsg">Report exported successfully!</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end previewPanel -->
+
+  </div>
+</div>
+
+<script>
+const reportTypes = {
+  session: { label: 'Session Summary', title: '📋 Session Summary — April 2026' },
+  nonatt:  { label: 'Non-Attendance Report', title: '🚫 Non-Attendance Report — April 2026' },
+  billing: { label: 'Billing Summary', title: '💰 Billing Summary — April 2026' },
+  slot:    { label: 'Slot Utilisation', title: '🗓 Slot Utilisation — April 2026' }
+};
+
+let currentReport = 'session';
+
+function selectReport(type) {
+  currentReport = type;
+  Object.keys(reportTypes).forEach(t => {
+    document.getElementById('rt-' + t).classList.toggle('selected', t === type);
+  });
+  document.getElementById('reportTypeLabel').textContent = reportTypes[type].label;
+  // Hide preview when type changes
+  document.getElementById('previewPanel').classList.remove('visible');
+  document.getElementById('exportSuccess').classList.remove('visible');
+}
+
+function generatePreview() {
+  const panel = document.getElementById('previewPanel');
+  const loading = document.getElementById('loadingState');
+  panel.classList.remove('visible');
+  loading.classList.add('visible');
+
+  setTimeout(() => {
+    loading.classList.remove('visible');
+    panel.classList.add('visible');
+    document.getElementById('previewTitle').textContent = reportTypes[currentReport].title;
+    updatePreviewContent();
+    document.getElementById('exportSuccess').classList.remove('visible');
+  }, 800);
+}
+
+function updatePreviewContent() {
+  const statsEl = document.getElementById('summaryStats');
+  const tableEl = document.getElementById('previewTableBody');
+
+  if (currentReport === 'nonatt') {
+    statsEl.innerHTML = `
+      <div class="summary-stat"><div class="summary-stat-label">Total UTC</div><div class="summary-stat-value red">4</div></div>
+      <div class="summary-stat"><div class="summary-stat-label">Absent</div><div class="summary-stat-value" style="color:var(--red)">2</div></div>
+      <div class="summary-stat"><div class="summary-stat-label">Patient Unwell</div><div class="summary-stat-value amber">1</div></div>
+      <div class="summary-stat"><div class="summary-stat-label">Refused</div><div class="summary-stat-value" style="color:var(--purple)">1</div></div>`;
+    document.getElementById('previewTable').querySelector('thead tr').innerHTML =
+      '<th>Date</th><th>Patient</th><th>Service</th><th>Reason</th><th>Care Category</th><th>Re-booked</th>';
+    tableEl.innerHTML = `
+      <tr><td><strong>Thu 2 Apr</strong></td><td>Mdm Chen Li</td><td>ME</td><td style="color:var(--red);font-weight:700;">Absent</td><td><span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;background:#fef3c7;color:#92400e;">TA</span></td><td style="color:var(--green);font-weight:700;">✅ Yes</td></tr>
+      <tr><td><strong>Tue 7 Apr</strong></td><td>Mr Ahmad Bin Ali</td><td>AR (OT)</td><td style="color:#92400e;font-weight:700;">No Transport</td><td><span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;background:#f3e8ff;color:#7e22ce;">OT</span></td><td style="color:var(--green);font-weight:700;">✅ Yes</td></tr>
+      <tr><td><strong>Thu 9 Apr</strong></td><td>Mdm Wong Ah Kow</td><td>AR (PT)</td><td style="color:#9f1239;font-weight:700;">Patient Unwell</td><td><span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;background:#dbeafe;color:#1d4ed8;">PT</span></td><td style="color:var(--green);font-weight:700;">✅ Yes</td></tr>
+      <tr><td><strong>Mon 14 Apr</strong></td><td>Mr Rajan Pillai</td><td>CBN</td><td style="color:var(--purple);font-weight:700;">Patient Refused</td><td><span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;background:#dcfce7;color:#15803d;">CBN</span></td><td style="color:var(--red);">❌ No</td></tr>`;
+  } else if (currentReport === 'billing') {
+    statsEl.innerHTML = `
+      <div class="summary-stat"><div class="summary-stat-label">Total Billed</div><div class="summary-stat-value">44</div></div>
+      <div class="summary-stat"><div class="summary-stat-label">AR Sessions</div><div class="summary-stat-value green">28</div></div>
+      <div class="summary-stat"><div class="summary-stat-label">ME Sessions</div><div class="summary-stat-value" style="color:var(--purple)">10</div></div>
+      <div class="summary-stat"><div class="summary-stat-label">CBN Sessions</div><div class="summary-stat-value amber">6</div></div>`;
+    document.getElementById('previewTable').querySelector('thead tr').innerHTML =
+      '<th>Service</th><th>Sessions</th><th>With Transport</th><th>W/o Transport</th><th>Transport Rate</th>';
+    tableEl.innerHTML = `
+      <tr><td><strong>AR (PT)</strong></td><td class="num-cell">16</td><td class="num-cell num-completed">14</td><td class="num-cell" style="color:var(--muted)">2</td><td><div>88%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:88%;"></div></div></td></tr>
+      <tr><td><strong>AR (PT+OT)</strong></td><td class="num-cell">8</td><td class="num-cell num-completed">7</td><td class="num-cell" style="color:var(--muted)">1</td><td><div>88%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:88%;"></div></div></td></tr>
+      <tr><td><strong>AR (OT)</strong></td><td class="num-cell">4</td><td class="num-cell num-completed">4</td><td class="num-cell" style="color:var(--muted)">0</td><td><div>100%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:100%;"></div></div></td></tr>
+      <tr><td><strong>ME</strong></td><td class="num-cell">10</td><td class="num-cell num-completed">9</td><td class="num-cell" style="color:var(--muted)">1</td><td><div>90%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:90%;"></div></div></td></tr>
+      <tr><td><strong>CBN</strong></td><td class="num-cell">6</td><td class="num-cell num-completed">5</td><td class="num-cell" style="color:var(--muted)">1</td><td><div>83%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:83%;"></div></div></td></tr>`;
+  } else if (currentReport === 'slot') {
+    statsEl.innerHTML = `
+      <div class="summary-stat"><div class="summary-stat-label">Total Slot-Days</div><div class="summary-stat-value">240</div></div>
+      <div class="summary-stat"><div class="summary-stat-label">Filled Slots</div><div class="summary-stat-value green">192</div></div>
+      <div class="summary-stat"><div class="summary-stat-label">Blocked</div><div class="summary-stat-value amber">12</div></div>
+      <div class="summary-stat"><div class="summary-stat-label">Avg Fill Rate</div><div class="summary-stat-value" style="color:var(--primary)">80%</div></div>`;
+    document.getElementById('previewTable').querySelector('thead tr').innerHTML =
+      '<th>Time Period</th><th>Total Slots</th><th>Booked</th><th>Blocked</th><th>Remaining</th><th>Fill Rate</th>';
+    tableEl.innerHTML = `
+      <tr><td><strong>09:00 – 09:30</strong></td><td class="num-cell">40</td><td class="num-cell num-completed">36</td><td class="num-cell num-cancelled">2</td><td class="num-cell" style="color:var(--muted)">2</td><td><div>90%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:90%;"></div></div></td></tr>
+      <tr><td><strong>09:30 – 10:00</strong></td><td class="num-cell">40</td><td class="num-cell num-completed">30</td><td class="num-cell num-cancelled">2</td><td class="num-cell" style="color:var(--muted)">8</td><td><div>75%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:75%;"></div></div></td></tr>
+      <tr><td><strong>10:00 – 10:30</strong></td><td class="num-cell">40</td><td class="num-cell num-completed">32</td><td class="num-cell num-cancelled">4</td><td class="num-cell" style="color:var(--muted)">4</td><td><div>80%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:80%;"></div></div></td></tr>
+      <tr><td><strong>14:00 – 14:30</strong></td><td class="num-cell">40</td><td class="num-cell num-completed">38</td><td class="num-cell num-cancelled">0</td><td class="num-cell" style="color:var(--muted)">2</td><td><div>95%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:95%;"></div></div></td></tr>
+      <tr><td><strong>14:30 – 15:00</strong></td><td class="num-cell">40</td><td class="num-cell num-completed">28</td><td class="num-cell num-cancelled">4</td><td class="num-cell" style="color:var(--muted)">8</td><td><div>70%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:70%;"></div></div></td></tr>`;
+  } else {
+    // Session summary (default)
+    statsEl.innerHTML = `
+      <div class="summary-stat"><div class="summary-stat-label">Total Sessions</div><div class="summary-stat-value">52</div></div>
+      <div class="summary-stat"><div class="summary-stat-label">Completed</div><div class="summary-stat-value green">44</div></div>
+      <div class="summary-stat"><div class="summary-stat-label">Unable to Complete</div><div class="summary-stat-value amber">4</div></div>
+      <div class="summary-stat"><div class="summary-stat-label">Cancelled</div><div class="summary-stat-value red">4</div></div>`;
+    document.getElementById('previewTable').querySelector('thead tr').innerHTML =
+      '<th>Date</th><th>Total Slots</th><th>Booked</th><th>Completed</th><th>UTC</th><th>Cancelled</th><th>Fill Rate</th>';
+    tableEl.innerHTML = `
+      <tr><td><strong>Thu 2 Apr</strong></td><td class="num-cell">12</td><td class="num-cell">10</td><td class="num-cell num-completed">8</td><td class="num-cell num-utc">1</td><td class="num-cell num-cancelled">1</td><td><div>83%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:83%;"></div></div></td></tr>
+      <tr><td><strong>Fri 3 Apr</strong></td><td class="num-cell">12</td><td class="num-cell">9</td><td class="num-cell num-completed">9</td><td class="num-cell num-utc">0</td><td class="num-cell num-cancelled">0</td><td><div>75%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:75%;"></div></div></td></tr>
+      <tr><td><strong>Mon 7 Apr</strong></td><td class="num-cell">12</td><td class="num-cell">11</td><td class="num-cell num-completed">10</td><td class="num-cell num-utc">1</td><td class="num-cell num-cancelled">0</td><td><div>92%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:92%;"></div></div></td></tr>
+      <tr><td><strong>Tue 8 Apr</strong></td><td class="num-cell">12</td><td class="num-cell">10</td><td class="num-cell num-completed">9</td><td class="num-cell num-utc">1</td><td class="num-cell num-cancelled">0</td><td><div>83%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:83%;"></div></div></td></tr>
+      <tr><td><strong>Thu 9 Apr</strong></td><td class="num-cell">12</td><td class="num-cell">8</td><td class="num-cell num-completed">7</td><td class="num-cell num-utc">1</td><td class="num-cell num-cancelled">0</td><td><div>67%</div><div class="fill-bar"><div class="fill-bar-inner" style="width:67%;"></div></div></td></tr>
+      <tr style="background:#f8fafc;"><td style="color:var(--muted);font-size:12px;">... (14 more days)</td><td class="num-cell" style="color:var(--muted);">—</td><td class="num-cell" style="color:var(--muted);">—</td><td class="num-cell" style="color:var(--muted);">—</td><td class="num-cell" style="color:var(--muted);">—</td><td class="num-cell" style="color:var(--muted);">—</td><td style="color:var(--muted);font-size:11px;">See full export</td></tr>`;
+  }
+}
+
+function exportReport(format) {
+  const success = document.getElementById('exportSuccess');
+  const msg = document.getElementById('exportMsg');
+  const filename = format === 'csv' ? 'report_apr2026.csv' : 'report_apr2026.pdf';
+  msg.textContent = `Report exported successfully · ${filename}`;
+  success.classList.add('visible');
+  setTimeout(() => success.classList.remove('visible'), 4000);
+}
+
+// Auto-show session summary preview on load
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('previewPanel').classList.add('visible');
+    updatePreviewContent();
+  }, 200);
+});
+</script>
+</body>
+</html>

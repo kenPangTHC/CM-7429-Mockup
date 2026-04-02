@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workflow Swimlane — CARES Scheduler v2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { display: flex !important; min-height: 100vh; margin: 0; font-family: 'Outfit', ui-sans-serif, sans-serif; background: #f0fdf9; color: #111827; }
+
+    /* ── NAV SIDEBAR ─────────────────────────────────────────── */
+    .nav-sidebar { width: 200px; min-width: 200px; background: #1a2e2c; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 200; display: flex; flex-direction: column; }
+    .nav-sidebar-profile { padding: 20px 14px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .nav-sidebar-avatar { width: 46px; height: 46px; border-radius: 50%; background: rgba(13,148,136,0.25); border: 2px solid rgba(13,148,136,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 9px; }
+    .nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
+    .nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; }
+    .nav-sidebar-nav { flex: 1; padding: 4px 0; }
+    .nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+    .nav-sidebar-link { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; color: rgba(255,255,255,0.68); text-decoration: none; font-size: 12px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
+    .nav-sidebar-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.95); }
+    .nav-sidebar-link.active { background: rgba(13,148,136,0.18); color: #5eead4; border-left-color: #0d9488; }
+    .nav-sidebar-link-inner { display: flex; align-items: center; gap: 8px; }
+    .nav-chevron { font-size: 10px; opacity: 0.35; }
+
+    /* ── MAIN WRAPPER ────────────────────────────────────────── */
+    .main-wrapper { margin-left: 200px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 0 20px; height: 46px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-hamburger { background: #0d9488; border: none; border-radius: 5px; color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; }
+    .topbar-logo { font-size: 22px; }
+    .topbar-session { font-size: 11.5px; color: #6b7280; }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .topbar-welcome { font-size: 11.5px; color: #9ca3af; }
+    .topbar-facility { border: 1px solid #d1d5db; border-radius: 6px; padding: 3px 8px; font-size: 11px; color: #374151; background: white; cursor: pointer; }
+    .topbar-notif { position: relative; background: none; border: none; cursor: pointer; font-size: 17px; padding: 0; }
+    .topbar-notif-badge { position: absolute; top: -4px; right: -5px; background: #f59e0b; color: white; border-radius: 10px; font-size: 9px; padding: 1px 4px; font-weight: 700; }
+    .topbar-logout { color: #6b7280; font-size: 11.5px; text-decoration: none; }
+    .page-loaded-bar { background: #fff; border-bottom: 1px solid #f3f4f6; padding: 3px 20px; font-size: 11px; color: #9ca3af; }
+
+    /* ── PAGE ────────────────────────────────────────────────── */
+    .page-content { padding: 24px; flex: 1; }
+    .page-header { margin-bottom: 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .page-title { font-size: 22px; font-weight: 800; color: #111827; margin: 0 0 4px; }
+    .page-sub { font-size: 13px; color: #6b7280; }
+
+    /* ── LEGEND BAR ──────────────────────────────────────────── */
+    .legend-bar { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #374151; font-weight: 500; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 4px; }
+
+    /* ── DIAGRAM OUTER ───────────────────────────────────────── */
+    .swimlane-wrapper { overflow-x: auto; padding-bottom: 16px; }
+    .diagram-outer { background: #071612; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255,255,255,0.07); box-shadow: 0 12px 30px rgba(0,0,0,0.25); }
+    .swimlane-grid { display: flex; flex-direction: column; gap: 0; min-width: 2220px; }
+
+    /* ── PHASE HEADER ROW ────────────────────────────────────── */
+    .phase-header-row { display: flex; align-items: stretch; min-width: 2220px; background: #041009; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .phase-header-spacer { width: 155px; min-width: 155px; flex-shrink: 0; border-right: 2px solid rgba(255,255,255,0.08); }
+    .phase-label { display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.5); padding: 8px 4px; border-right: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
+
+    /* ── STEP NUMBERS ROW ────────────────────────────────────── */
+    .step-numbers-row { display: flex; align-items: center; padding: 6px 0 6px 171px; min-width: 2220px; border-bottom: 1px solid rgba(255,255,255,0.06); background: #061410; }
+    .step-num-label { width: 155px; min-width: 155px; text-align: center; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.07em; }
+    .step-num-label.active { color: #f59e0b; }
+    .step-arrow-gap { width: 16px; min-width: 16px; }
+
+    /* ── LANE ────────────────────────────────────────────────── */
+    .lane { display: flex; align-items: stretch; min-height: 200px; }
+    .lane-header { width: 155px; min-width: 155px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 16px 10px; border-right: 2px solid rgba(255,255,255,0.12); position: relative; z-index: 2; }
+    .lane-header-icon { font-size: 26px; }
+    .lane-header-name { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; text-align: center; }
+    .lane-header-role { font-size: 10.5px; font-weight: 500; text-align: center; opacity: 0.75; }
+    .lane-body { flex: 1; display: flex; align-items: center; padding: 20px 0 20px 16px; gap: 0; }
+
+    /* ── LANE COLOURS ────────────────────────────────────────── */
+    .lane-admin { background: linear-gradient(90deg, #3d2008 0%, #2c1606 100%); }
+    .lane-admin .lane-header { background: #b45309; }
+    .lane-admin .lane-header-name { color: #fef3c7; }
+    .lane-admin .lane-header-role { color: #fcd34d; }
+
+    .lane-coord { background: linear-gradient(90deg, #0f2540 0%, #091a2f 100%); }
+    .lane-coord .lane-header { background: #1d4ed8; }
+    .lane-coord .lane-header-name { color: #bfdbfe; }
+    .lane-coord .lane-header-role { color: #93c5fd; }
+
+    .lane-system { background: linear-gradient(90deg, #1a1f2e 0%, #111622 100%); }
+    .lane-system .lane-header { background: #334155; }
+    .lane-system .lane-header-name { color: #cbd5e1; }
+    .lane-system .lane-header-role { color: #94a3b8; }
+
+    .lane-patient { background: linear-gradient(90deg, #2e1065 0%, #200b4a 100%); }
+    .lane-patient .lane-header { background: #6d28d9; }
+    .lane-patient .lane-header-name { color: #ede9fe; }
+    .lane-patient .lane-header-role { color: #c4b5fd; }
+
+    /* ── STEP CARDS ──────────────────────────────────────────── */
+    .step-wrap { display: flex; align-items: center; position: relative; }
+    .step-card { width: 155px; min-width: 155px; border-radius: 14px; padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 5px; position: relative; cursor: default; transition: transform 0.15s, box-shadow 0.15s; }
+    .step-card:hover { transform: translateY(-2px); }
+
+    .card-admin   { background: rgba(180,83,9,0.15);   border: 1.5px solid rgba(180,83,9,0.4); }
+    .card-admin:hover   { box-shadow: 0 6px 20px rgba(180,83,9,0.25); }
+    .card-coord   { background: rgba(29,78,216,0.15);  border: 1.5px solid rgba(29,78,216,0.4); }
+    .card-coord:hover   { box-shadow: 0 6px 20px rgba(29,78,216,0.25); }
+    .card-system  { background: rgba(100,116,139,0.15); border: 1.5px solid rgba(100,116,139,0.3); }
+    .card-system:hover  { box-shadow: 0 6px 20px rgba(100,116,139,0.2); }
+    .card-patient { background: rgba(124,58,237,0.15); border: 1.5px solid rgba(124,58,237,0.35); }
+    .card-patient:hover { box-shadow: 0 6px 20px rgba(124,58,237,0.25); }
+
+    /* Lock-gate card */
+    .card-lock { background: rgba(245,158,11,0.12) !important; border: 1.5px solid rgba(245,158,11,0.45) !important; }
+    .card-lock .step-num-badge { background: rgba(245,158,11,0.3) !important; color: #fde68a !important; }
+
+    /* Current / active step */
+    .card-current { border: 2px solid #f59e0b !important; background: rgba(245,158,11,0.18) !important; box-shadow: 0 0 0 3px rgba(245,158,11,0.15), 0 8px 24px rgba(245,158,11,0.22) !important; }
+    .card-current .step-num-badge { background: #f59e0b !important; color: #fff !important; }
+    .current-glow { position: absolute; inset: -3px; border-radius: 16px; border: 2px solid rgba(245,158,11,0.4); animation: glow-pulse 2.5s infinite; pointer-events: none; }
+    @keyframes glow-pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+    /* Done / completed */
+    .card-done { opacity: 0.72; }
+    .done-badge { position: absolute; top: 8px; right: 8px; background: #16a34a; color: #fff; border-radius: 10px; font-size: 9px; font-weight: 800; padding: 2px 5px; }
+    .current-badge { position: absolute; top: 8px; right: 8px; background: #f59e0b; color: #fff; border-radius: 10px; font-size: 9px; font-weight: 800; padding: 2px 5px; animation: glow-pulse 2s infinite; }
+    .lock-badge { position: absolute; top: 8px; right: 8px; background: #b45309; color: #fef3c7; border-radius: 10px; font-size: 9px; font-weight: 800; padding: 2px 5px; }
+
+    .step-num-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; }
+    .step-num-badge { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 800; }
+    .num-admin   { background: rgba(180,83,9,0.3);    color: #fcd34d; }
+    .num-coord   { background: rgba(29,78,216,0.3);   color: #93c5fd; }
+    .num-system  { background: rgba(100,116,139,0.3); color: #94a3b8; }
+    .num-patient { background: rgba(124,58,237,0.3);  color: #c4b5fd; }
+
+    .step-icon  { font-size: 18px; }
+    .step-title { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.3; }
+    .step-desc  { font-size: 10.5px; color: rgba(255,255,255,0.6); line-height: 1.5; }
+    .step-link  { margin-top: 6px; display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700; border-radius: 6px; padding: 3px 9px; text-decoration: none; transition: opacity 0.15s; }
+    .link-admin   { background: rgba(180,83,9,0.25);    color: #fcd34d; }
+    .link-admin:hover   { background: rgba(180,83,9,0.45);    color: #fff; }
+    .link-coord   { background: rgba(29,78,216,0.25);   color: #93c5fd; }
+    .link-coord:hover   { background: rgba(29,78,216,0.45);   color: #fff; }
+    .link-system  { background: rgba(100,116,139,0.25); color: #94a3b8; }
+    .link-system:hover  { background: rgba(100,116,139,0.45); color: #fff; }
+    .link-patient { background: rgba(124,58,237,0.25);  color: #c4b5fd; }
+    .link-patient:hover { background: rgba(124,58,237,0.45);  color: #fff; }
+    .link-current { background: rgba(245,158,11,0.25);  color: #fde68a; }
+    .link-current:hover { background: rgba(245,158,11,0.45);  color: #fff; }
+
+    /* ── CONNECTORS ──────────────────────────────────────────── */
+    .arrow { display: flex; align-items: center; width: 16px; min-width: 16px; justify-content: center; color: rgba(255,255,255,0.2); font-size: 11px; flex-shrink: 0; }
+    .spacer { width: 171px; min-width: 171px; flex-shrink: 0; }
+    .empty-step { width: 155px; min-width: 155px; }
+    .lane-divider { height: 1px; background: rgba(255,255,255,0.06); }
+    .cross-arrow-section { position: relative; height: 34px; background: #051110; display: flex; align-items: center; overflow: visible; min-width: 2220px; }
+    .cross-arrow-section svg { position: absolute; top: 0; left: 0; width: 2220px; height: 34px; pointer-events: none; }
+    .scroll-hint { text-align: right; font-size: 11px; color: rgba(255,255,255,0.3); padding: 6px 18px; font-style: italic; background: #041009; }
+
+    /* ── FOOTER ──────────────────────────────────────────────── */
+    .page-footer-note { margin-top: 18px; background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; padding: 14px 20px; display: flex; align-items: center; gap: 16px; }
+    .footer-note-text { font-size: 12px; color: #6b7280; flex: 1; line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ──────────────────────────────────────────────────── -->
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-profile">
+    <div class="nav-sidebar-avatar">🏥</div>
+    <div class="nav-sidebar-name">CARES Admin<br>Tetsuyu Heritage</div>
+    <div class="nav-sidebar-role">Care Coordinator ▾</div>
+  </div>
+  <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
+    <a href="dashboard.html"        class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
+    <a href="schedule.html"         class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
+    <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
+    <a href="appointments.html"     class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="slot-config.html"         class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Slot Config</span></span><span class="nav-chevron">‹</span></a>
+    <a href="non-attendance.html"      class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🚫</span><span>Non-Attendance</span></span><span class="nav-chevron">‹</span></a>
+    <a href="reports.html"             class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📈</span><span>Reports</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html"   class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>📊</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
+  </nav>
+</aside>
+
+<!-- ── MAIN ─────────────────────────────────────────────────────── -->
+<div class="main-wrapper">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-hamburger">☰</button>
+      <span class="topbar-logo">🏥</span>
+      <span class="topbar-session">CARES Scheduler v2 · Thu, 2 Apr 2026</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-welcome">Welcome, Ms Sarah</span>
+      <select class="topbar-facility"><option>Tetsuyu Heritage Centre</option></select>
+      <button class="topbar-notif">🔔<span class="topbar-notif-badge">3</span></button>
+      <a class="topbar-logout" href="#">↩ Log out</a>
+    </div>
+  </div>
+  <div class="page-loaded-bar">Page loaded: 02-Apr-2026 11:41 AM</div>
+
+  <div class="page-content">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">📊 Scheduling Workflow</div>
+        <div class="page-sub">End-to-end appointment scheduling — 4 roles · 12 steps · CARES Scheduler v2 · Commit slots week by week</div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend-bar">
+      <span style="font-size:12px;font-weight:700;color:#374151;">Lane key:</span>
+      <div class="legend-item"><span class="legend-dot" style="background:#b45309;"></span> Admin</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#1d4ed8;"></span> Care Coordinator</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#475569;"></span> System (AUTO)</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#6d28d9;"></span> Patient</div>
+      <div style="width:1px;height:18px;background:#e5e7eb;margin:0 4px;"></div>
+      <div class="legend-item"><span class="legend-dot" style="background:#16a34a;"></span> ✓ Done</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> ▶ Active Step</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#b45309;"></span> 🔒 Commit Gate</div>
+      <div style="margin-left:auto;font-size:12px;color:#6b7280;font-style:italic;">← scroll horizontally to see all 12 steps →</div>
+    </div>
+
+    <!-- Swimlane diagram -->
+    <div class="swimlane-wrapper">
+      <div class="diagram-outer">
+        <div class="swimlane-grid">
+
+          <!-- ══ PHASE HEADER ══════════════════════════════════════════ -->
+          <!-- Steps 1-4 = Setup & Commit (4×155 + 3×16 = 668px)        -->
+          <!-- Steps 5-7 = Book Appointment (3×155 + 2×16 = 497px)      -->
+          <!-- Steps 8-10 = Daily Operations (3×155 + 2×16 = 497px)     -->
+          <!-- Step 11 = Appt Changes (155px)                            -->
+          <!-- Step 12 = Reports (155px)                                 -->
+          <div class="phase-header-row">
+            <div class="phase-header-spacer"></div>
+            <div style="flex:1;display:flex;padding-left:16px;">
+              <div class="phase-label" style="width:668px;">🔧 Setup &amp; Commit</div>
+              <div style="width:16px;flex-shrink:0;"></div>
+              <div class="phase-label" style="width:497px;">📅 Book Appointment</div>
+              <div style="width:16px;flex-shrink:0;"></div>
+              <div class="phase-label" style="width:497px;">🗓️ Daily Operations</div>
+              <div style="width:16px;flex-shrink:0;"></div>
+              <div class="phase-label" style="width:155px;">🔀 Changes</div>
+              <div style="width:16px;flex-shrink:0;"></div>
+              <div class="phase-label" style="width:155px;">📈 Reports</div>
+            </div>
+          </div>
+
+          <!-- ══ STEP NUMBERS ═══════════════════════════════════════════ -->
+          <div class="step-numbers-row">
+            <div class="step-num-label">Step 1</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 2</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 3</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 4</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label active">Step 5</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label active">Step 6</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label active">Step 7</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 8</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 9</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 10</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 11</div><div class="step-arrow-gap"></div>
+            <div class="step-num-label">Step 12</div>
+          </div>
+
+          <!-- ══════════════════════════════════════════════════════════ -->
+          <!-- LANE 1: ADMIN                                              -->
+          <!-- Active steps: 1, 2, 3, 4, 12                              -->
+          <!-- ══════════════════════════════════════════════════════════ -->
+          <div class="lane lane-admin">
+            <div class="lane-header">
+              <div class="lane-header-icon">🏛️</div>
+              <div class="lane-header-name">Admin</div>
+              <div class="lane-header-role">Facility Admin</div>
+            </div>
+            <div class="lane-body">
+
+              <!-- Step 1: Configure Template -->
+              <div class="step-wrap">
+                <div class="step-card card-admin card-done">
+                  <span class="done-badge">✓ Done</span>
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-admin">1</span>
+                    <span class="step-icon">📐</span>
+                  </div>
+                  <div class="step-title">Configure Weekly Template</div>
+                  <div class="step-desc">Define time periods per day &amp; slot counts per care category (PT/OT/TA/CBN)</div>
+                  <a href="slot-config.html" class="step-link link-admin">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Step 2: Categories + Holidays -->
+              <div class="step-wrap">
+                <div class="step-card card-admin card-done">
+                  <span class="done-badge">✓ Done</span>
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-admin">2</span>
+                    <span class="step-icon">👥</span>
+                  </div>
+                  <div class="step-title">Set Categories &amp; Holidays</div>
+                  <div class="step-desc">Define PT/OT/TA/CBN groups; add public holidays (auto-excluded from slots)</div>
+                  <a href="slot-config.html" class="step-link link-admin">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Step 3: Copy to Days -->
+              <div class="step-wrap">
+                <div class="step-card card-admin card-done">
+                  <span class="done-badge">✓ Done</span>
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-admin">3</span>
+                    <span class="step-icon">📋</span>
+                  </div>
+                  <div class="step-title">Copy Template to Weekdays</div>
+                  <div class="step-desc">Replicate Mon schedule to Tue–Fri using "Copy to:" selector; adjust per day</div>
+                  <a href="slot-config.html" class="step-link link-admin">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Step 4: Commit (GATE) -->
+              <div class="step-wrap">
+                <div class="step-card card-admin card-lock card-done">
+                  <span class="lock-badge">🔒 Gate</span>
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-admin">4</span>
+                    <span class="step-icon">🔒</span>
+                  </div>
+                  <div class="step-title">Commit Slots for Week</div>
+                  <div class="step-desc">Lock template as actual capacity for a specific calendar week. Must be done before bookings for that week. Repeat each week</div>
+                  <a href="slot-config.html" class="step-link link-admin">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Steps 5–11: spacers -->
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+
+              <!-- Step 12: Reports -->
+              <div class="step-wrap">
+                <div class="step-card card-admin">
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-admin">12</span>
+                    <span class="step-icon">📈</span>
+                  </div>
+                  <div class="step-title">Generate Reports</div>
+                  <div class="step-desc">Session counts, non-attendance, slot utilisation &amp; AIC billing by category &amp; month</div>
+                  <a href="reports.html" class="step-link link-admin">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Cross arrow: Admin commit → System lock (at step 4) -->
+          <div class="cross-arrow-section">
+            <svg viewBox="0 0 2220 34" xmlns="http://www.w3.org/2000/svg">
+              <!-- Step 4 center x = 155 + 16 + 3×171 + 78 = 762 -->
+              <path d="M 762 2 L 762 32" stroke="rgba(245,158,11,0.7)" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#admin-dn)" fill="none"/>
+              <text x="768" y="22" fill="rgba(245,158,11,0.8)" font-size="9" font-family="Outfit,sans-serif">locks slots ↓</text>
+              <defs>
+                <marker id="admin-dn" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+                  <path d="M0,0 L0,7 L7,3.5 z" fill="rgba(245,158,11,0.7)"/>
+                </marker>
+              </defs>
+            </svg>
+          </div>
+          <div class="lane-divider"></div>
+
+          <!-- ══════════════════════════════════════════════════════════ -->
+          <!-- LANE 2: CARE COORDINATOR                                   -->
+          <!-- Active steps: 5, 6, 7, 9, 10, 11                          -->
+          <!-- ══════════════════════════════════════════════════════════ -->
+          <div class="lane lane-coord">
+            <div class="lane-header">
+              <div class="lane-header-icon">🧑‍💼</div>
+              <div class="lane-header-name">Coordinator</div>
+              <div class="lane-header-role">Care Coordinator</div>
+            </div>
+            <div class="lane-body">
+
+              <!-- Steps 1–4: spacers -->
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+
+              <!-- Step 5: Search Patient — ACTIVE -->
+              <div class="step-wrap">
+                <div class="step-card card-coord card-current">
+                  <span class="current-badge">▶ Active</span>
+                  <div class="current-glow"></div>
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-coord">5</span>
+                    <span class="step-icon">🔍</span>
+                  </div>
+                  <div class="step-title">Search &amp; Select Patient</div>
+                  <div class="step-desc">Type patient name or ID; confirm name, IC and care home</div>
+                  <a href="book-appointment.html" class="step-link link-current">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Step 6: Pick Category + Slot — ACTIVE -->
+              <div class="step-wrap">
+                <div class="step-card card-coord card-current">
+                  <span class="current-badge">▶ Active</span>
+                  <div class="current-glow"></div>
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-coord">6</span>
+                    <span class="step-icon">🎟️</span>
+                  </div>
+                  <div class="step-title">Pick Category &amp; Time Slot</div>
+                  <div class="step-desc">Cinema-style grid: PT/OT/TA/CBN rows. Pick a time pill — green=available, amber=last, grey=full</div>
+                  <a href="book-appointment.html" class="step-link link-current">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Step 7: AIC + Recurrence — ACTIVE -->
+              <div class="step-wrap">
+                <div class="step-card card-coord card-current">
+                  <span class="current-badge">▶ Active</span>
+                  <div class="current-glow"></div>
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-coord">7</span>
+                    <span class="step-icon">🔄</span>
+                  </div>
+                  <div class="step-title">AIC Service &amp; Recurrence</div>
+                  <div class="step-desc">Link AIC service, bill flag, recurrence (weekly every N / monthly nth-weekday). Preview slot availability per occurrence</div>
+                  <a href="book-appointment.html" class="step-link link-current">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Step 8: spacer (System creates) -->
+              <div class="spacer"></div>
+
+              <!-- Step 9: Daily Schedule / Block Out -->
+              <div class="step-wrap">
+                <div class="step-card card-coord">
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-coord">9</span>
+                    <span class="step-icon">📋</span>
+                  </div>
+                  <div class="step-title">View Schedule &amp; Block Out</div>
+                  <div class="step-desc">Day view of all slots by category. Use Block Out to zero a date+slot without changing committed template</div>
+                  <a href="schedule.html" class="step-link link-coord">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Step 10: Mark Done / Non-Attendance -->
+              <div class="step-wrap">
+                <div class="step-card card-coord">
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-coord">10</span>
+                    <span class="step-icon">✅</span>
+                  </div>
+                  <div class="step-title">Mark Done / Non-Attendance</div>
+                  <div class="step-desc">Mark session complete with notes, or log UTC reason (hospitalised, refused, etc.) to free the slot</div>
+                  <a href="session-complete.html" class="step-link link-coord">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Step 11: Change Appointment -->
+              <div class="step-wrap">
+                <div class="step-card card-coord">
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-coord">11</span>
+                    <span class="step-icon">🔀</span>
+                  </div>
+                  <div class="step-title">Change Appointment</div>
+                  <div class="step-desc">Reassign category or slot — "This appointment" or "This &amp; all future". Confirm before &amp; after shown</div>
+                  <a href="appointments.html" class="step-link link-coord">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Step 12: spacer -->
+              <div class="spacer"></div>
+
+            </div>
+          </div>
+
+          <!-- Cross arrows: Coord booking → System creates (step 7→8), System update ↑ to Coord at step 10 -->
+          <div class="cross-arrow-section">
+            <svg viewBox="0 0 2220 34" xmlns="http://www.w3.org/2000/svg">
+              <!-- Step 7→8: Coordinator confirms → System creates records, x at step 8 = 155+16+7×171+78 = 1446 -->
+              <path d="M 1275 2 L 1275 32" stroke="rgba(29,78,216,0.65)" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#coord-dn)" fill="none"/>
+              <text x="1281" y="22" fill="rgba(29,78,216,0.75)" font-size="9" font-family="Outfit,sans-serif">confirm ↓</text>
+              <!-- Step 10: System frees slot back up to coordinator view -->
+              <path d="M 1787 32 L 1787 2" stroke="rgba(100,116,139,0.6)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#sys-up)" fill="none"/>
+              <text x="1793" y="14" fill="rgba(100,116,139,0.7)" font-size="9" font-family="Outfit,sans-serif">slot freed ↑</text>
+              <defs>
+                <marker id="coord-dn" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+                  <path d="M0,0 L0,7 L7,3.5 z" fill="rgba(29,78,216,0.65)"/>
+                </marker>
+                <marker id="sys-up" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+                  <path d="M0,0 L0,7 L7,3.5 z" fill="rgba(100,116,139,0.6)"/>
+                </marker>
+              </defs>
+            </svg>
+          </div>
+          <div class="lane-divider"></div>
+
+          <!-- ══════════════════════════════════════════════════════════ -->
+          <!-- LANE 3: SYSTEM (AUTO)                                      -->
+          <!-- Active steps: 4 (lock), 8 (create appts), 10 (counters)   -->
+          <!-- ══════════════════════════════════════════════════════════ -->
+          <div class="lane lane-system">
+            <div class="lane-header">
+              <div class="lane-header-icon">⚙️</div>
+              <div class="lane-header-name">System</div>
+              <div class="lane-header-role">CARES Platform</div>
+            </div>
+            <div class="lane-body">
+
+              <!-- Steps 1–3: spacers -->
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+
+              <!-- Step 4: Lock month -->
+              <div class="step-wrap">
+                <div class="step-card card-system card-done">
+                  <span class="done-badge">✓ AUTO</span>
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-system">4</span>
+                    <span class="step-icon">🗄️</span>
+                  </div>
+                  <div class="step-title">Lock &amp; Materialise Week Slots</div>
+                  <div class="step-desc">Writes WeekSlotCommit rows from template for the selected calendar week. Blocks further period/count edits for that week</div>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Steps 5–7: spacers -->
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+
+              <!-- Step 8: Create appointment records -->
+              <div class="step-wrap">
+                <div class="step-card card-system">
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-system">8</span>
+                    <span class="step-icon">📝</span>
+                  </div>
+                  <div class="step-title">Create Appointment Records</div>
+                  <div class="step-desc">Writes Appointment rows with RecipientType + ID for category and patient. Stores recurrence columns (Frequency, Days, Interval, IntervalFlag, Every_Days)</div>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Steps 9: spacer -->
+              <div class="spacer"></div>
+
+              <!-- Step 10: Update slot counters -->
+              <div class="step-wrap">
+                <div class="step-card card-system">
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-system">10</span>
+                    <span class="step-icon">🔢</span>
+                  </div>
+                  <div class="step-title">Update Slot Counters</div>
+                  <div class="step-desc">On Mark Done: decrements count. On Non-Attendance: frees slot back. Block Out: sets count to 0 for that date only</div>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Step 11: spacer -->
+              <div class="spacer"></div>
+
+              <!-- Step 12: Aggregate report data -->
+              <div class="step-wrap">
+                <div class="step-card card-system">
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-system">12</span>
+                    <span class="step-icon">📊</span>
+                  </div>
+                  <div class="step-title">Aggregate Report Data</div>
+                  <div class="step-desc">Joins AppointmentSession + NonAttendance + MonthSlotCommit for utilisation, non-attendance rate &amp; AIC billing totals</div>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Cross arrows: System creates → Patient confirmed (step 8), session done → Patient at step 10 -->
+          <div class="cross-arrow-section">
+            <svg viewBox="0 0 2220 34" xmlns="http://www.w3.org/2000/svg">
+              <!-- Step 8: System creates → Patient receives confirmed appt, x = 155+16+7×171+78 = 1446 -->
+              <path d="M 1446 2 L 1446 32" stroke="rgba(100,116,139,0.65)" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#sys-pt-dn)" fill="none"/>
+              <text x="1452" y="22" fill="rgba(100,116,139,0.75)" font-size="9" font-family="Outfit,sans-serif">appt created ↓</text>
+              <defs>
+                <marker id="sys-pt-dn" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+                  <path d="M0,0 L0,7 L7,3.5 z" fill="rgba(100,116,139,0.65)"/>
+                </marker>
+              </defs>
+            </svg>
+          </div>
+          <div class="lane-divider"></div>
+
+          <!-- ══════════════════════════════════════════════════════════ -->
+          <!-- LANE 4: PATIENT                                            -->
+          <!-- Active steps: 8 (confirmed), 10 (attends/misses), 11      -->
+          <!-- ══════════════════════════════════════════════════════════ -->
+          <div class="lane lane-patient">
+            <div class="lane-header">
+              <div class="lane-header-icon">🧑‍🦽</div>
+              <div class="lane-header-name">Patient</div>
+              <div class="lane-header-role">Service User</div>
+            </div>
+            <div class="lane-body">
+
+              <!-- Steps 1–7: spacers -->
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+              <div class="spacer"></div>
+
+              <!-- Step 8: Appointment confirmed -->
+              <div class="step-wrap">
+                <div class="step-card card-patient">
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-patient">8</span>
+                    <span class="step-icon">✉️</span>
+                  </div>
+                  <div class="step-title">Appointment Confirmed</div>
+                  <div class="step-desc">Patient booked into category slot. Recurrence series created. Slot count decremented from committed capacity</div>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Step 9: spacer -->
+              <div class="spacer"></div>
+
+              <!-- Step 10: Attends or misses -->
+              <div class="step-wrap">
+                <div class="step-card card-patient">
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-patient">10</span>
+                    <span class="step-icon">🏥</span>
+                  </div>
+                  <div class="step-title">Attends or Misses Session</div>
+                  <div class="step-desc">Session marked done by coordinator, or UTC non-attendance reason recorded (hospitalised, refused, etc.)</div>
+                  <a href="non-attendance.html" class="step-link link-patient">Non-Att ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Step 11: Change requested -->
+              <div class="step-wrap">
+                <div class="step-card card-patient">
+                  <div class="step-num-row">
+                    <span class="step-num-badge num-patient">11</span>
+                    <span class="step-icon">📞</span>
+                  </div>
+                  <div class="step-title">Appointment Changed</div>
+                  <div class="step-desc">Coordinator reassigns category/slot for this or all future occurrences. Before &amp; after confirmation shown</div>
+                  <a href="appointments.html" class="step-link link-patient">Open ↗</a>
+                </div>
+                <div class="arrow">→</div>
+              </div>
+
+              <!-- Step 12: spacer -->
+              <div class="spacer"></div>
+
+            </div>
+          </div>
+
+          <!-- Scroll hint -->
+          <div class="scroll-hint">4 lanes · 12 steps · scroll right to see full workflow →</div>
+
+        </div><!-- /swimlane-grid -->
+      </div><!-- /diagram-outer -->
+    </div><!-- /swimlane-wrapper -->
+
+    <!-- Footer note -->
+    <div class="page-footer-note">
+      <span style="font-size:20px;">📋</span>
+      <div class="footer-note-text">
+        End-to-end scheduling workflow for CARES v2. Step 4 (<strong>Commit Week</strong>) must be done each week before bookings can be made for that week — repeat weekly.
+        The 🔒 <strong>Commit Gate</strong> locks that week's slot template — only Block Out on the Schedule page is allowed after committing a week.
+        Click any <strong>Open ↗</strong> link to navigate directly to that page.
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+</div><!-- /main-wrapper -->
+
+</body>
+</html>

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complete Session — CARES Scheduler v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #0d9488;
+  --primary-dk: #0f766e;
+  --primary-xdk: #134e4a;
+  --primary-light: #f0fdf9;
+  --primary-mid: #ccfbf1;
+  --nav-bg: #1a2e2c;
+  --bg: #f0fdf9;
+  --text: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --radius: 16px;
+  --green: #10b981;
+  --blue: #3b82f6;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --purple: #8b5cf6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); display: flex !important; min-height: 100vh; }
+
+.nav-sidebar { width: 200px; min-width: 200px; background: #1a2e2c; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 200; display: flex; flex-direction: column; }
+.nav-sidebar-profile { padding: 20px 14px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.nav-sidebar-avatar { width: 46px; height: 46px; border-radius: 50%; background: rgba(13,148,136,0.25); border: 2px solid rgba(13,148,136,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 9px; }
+.nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
+.nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; cursor: pointer; }
+.nav-sidebar-nav { flex: 1; padding: 4px 0; }
+.nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+.nav-sidebar-link { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; color: rgba(255,255,255,0.68); text-decoration: none; font-size: 12px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
+.nav-sidebar-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.95); }
+.nav-sidebar-link.active { background: rgba(13,148,136,0.18); color: #5eead4; border-left-color: #0d9488; }
+.nav-sidebar-link-inner { display: flex; align-items: center; gap: 8px; }
+.nav-chevron { font-size: 10px; opacity: 0.35; }
+
+.main-wrapper { margin-left: 200px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+.topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar-hamburger { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--muted); }
+.topbar-logo { font-size: 20px; }
+.topbar-session { font-size: 13px; font-weight: 600; color: var(--text); }
+.topbar-right { display: flex; align-items: center; gap: 14px; }
+.topbar-welcome { font-size: 12.5px; color: var(--muted); }
+.topbar-facility { font-size: 12px; border: 1px solid var(--border); border-radius: 8px; padding: 4px 8px; color: var(--text); font-family: 'Outfit', sans-serif; background: #fff; cursor: pointer; }
+.topbar-notif { position: relative; background: none; border: none; font-size: 18px; cursor: pointer; }
+.topbar-notif-badge { position: absolute; top: -2px; right: -4px; background: var(--red); color: #fff; border-radius: 99px; font-size: 9px; font-weight: 700; padding: 0 4px; min-width: 16px; text-align: center; font-family: 'Outfit', sans-serif; }
+.topbar-logout { font-size: 12px; color: var(--muted); text-decoration: none; font-weight: 500; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); transition: all 0.15s; }
+.topbar-logout:hover { background: #fef2f2; color: var(--red); border-color: #fecaca; }
+
+.page-content { flex: 1; padding: 32px 28px 60px; display: flex; flex-direction: column; align-items: center; }
+.center-card { width: 100%; max-width: 640px; }
+
+/* Breadcrumb */
+.breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); margin-bottom: 22px; }
+.breadcrumb a { color: var(--primary); text-decoration: none; font-weight: 600; }
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb-sep { opacity: 0.5; }
+
+/* Context card */
+.context-card { border: 2px solid var(--primary); border-radius: var(--radius); padding: 20px 22px; margin-bottom: 22px; background: #fff; box-shadow: var(--shadow-md); }
+.context-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.context-status-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px rgba(16,185,129,0.25); flex-shrink: 0; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 3px rgba(16,185,129,0.25); } 50% { box-shadow: 0 0 0 6px rgba(16,185,129,0.1); } }
+.context-status-label { font-size: 13px; font-weight: 700; color: var(--green); }
+.context-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.context-field { }
+.context-field-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 3px; }
+.context-field-value { font-size: 13.5px; font-weight: 600; color: var(--text); line-height: 1.4; }
+.context-field-value small { font-size: 11.5px; font-weight: 400; color: var(--muted); display: block; margin-top: 1px; }
+.svc-badge { display: inline-block; padding: 2px 9px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+.svc-ar { background: var(--primary-mid); color: var(--primary-xdk); }
+
+/* Sections */
+.card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-md); border: 1px solid var(--border); margin-bottom: 18px; overflow: hidden; }
+.card-header { padding: 16px 20px 13px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.card-header-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--primary-mid); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+.card-title { font-size: 14px; font-weight: 700; }
+.card-subtitle { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.card-body { padding: 18px 20px; }
+
+/* Outcome radio cards */
+.outcome-cards { display: flex; flex-direction: column; gap: 10px; }
+.outcome-card { border: 2px solid var(--border); border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: all 0.15s; display: flex; align-items: flex-start; gap: 12px; }
+.outcome-card:hover { border-color: var(--primary); background: var(--primary-light); }
+.outcome-card.selected-completed { border-color: var(--green); background: #f0fdf4; }
+.outcome-card.selected-partial { border-color: var(--amber); background: #fffbeb; }
+.outcome-card.selected-utc { border-color: var(--red); background: #fef2f2; }
+.outcome-radio { width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid var(--border); margin-top: 1px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.outcome-card.selected-completed .outcome-radio { border-color: var(--green); background: var(--green); }
+.outcome-card.selected-partial .outcome-radio { border-color: var(--amber); background: var(--amber); }
+.outcome-card.selected-utc .outcome-radio { border-color: var(--red); background: var(--red); }
+.outcome-radio-dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity 0.15s; }
+.outcome-card.selected-completed .outcome-radio-dot,
+.outcome-card.selected-partial .outcome-radio-dot,
+.outcome-card.selected-utc .outcome-radio-dot { opacity: 1; }
+.outcome-icon { font-size: 22px; flex-shrink: 0; }
+.outcome-text .outcome-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.outcome-text .outcome-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* UTC details panel */
+.utc-detail-panel { background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 10px; padding: 16px; margin-top: 14px; display: none; }
+.utc-detail-panel.visible { display: block; }
+.form-group { margin-bottom: 14px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+.form-input { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 13px; font-family: 'Outfit', sans-serif; color: var(--text); outline: none; transition: border-color 0.15s; }
+.form-input:focus { border-color: var(--primary); }
+.form-textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 13px; font-family: 'Outfit', sans-serif; resize: vertical; min-height: 80px; outline: none; }
+.form-textarea:focus { border-color: var(--primary); }
+
+/* Checkbox */
+.checkbox-row { display: flex; align-items: center; gap: 10px; }
+.checkbox-custom { width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--primary); background: var(--primary); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
+.checkbox-custom.unchecked { background: #fff; }
+.checkbox-label { font-size: 13px; font-weight: 500; cursor: pointer; }
+.transport-warning { font-size: 11.5px; color: var(--amber); margin-top: 8px; padding: 7px 10px; background: #fffbeb; border-radius: 8px; border: 1px solid #fde68a; display: none; }
+.transport-warning.visible { display: block; }
+
+/* Action buttons */
+.action-row { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 20px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; font-family: 'Outfit', sans-serif; transition: all 0.15s; text-decoration: none; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dk); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(13,148,136,0.35); }
+.btn-ghost { background: none; color: var(--text); border: 1.5px solid var(--border); }
+.btn-ghost:hover { border-color: #94a3b8; }
+.btn-cancel { background: none; color: var(--muted); font-size: 13px; padding: 8px 0; font-weight: 500; border: none; }
+.btn-cancel:hover { color: var(--text); }
+
+/* Success state */
+.success-state { display: none; text-align: center; padding: 32px 24px; }
+.success-state.visible { display: block; }
+.success-check-anim { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--green), #059669); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 36px; box-shadow: 0 8px 32px rgba(16,185,129,0.3); animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.success-title { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+.success-sub { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+.redirect-label { font-size: 13px; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; }
+.redirect-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); animation: blink 1s infinite; }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+.success-btns { display: flex; flex-direction: column; gap: 10px; max-width: 320px; margin: 0 auto; }
+.btn-success { background: var(--primary); color: #fff; padding: 13px 20px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; font-family: 'Outfit', sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-back { background: none; color: var(--text); border: 1.5px solid var(--border); padding: 11px 20px; border-radius: 10px; font-size: 13.5px; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; }
+</style>
+</head>
+<body>
+
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-profile">
+    <div class="nav-sidebar-avatar">🤝</div>
+    <div class="nav-sidebar-name">Cares Admin<br>TETSUYU</div>
+    <div class="nav-sidebar-role">Care Coordinator ▾</div>
+  </div>
+  <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Main</span>
+    <a href="dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
+    <a href="schedule.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
+    <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
+    <a href="appointments.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="slot-config.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Slot Config</span></span><span class="nav-chevron">‹</span></a>
+    <a href="non-attendance.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🚫</span><span>Non-Attendance</span></span><span class="nav-chevron">‹</span></a>
+    <a href="reports.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📈</span><span>Reports</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📊</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
+  </nav>
+</aside>
+
+<div class="main-wrapper">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-hamburger">☰</button>
+      <span class="topbar-logo">🏥</span>
+      <span class="topbar-session">CARES Scheduler v2 · Thu, 2 Apr 2026</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-welcome">Welcome, Ms Sarah</span>
+      <select class="topbar-facility"><option>Tetsuyu Heritage Centre</option></select>
+      <button class="topbar-notif">🔔<span class="topbar-notif-badge">3</span></button>
+      <a href="#" class="topbar-logout">⏻ Logout</a>
+    </div>
+  </div>
+
+  <div class="page-content">
+    <div class="center-card">
+
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="appointments.html">📋 Appointments</a>
+        <span class="breadcrumb-sep">›</span>
+        <span>Complete Session</span>
+      </div>
+
+      <!-- Main form -->
+      <div id="formView">
+
+        <!-- Appointment Context Card -->
+        <div class="context-card">
+          <div class="context-header">
+            <div class="context-status-dot"></div>
+            <span class="context-status-label">🟢 Session in Progress</span>
+          </div>
+          <div class="context-grid">
+            <div class="context-field">
+              <div class="context-field-label">Patient</div>
+              <div class="context-field-value">Mdm Lim Siew Lan <small>Block C, Room 12</small></div>
+            </div>
+            <div class="context-field">
+              <div class="context-field-label">Date &amp; Time</div>
+              <div class="context-field-value">Thu, 2 Apr 2026 <small>09:00 – 09:30</small></div>
+            </div>
+            <div class="context-field">
+              <div class="context-field-label">Service</div>
+              <div class="context-field-value"><span class="svc-badge svc-ar">AR (PT)</span><small>AIC Episode #2024-0341</small></div>
+            </div>
+            <div class="context-field">
+              <div class="context-field-label">Care Category</div>
+              <div class="context-field-value">PT <small style="color:var(--green);">✅ Transport taken</small></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 1: Session Outcome -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-icon">🎯</div>
+            <div>
+              <div class="card-title">Section 1 — Session Outcome</div>
+              <div class="card-subtitle">Select the result of this therapy session</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="outcome-cards">
+              <div class="outcome-card" id="oc-completed" onclick="selectOutcome('completed')">
+                <div class="outcome-radio"><div class="outcome-radio-dot"></div></div>
+                <div class="outcome-icon">✅</div>
+                <div class="outcome-text">
+                  <div class="outcome-title">Session Completed</div>
+                  <div class="outcome-desc">Patient attended and completed the session fully</div>
+                </div>
+              </div>
+              <div class="outcome-card" id="oc-partial" onclick="selectOutcome('partial')">
+                <div class="outcome-radio"><div class="outcome-radio-dot"></div></div>
+                <div class="outcome-icon">⚠️</div>
+                <div class="outcome-text">
+                  <div class="outcome-title">Partially Completed</div>
+                  <div class="outcome-desc">Patient attended but could not complete the session fully</div>
+                </div>
+              </div>
+              <div class="outcome-card" id="oc-utc" onclick="selectOutcome('utc')">
+                <div class="outcome-radio"><div class="outcome-radio-dot"></div></div>
+                <div class="outcome-icon">🚫</div>
+                <div class="outcome-text">
+                  <div class="outcome-title">Unable to Complete</div>
+                  <div class="outcome-desc">Patient did not attend or session could not proceed</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- UTC detail sub-panel -->
+            <div class="utc-detail-panel" id="utcDetailPanel">
+              <div class="form-group">
+                <label class="form-label">Reason for Unable to Complete</label>
+                <select class="form-input">
+                  <option value="">— Select reason —</option>
+                  <option>Absent</option>
+                  <option>Patient Unwell</option>
+                  <option>No Transport</option>
+                  <option>Late Arrival</option>
+                  <option>Patient Refused</option>
+                  <option>Equipment Issue</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Remarks</label>
+                <textarea class="form-textarea" placeholder="Describe what happened..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Session Notes -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-icon">📝</div>
+            <div>
+              <div class="card-title">Section 2 — Session Notes</div>
+              <div class="card-subtitle">Brief notes (optional — detailed notes in Progress Notes)</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <textarea class="form-textarea" placeholder="e.g. Patient completed 3 sets of shoulder exercises. Good cooperation. Right side ROM improved..." style="min-height:100px;"></textarea>
+          </div>
+        </div>
+
+        <!-- Section 3: Transport Confirmation -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-icon">🚌</div>
+            <div>
+              <div class="card-title">Section 3 — Transport Confirmation</div>
+              <div class="card-subtitle">Affects billing — uncheck if patient did not take transport</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="checkbox-row">
+              <div class="checkbox-custom" id="transportCheck" onclick="toggleTransport()">
+                <span style="color:#fff;font-size:12px;font-weight:700;">✓</span>
+              </div>
+              <span class="checkbox-label" onclick="toggleTransport()">Transport was taken by patient</span>
+            </div>
+            <div class="transport-warning" id="transportWarning">
+              ⚠️ Transport will be removed from billing for this session.
+            </div>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="action-row">
+          <button class="btn btn-primary" onclick="confirmSession()">✅ Confirm &amp; Go to Progress Notes</button>
+          <button class="btn btn-ghost">💾 Save Only</button>
+          <button class="btn btn-cancel" onclick="window.location.href='appointments.html'">✕ Cancel — Back to Appointments</button>
+        </div>
+
+      </div><!-- end formView -->
+
+      <!-- Success State -->
+      <div class="success-state" id="successView">
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div class="card-body" style="padding:40px 32px;text-align:center;">
+            <div class="success-check-anim">✅</div>
+            <div class="success-title">Session Marked Complete!</div>
+            <div class="success-sub">Mdm Lim Siew Lan · Thu 2 Apr · 09:00–09:30 · AR (PT)</div>
+            <div class="redirect-label">
+              <div class="redirect-dot"></div>
+              Redirecting to Progress Notes...
+            </div>
+            <div class="success-btns">
+              <button class="btn-success">Open Progress Notes →</button>
+              <button class="btn-back" onclick="window.location.href='appointments.html'">‹ Back to Appointments</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end center-card -->
+  </div><!-- end page-content -->
+</div>
+
+<script>
+let selectedOutcome = null;
+let transportTaken = true;
+
+function selectOutcome(type) {
+  selectedOutcome = type;
+  document.getElementById('oc-completed').className = 'outcome-card';
+  document.getElementById('oc-partial').className = 'outcome-card';
+  document.getElementById('oc-utc').className = 'outcome-card';
+  const map = { completed: 'selected-completed', partial: 'selected-partial', utc: 'selected-utc' };
+  document.getElementById('oc-' + type).className = 'outcome-card ' + map[type];
+  document.getElementById('utcDetailPanel').classList.toggle('visible', type === 'utc');
+}
+
+function toggleTransport() {
+  transportTaken = !transportTaken;
+  const check = document.getElementById('transportCheck');
+  check.classList.toggle('unchecked', !transportTaken);
+  check.innerHTML = transportTaken ? '<span style="color:#fff;font-size:12px;font-weight:700;">✓</span>' : '';
+  document.getElementById('transportWarning').classList.toggle('visible', !transportTaken);
+}
+
+function confirmSession() {
+  if (!selectedOutcome) {
+    alert('Please select a session outcome first.');
+    return;
+  }
+  document.getElementById('formView').style.display = 'none';
+  const sv = document.getElementById('successView');
+  sv.style.display = 'block';
+  sv.classList.add('visible');
+}
+</script>
+</body>
+</html>
