@@ -396,11 +396,11 @@
         <h3>Manage Appointment</h3>
       </div>
 
-      <a class="action-item" href="therapist-change.html"onclick="sessionStorage.setItem('changeContext','recurring')">
+      <a class="action-item" href="#" onclick="event.preventDefault(); showSessionPickerModal()">
         <div class="action-icon" style="background:#fffbeb;">🔀</div>
         <div>
           <div class="action-title">Change Therapist</div>
-          <div class="action-desc">Reassign to a different therapist — single or series</div>
+          <div class="action-desc">Reassign a session to a different therapist</div>
         </div>
         <span class="action-arrow">›</span>
       </a>
@@ -478,6 +478,23 @@
 </div>
 
 <!-- CONFLICT PICKER MODAL -->
+<!-- SESSION PICKER MODAL (Change Therapist) -->
+<div class="modal-overlay" id="sessionPickerModal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <h3>Select Appointment to Reassign</h3>
+      <p>Choose the session you want to change the therapist for.</p>
+    </div>
+    <div class="modal-body">
+      <div id="sessionPickerList" style="display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeSessionPicker()">Cancel</button>
+      <button class="btn btn-primary" id="sessionPickerBtn" disabled onclick="goToChangeTherapistFromPicker()">Change Therapist →</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="conflictPickerModal">
   <div class="modal" style="max-width:480px;">
     <div class="modal-header">
@@ -500,6 +517,74 @@
 
 <script>
   let selectedScope = 'following';
+
+  // ── Session Picker Modal (Change Therapist) ────────────────
+  const seriesSessions = [
+    { num:5,  date:'Mon, 6 Apr 2026',  time:'09:00',  status:'conflict',  label:'⚠ Leave Conflict' },
+    { num:6,  date:'Mon, 13 Apr 2026', time:'09:00',  status:'conflict',  label:'⚠ Leave Conflict' },
+    { num:7,  date:'Mon, 20 Apr 2026', time:'09:00',  status:'upcoming',  label:'Upcoming' },
+    { num:8,  date:'Mon, 27 Apr 2026', time:'09:00',  status:'upcoming',  label:'Upcoming' },
+    { num:9,  date:'Mon, 4 May 2026',  time:'09:00',  status:'upcoming',  label:'Upcoming' },
+    { num:10, date:'Mon, 11 May 2026', time:'09:00',  status:'upcoming',  label:'Upcoming' },
+    { num:11, date:'Mon, 18 May 2026', time:'09:00',  status:'upcoming',  label:'Upcoming' },
+    { num:12, date:'Mon, 25 May 2026', time:'09:00',  status:'upcoming',  label:'Upcoming' },
+  ];
+  let selectedPickerSession = null;
+
+  function showSessionPickerModal() {
+    selectedPickerSession = null;
+    document.getElementById('sessionPickerBtn').disabled = true;
+    const list = document.getElementById('sessionPickerList');
+    list.innerHTML = seriesSessions.map(s => {
+      const isConflict = s.status === 'conflict';
+      const badgeBg  = isConflict ? '#fff7ed' : '#f0fdf4';
+      const badgeClr = isConflict ? '#c2410c' : '#15803d';
+      const badgeIcon = isConflict ? '⚠️' : '📅';
+      return `<div class="conflict-session-row" id="sprow-${s.num}" onclick="selectPickerSession(${s.num})"
+        style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1.5px solid #e5e7eb;cursor:pointer;background:#fff;transition:all .15s;">
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:13px;color:#111827;">Session #${s.num} &nbsp;·&nbsp; ${s.date}</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:2px;">⏰ ${s.time} &nbsp;·&nbsp; <span style="color:#9d174d;">Dr Marcus Lee</span></div>
+          <div style="font-size:11.5px;margin-top:4px;"><span style="background:${badgeBg};color:${badgeClr};border-radius:5px;padding:2px 8px;font-weight:600;">${badgeIcon} ${s.label}</span></div>
+        </div>
+        <div class="conflict-radio" id="spradio-${s.num}" style="width:20px;height:20px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;"></div>
+      </div>`;
+    }).join('');
+    document.getElementById('sessionPickerModal').classList.add('show');
+  }
+
+  function selectPickerSession(num) {
+    selectedPickerSession = num;
+    seriesSessions.forEach(s => {
+      const row   = document.getElementById('sprow-'   + s.num);
+      const radio = document.getElementById('spradio-' + s.num);
+      const sel = s.num === num;
+      row.style.borderColor  = sel ? 'var(--primary)' : '#e5e7eb';
+      row.style.background   = sel ? 'var(--primary-light, #f0fdfa)' : '#fff';
+      radio.style.borderColor = sel ? 'var(--primary)' : '#d1d5db';
+      radio.style.background  = sel ? 'var(--primary)' : 'transparent';
+    });
+    document.getElementById('sessionPickerBtn').disabled = false;
+  }
+
+  function closeSessionPicker() {
+    document.getElementById('sessionPickerModal').classList.remove('show');
+  }
+
+  function goToChangeTherapistFromPicker() {
+    if (!selectedPickerSession) return;
+    const s = seriesSessions.find(x => x.num === selectedPickerSession);
+    if (!s) return;
+    closeSessionPicker();
+    const params = new URLSearchParams({
+      patient:   'Mdm Lim Siew Lan',
+      therapist: 'Dr Marcus Lee',
+      date:      s.date,
+      time:      s.time,
+      title:     'Occupational Therapy'
+    });
+    window.location = 'therapist-change.html?' + params.toString();
+  }
 
   function showScopeModal(action) {
     const modal = document.getElementById('scopeModal');

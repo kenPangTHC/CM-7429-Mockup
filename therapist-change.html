@@ -514,7 +514,7 @@
         </tbody>
       </table>
       <div class="impact-note">
-        📅 Scope: <strong>This appointment only</strong> — Mon, 6 Apr 2026 · 09:00 · Recurring series not affected.
+        📅 Scope: <strong>This appointment only</strong> — <span id="confirmImpactDate"></span> · Recurring series not affected.
       </div>
     </div>
     <div class="modal-footer">
@@ -531,11 +531,11 @@
     <h2>Change Applied!</h2>
     <p id="successMsg">1 appointment successfully reassigned to Dr Angela Lim.</p>
     <div class="success-detail">
-      <div class="success-row"><span class="sr-label">Patient</span><span class="sr-val">Mdm Lim Siew Lan</span></div>
-      <div class="success-row"><span class="sr-label">From</span><span class="sr-val">Dr Marcus Lee</span></div>
+      <div class="success-row"><span class="sr-label">Patient</span><span class="sr-val" id="successPatient">Mdm Lim Siew Lan</span></div>
+      <div class="success-row"><span class="sr-label">From</span><span class="sr-val" id="successFrom">Dr Marcus Lee</span></div>
       <div class="success-row"><span class="sr-label">To</span><span class="sr-val" id="successTo">Dr Angela Lim</span></div>
       <div class="success-row"><span class="sr-label">Sessions</span><span class="sr-val" id="successSessions">1 appointment reassigned</span></div>
-      <div class="success-row"><span class="sr-label">Effective</span><span class="sr-val">Mon, 6 Apr 2026 · 09:00 only</span></div>
+      <div class="success-row"><span class="sr-label">Effective</span><span class="sr-val" id="successEffective">Mon, 6 Apr 2026 · 09:00 only</span></div>
     </div>
     <div class="success-actions">
       <button class="btn btn-ghost" onclick="window.location='recurring-edit.html'">View Appointment</button>
@@ -545,19 +545,28 @@
 </div>
 
 <script>
+  // Parse query params — available globally so all functions can use them
+  var _qp       = new URLSearchParams(window.location.search);
+  var qPatient   = _qp.get('patient')   || 'Mdm Lim Siew Lan';
+  var qTherapist = _qp.get('therapist') || 'Dr Marcus Lee';
+  var qDate      = _qp.get('date')      || 'Mon, 6 Apr 2026';
+  var qTime      = _qp.get('time')      || '09:00';
+  var qTitle     = _qp.get('title')     || 'Occupational Therapy';
+  var _day       = qDate.split(',')[0]; // extract day abbr e.g. "Mon", "Thu"
+
   const sessions = [
-    { num:1,  date:'Mon, 6 Apr 2026',  time:'09:00', conflict:true  },
-    { num:2,  date:'Mon, 13 Apr 2026', time:'09:00', conflict:true  },
-    { num:3,  date:'Mon, 20 Apr 2026', time:'09:00', conflict:false },
-    { num:4,  date:'Mon, 27 Apr 2026', time:'09:00', conflict:false },
-    { num:5,  date:'Mon, 4 May 2026',  time:'09:00', conflict:false },
-    { num:6,  date:'Mon, 11 May 2026', time:'09:00', conflict:false },
-    { num:7,  date:'Mon, 18 May 2026', time:'09:00', conflict:false },
-    { num:8,  date:'Mon, 25 May 2026', time:'09:00', conflict:false },
-    { num:9,  date:'Mon, 1 Jun 2026',  time:'09:00', conflict:false },
-    { num:10, date:'Mon, 8 Jun 2026',  time:'09:00', conflict:false },
-    { num:11, date:'Mon, 15 Jun 2026', time:'09:00', conflict:false },
-    { num:12, date:'Mon, 22 Jun 2026', time:'09:00', conflict:false },
+    { num:1,  date: qDate,                        time: qTime,  conflict:true  },
+    { num:2,  date:`${_day}, 13 Apr 2026`,        time: qTime,  conflict:true  },
+    { num:3,  date:`${_day}, 20 Apr 2026`,        time: qTime,  conflict:false },
+    { num:4,  date:`${_day}, 27 Apr 2026`,        time: qTime,  conflict:false },
+    { num:5,  date:`${_day}, 4 May 2026`,         time: qTime,  conflict:false },
+    { num:6,  date:`${_day}, 11 May 2026`,        time: qTime,  conflict:false },
+    { num:7,  date:`${_day}, 18 May 2026`,        time: qTime,  conflict:false },
+    { num:8,  date:`${_day}, 25 May 2026`,        time: qTime,  conflict:false },
+    { num:9,  date:`${_day}, 1 Jun 2026`,         time: qTime,  conflict:false },
+    { num:10, date:`${_day}, 8 Jun 2026`,         time: qTime,  conflict:false },
+    { num:11, date:`${_day}, 15 Jun 2026`,        time: qTime,  conflict:false },
+    { num:12, date:`${_day}, 22 Jun 2026`,        time: qTime,  conflict:false },
   ];
   let selectedSessions = new Set([1, 2]); // default: conflict sessions pre-checked
 
@@ -676,7 +685,7 @@
   function updateActionBar() {
     const d = therapistData[selectedT];
     document.getElementById('actionBarTitle').textContent = `Reassign 1 appointment to ${d.name}`;
-    document.getElementById('actionBarMeta').textContent = `This appointment only · Mon, 6 Apr 2026 · 09:00 · Recurring OT · Mdm Lim Siew Lan`;
+    document.getElementById('actionBarMeta').textContent = `This appointment only · ${qDate} · ${qTime} · ${qTitle} · ${qPatient}`;
   }
 
   function showConfirmModal() {
@@ -685,6 +694,7 @@
     document.getElementById('confirmNewSpec').textContent = d.spec;
     document.getElementById('confirmNewRoom').textContent = d.room;
     document.getElementById('confirmSessions').textContent = '1 appointment — confirmed';
+    document.getElementById('confirmImpactDate').textContent = `${qDate} · ${qTime}`;
     document.getElementById('confirmModal').classList.add('show');
   }
 
@@ -692,8 +702,11 @@
     document.getElementById('confirmModal').classList.remove('show');
     const d = therapistData[selectedT];
     document.getElementById('successMsg').textContent = `1 appointment successfully reassigned to ${d.name}.`;
+    document.getElementById('successPatient').textContent = qPatient;
+    document.getElementById('successFrom').textContent = qTherapist;
     document.getElementById('successTo').textContent = d.name;
     document.getElementById('successSessions').textContent = '1 appointment reassigned';
+    document.getElementById('successEffective').textContent = `${qDate} · ${qTime} only`;
     document.getElementById('successOverlay').classList.add('show');
   }
 
@@ -721,7 +734,11 @@
   function showConfirmModal_unused() { /* replaced above */ }
   function applyChange_unused() { /* replaced above */ }
 
-  // Initialise comparison on page load
+  // Initialise page with query param data (qPatient/qTherapist/qDate/qTime/qTitle are global)
+  document.querySelector('.context-title').textContent = 'Change Therapist — ' + qPatient;
+  document.querySelector('.context-meta').textContent  = qTitle + ' · ' + qTime + ' · ' + qTherapist + ' (currently assigned)';
+  document.querySelector('.scope-pill').textContent    = '📅 This appointment only · ' + qDate + ' · ' + qTime;
+
   renderComparison();
   updateActionBar();
 </script>

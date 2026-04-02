@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -600,7 +600,7 @@
         <div style="padding: 0 20px 14px; display:flex; gap:10px; flex-wrap:wrap;">
           <div class="conflict-notice" style="flex:1;">
             ⚠️ Dr Marcus Lee is on leave Apr 6–13 · Sessions 5 &amp; 6 need reassignment
-            <button class="btn btn-amber" style="padding:4px 10px;font-size:12px;margin-left:auto;" onclick="window.location='therapist-change.html'">🔀 Reassign →</button>
+            <button class="btn btn-amber" style="padding:4px 10px;font-size:12px;margin-left:auto;" onclick="changeTherapist('Mdm Lim Siew Lan','Dr Marcus Lee','Mon, 6 Apr 2026','10:00–10:30','Occupational Therapy')">🔀 Reassign →</button>
           </div>
         </div>
 
@@ -643,35 +643,35 @@
                 <td><strong>Mon, 14 Apr 2026</strong> · 10:00–10:30</td>
                 <td>Dr Marcus Lee</td>
                 <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
-                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-ot-4','OT · Session 4 of 8 · Mdm Lim Siew Lan','Mon, 14 Apr 2026','10:00–10:30','Dr Marcus Lee')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-ot-4','OT · Session 4 of 8 · Mdm Lim Siew Lan','Mon, 14 Apr 2026','10:00–10:30','Dr Marcus Lee')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;" onclick="changeTherapist('Mdm Lim Siew Lan','Dr Marcus Lee','Mon, 14 Apr 2026','10:00–10:30','Occupational Therapy')">🔀 Change</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
               <tr style="background:#fffdf0;">
                 <td><div class="sess-num" style="background:#f59e0b;">5</div></td>
                 <td><strong>Mon, 6 Apr 2026</strong> · 10:00–10:30 &nbsp;<span style="font-size:12px;color:#92400e;font-weight:600;">⚠ Leave conflict</span></td>
                 <td style="color:#92400e;">Dr Marcus Lee <span style="font-size:11px;">(on leave)</span></td>
                 <td><span class="badge badge-conflict">⚠ Conflict</span></td>
-                <td><div class="sess-actions"><button class="btn btn-amber" style="padding:5px 10px;" onclick="window.location='therapist-change.html'">🔀 Reassign</button></div></td>
+                <td><div class="sess-actions"><button class="btn btn-amber" style="padding:5px 10px;" onclick="changeTherapist('Mdm Lim Siew Lan','Dr Marcus Lee','Mon, 6 Apr 2026','10:00–10:30','Occupational Therapy')">🔀 Reassign</button></div></td>
               </tr>
               <tr style="background:#fffdf0;">
                 <td><div class="sess-num" style="background:#f59e0b;">6</div></td>
                 <td><strong>Mon, 13 Apr 2026</strong> · 10:00–10:30 &nbsp;<span style="font-size:12px;color:#92400e;font-weight:600;">⚠ Leave conflict</span></td>
                 <td style="color:#92400e;">Dr Marcus Lee <span style="font-size:11px;">(on leave)</span></td>
                 <td><span class="badge badge-conflict">⚠ Conflict</span></td>
-                <td><div class="sess-actions"><button class="btn btn-amber" style="padding:5px 10px;" onclick="window.location='therapist-change.html'">🔀 Reassign</button></div></td>
+                <td><div class="sess-actions"><button class="btn btn-amber" style="padding:5px 10px;" onclick="changeTherapist('Mdm Lim Siew Lan','Dr Marcus Lee','Mon, 13 Apr 2026','10:00–10:30','Occupational Therapy')">🔀 Reassign</button></div></td>
               </tr>
               <tr id="sess-ot-7">
                 <td><div class="sess-num">7</div></td>
                 <td><strong>Mon, 20 Apr 2026</strong> · 10:00–10:30</td>
                 <td>Dr Marcus Lee</td>
                 <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
-                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-ot-7','OT · Session 7 of 8 · Mdm Lim Siew Lan','Mon, 20 Apr 2026','10:00–10:30','Dr Marcus Lee')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-ot-7','OT · Session 7 of 8 · Mdm Lim Siew Lan','Mon, 20 Apr 2026','10:00–10:30','Dr Marcus Lee')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;" onclick="changeTherapist('Mdm Lim Siew Lan','Dr Marcus Lee','Mon, 20 Apr 2026','10:00–10:30','Occupational Therapy')">🔀 Change</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
               <tr id="sess-ot-8">
                 <td><div class="sess-num">8</div></td>
                 <td><strong>Mon, 27 Apr 2026</strong> · 10:00–10:30</td>
                 <td>Dr Marcus Lee</td>
                 <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
-                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-ot-8','OT · Session 8 of 8 · Mdm Lim Siew Lan','Mon, 27 Apr 2026','10:00–10:30','Dr Marcus Lee')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-ot-8','OT · Session 8 of 8 · Mdm Lim Siew Lan','Mon, 27 Apr 2026','10:00–10:30','Dr Marcus Lee')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;" onclick="changeTherapist('Mdm Lim Siew Lan','Dr Marcus Lee','Mon, 27 Apr 2026','10:00–10:30','Occupational Therapy')">🔀 Change</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
             </tbody>
           </table>
@@ -681,7 +681,6 @@
           <div class="series-footer-info">3 of 8 sessions completed · 2 conflicts pending</div>
           <div class="series-footer-actions">
             <a href="recurring-edit.html" class="btn btn-purple">✏️ Edit Series</a>
-            <button class="btn btn-amber" onclick="window.location='therapist-change.html'">🔀 Change Therapist</button>
             <button class="btn btn-red" onclick="openCancelModal('series')">✕ Cancel Series</button>
           </div>
         </div>
@@ -734,35 +733,35 @@
                 <td><strong>Thu, 16 Apr 2026</strong> · 14:00–14:30</td>
                 <td>Dr Wei Chen</td>
                 <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
-                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-st-2','Speech Therapy · Session 2 of 6','Thu, 16 Apr 2026','14:00–14:30','Dr Wei Chen')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-st-2','Speech Therapy · Session 2 of 6','Thu, 16 Apr 2026','14:00–14:30','Dr Wei Chen')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;" onclick="changeTherapist('Mdm Lim Siew Lan','Dr Wei Chen','Thu, 16 Apr 2026','14:00–14:30','Speech Therapy')">🔀 Change</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
               <tr id="sess-st-3">
                 <td><div class="sess-num">3</div></td>
                 <td><strong>Thu, 30 Apr 2026</strong> · 14:00–14:30</td>
                 <td>Dr Wei Chen</td>
                 <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
-                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-st-3','Speech Therapy · Session 3 of 6','Thu, 30 Apr 2026','14:00–14:30','Dr Wei Chen')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-st-3','Speech Therapy · Session 3 of 6','Thu, 30 Apr 2026','14:00–14:30','Dr Wei Chen')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;" onclick="changeTherapist('Mdm Lim Siew Lan','Dr Wei Chen','Thu, 30 Apr 2026','14:00–14:30','Speech Therapy')">🔀 Change</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
               <tr id="sess-st-4">
                 <td><div class="sess-num">4</div></td>
                 <td><strong>Thu, 14 May 2026</strong> · 14:00–14:30</td>
                 <td>Dr Wei Chen</td>
                 <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
-                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-st-4','Speech Therapy · Session 4 of 6','Thu, 14 May 2026','14:00–14:30','Dr Wei Chen')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-st-4','Speech Therapy · Session 4 of 6','Thu, 14 May 2026','14:00–14:30','Dr Wei Chen')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;" onclick="changeTherapist('Mdm Lim Siew Lan','Dr Wei Chen','Thu, 14 May 2026','14:00–14:30','Speech Therapy')">🔀 Change</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
               <tr id="sess-st-5">
                 <td><div class="sess-num">5</div></td>
                 <td><strong>Thu, 28 May 2026</strong> · 14:00–14:30</td>
                 <td>Dr Wei Chen</td>
                 <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
-                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-st-5','Speech Therapy · Session 5 of 6','Thu, 28 May 2026','14:00–14:30','Dr Wei Chen')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-st-5','Speech Therapy · Session 5 of 6','Thu, 28 May 2026','14:00–14:30','Dr Wei Chen')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;" onclick="changeTherapist('Mdm Lim Siew Lan','Dr Wei Chen','Thu, 28 May 2026','14:00–14:30','Speech Therapy')">🔀 Change</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
               <tr id="sess-st-6">
                 <td><div class="sess-num">6</div></td>
                 <td><strong>Thu, 11 Jun 2026</strong> · 14:00–14:30</td>
                 <td>Dr Wei Chen</td>
                 <td class="sess-status"><span class="badge badge-upcoming">Upcoming</span></td>
-                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-st-6','Speech Therapy · Session 6 of 6','Thu, 11 Jun 2026','14:00–14:30','Dr Wei Chen')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;">Edit</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
+                <td class="sess-actions"><div class="sess-actions"><button class="btn-complete" onclick="openMarkDoneModal('sess-st-6','Speech Therapy · Session 6 of 6','Thu, 11 Jun 2026','14:00–14:30','Dr Wei Chen')">✓ Mark Done</button> <button class="btn btn-ghost" style="padding:5px 10px;" onclick="changeTherapist('Mdm Lim Siew Lan','Dr Wei Chen','Thu, 11 Jun 2026','14:00–14:30','Speech Therapy')">🔀 Change</button><button class="btn btn-red" style="padding:5px 10px;" onclick="openCancelModal('single')">Cancel</button></div></td>
               </tr>
             </tbody>
           </table>
@@ -772,7 +771,6 @@
           <div class="series-footer-info" style="color:var(--blue);">1 of 6 sessions completed · No conflicts</div>
           <div class="series-footer-actions">
             <button class="btn btn-ghost">✏️ Edit Series</button>
-            <button class="btn btn-ghost" onclick="window.location='therapist-change.html'">🔀 Change Therapist</button>
             <button class="btn btn-red" onclick="openCancelModal('series')">✕ Cancel Series</button>
           </div>
         </div>
@@ -805,8 +803,7 @@
           <span class="badge badge-upcoming">Upcoming</span>
           <div class="appt-actions">
             <button class="btn-complete" onclick="openMarkDoneModal('appt-physio-apr10','Physiotherapy Assessment','Thu, 10 Apr 2026','09:30–10:00','Ms Angela Lim')">✓ Mark Done</button>
-            <button class="btn btn-ghost">Edit</button>
-            <button class="btn btn-ghost" onclick="window.location='therapist-change.html'">🔀</button>
+            <button class="btn btn-ghost" onclick="changeTherapist('Mdm Lim Siew Lan','Ms Angela Lim','Thu, 10 Apr 2026','09:30–10:00','Physiotherapy Assessment')">🔀 Change</button>
             <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
           </div>
         </div>
@@ -830,8 +827,7 @@
           <span class="badge badge-upcoming">Upcoming</span>
           <div class="appt-actions">
             <button class="btn-complete" onclick="openMarkDoneModal('appt-nursing-apr23','Nursing Check — Blood Pressure','Thu, 23 Apr 2026','11:00–11:30','Nurse Janice Tan')">✓ Mark Done</button>
-            <button class="btn btn-ghost">Edit</button>
-            <button class="btn btn-ghost" onclick="window.location='therapist-change.html'">🔀</button>
+            <button class="btn btn-ghost" onclick="changeTherapist('Mdm Lim Siew Lan','Nurse Janice Tan','Thu, 23 Apr 2026','11:00–11:30','Nursing Check — Blood Pressure')">🔀 Change</button>
             <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
           </div>
         </div>
@@ -889,7 +885,7 @@
         <div class="appt-right">
           <span class="badge badge-upcoming">Upcoming</span>
           <div class="appt-actions">
-            <button class="btn btn-ghost">Edit</button>
+            <button class="btn btn-ghost" onclick="changeTherapist('Mdm Lim Siew Lan','Ms Angela Lim','Tue, 7 Apr 2026','09:00–09:30','Physiotherapy')">🔀 Change</button>
             <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
           </div>
         </div>
@@ -911,7 +907,7 @@
         <div class="appt-right">
           <span class="badge badge-upcoming">Upcoming</span>
           <div class="appt-actions">
-            <button class="btn btn-ghost">Edit</button>
+            <button class="btn btn-ghost" onclick="changeTherapist('Mdm Lim Siew Lan','Ms Angela Lim','Fri, 10 Apr 2026','09:30–10:00','Physiotherapy Assessment')">🔀 Change</button>
             <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
           </div>
         </div>
@@ -934,7 +930,7 @@
         <div class="appt-right">
           <span class="badge badge-upcoming">Upcoming</span>
           <div class="appt-actions">
-            <button class="btn btn-ghost">Edit</button>
+            <button class="btn btn-ghost" onclick="changeTherapist('Mr Tan Boon Kiat','Ms Angela Lim','Tue, 14 Apr 2026','10:30–11:00','Physiotherapy')">🔀 Change</button>
             <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
           </div>
         </div>
@@ -957,7 +953,7 @@
         <div class="appt-right">
           <span class="badge badge-upcoming">Upcoming</span>
           <div class="appt-actions">
-            <button class="btn btn-ghost">Edit</button>
+            <button class="btn btn-ghost" onclick="changeTherapist('Mdm Lim Siew Lan','Ms Angela Lim','Tue, 21 Apr 2026','09:00–09:30','Physiotherapy')">🔀 Change</button>
             <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
           </div>
         </div>
@@ -980,7 +976,7 @@
         <div class="appt-right">
           <span class="badge badge-upcoming">Upcoming</span>
           <div class="appt-actions">
-            <button class="btn btn-ghost">Edit</button>
+            <button class="btn btn-ghost" onclick="changeTherapist('Mr Tan Boon Kiat','Ms Angela Lim','Tue, 28 Apr 2026','10:30–11:00','Physiotherapy')">🔀 Change</button>
             <button class="btn btn-red" onclick="openCancelModal('single')">Cancel</button>
           </div>
         </div>
@@ -1566,6 +1562,11 @@
   </div>
 
   <script>
+  function changeTherapist(patient, therapist, date, time, title) {
+    var p = new URLSearchParams({ patient: patient, therapist: therapist, date: date, time: time, title: title });
+    window.location = 'therapist-change.html?' + p.toString();
+  }
+
   let _mdId = null;
 
   function openMarkDoneModal(id, label, date, time, therapist) {
