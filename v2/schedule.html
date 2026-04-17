@@ -147,7 +147,6 @@
     .slot-card.booked .slot-service { margin-top: 4px; }
     .slot-card.booked .slot-service .slot-status-txt { color: rgba(255,255,255,0.75) !important; font-size: 10px; font-weight: 500; }
     .slot-card.booked .slot-transport { color: rgba(255,255,255,0.75); }
-    .slot-card.booked .slot-transport input { accent-color: #fef3c7; }
     .slot-card.booked .badge { background: rgba(255,255,255,0.25); color: #fff; border: 1px solid rgba(255,255,255,0.35); }
 
     /* ── BLOCKED: dark slate + diagonal hatch — unmistakable in any vision ── */
@@ -171,7 +170,6 @@
     .slot-patient { font-weight: 700; font-size: 12px; display: block; }
     .slot-service { margin-top: 3px; display: flex; align-items: center; gap: 5px; }
     .slot-transport { font-size: 10px; color: var(--muted); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
-    .slot-transport input { accent-color: var(--primary); width: 12px; height: 12px; cursor: pointer; }
 
     .badge { font-size: 8.5px; font-weight: 800; border-radius: 4px; padding: 1px 5px; display: inline-block; }
     .badge-ar { background: rgba(13,148,136,0.13); color: var(--primary-dk); }
@@ -252,6 +250,7 @@
     <a href="schedule.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
     <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
     <a href="appointments.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage2queue.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚡</span><span>Unmatched Queue</span></span><span style="background:#f59e0b;color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:99px;">4</span></a>
     <span class="nav-section-label">Management</span>
     <a href="slot-config.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Slot Config</span></span><span class="nav-chevron">‹</span></a>
     <a href="non-attendance.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🚫</span><span>Non-Attendance</span></span><span class="nav-chevron">‹</span></a>
@@ -324,10 +323,9 @@
             <span class="cat-chip cat-pt">PT</span>
           </div>
           <div class="period-slots">
-            <div class="slot-card booked" onclick="showPopover(this, {name:'Mdm Lim Siew Lan', nric:'****1234', service:'AR-PT', serviceClass:'badge-ar', time:'09:00 – 09:30', date:'Thu, 2 Apr 2026', transport:true, status:'Confirmed'})">
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mdm Lim Siew Lan', nric:'****1234', service:'AR-PT', serviceClass:'badge-ar', time:'09:00 – 09:30', date:'Thu, 2 Apr 2026', transport:true, status:'Confirmed', cat:'PT'})">
               <span class="slot-patient">Mdm Lim Siew Lan</span>
               <div class="slot-service"><span class="badge badge-ar">AR-PT</span> <span class="slot-status-txt">Confirmed</span></div>
-              <div class="slot-transport"><input type="checkbox" checked onclick="event.stopPropagation()"> Transport taken</div>
             </div>
             <div class="slot-card open" onclick="bookSlot(this, '09:00 – 09:30')">
               <span>＋</span><span>Available</span>
@@ -350,15 +348,13 @@
             <span class="cat-chip cat-ot">OT</span>
           </div>
           <div class="period-slots">
-            <div class="slot-card booked" onclick="showPopover(this, {name:'Mr Tan Boon Kiat', nric:'****5678', service:'AR-OT', serviceClass:'badge-ar', time:'09:30 – 10:00', date:'Thu, 2 Apr 2026', transport:true, status:'Confirmed'})">
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mr Tan Boon Kiat', nric:'****5678', service:'AR-OT', serviceClass:'badge-ar', time:'09:30 – 10:00', date:'Thu, 2 Apr 2026', transport:true, status:'Confirmed', cat:'OT'})">
               <span class="slot-patient">Mr Tan Boon Kiat</span>
               <div class="slot-service"><span class="badge badge-ar">AR-OT</span> <span class="slot-status-txt">Confirmed</span></div>
-              <div class="slot-transport"><input type="checkbox" checked onclick="event.stopPropagation()"> Transport taken</div>
             </div>
-            <div class="slot-card booked" onclick="showPopover(this, {name:'Mdm Chen Li', nric:'****9012', service:'AR-OT', serviceClass:'badge-ar', time:'09:30 – 10:00', date:'Thu, 2 Apr 2026', transport:false, status:'Confirmed'})">
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mdm Chen Li', nric:'****9012', service:'AR-OT', serviceClass:'badge-ar', time:'09:30 – 10:00', date:'Thu, 2 Apr 2026', transport:false, status:'Confirmed', cat:'OT'})">
               <span class="slot-patient">Mdm Chen Li</span>
               <div class="slot-service"><span class="badge badge-ar">AR-OT</span> <span class="slot-status-txt">Confirmed</span></div>
-              <div class="slot-transport"><input type="checkbox" onclick="event.stopPropagation()"> Transport taken</div>
             </div>
             <div class="slot-card open" onclick="bookSlot(this, '09:30 – 10:00')">
               <span>＋</span><span>Available</span>
@@ -381,10 +377,9 @@
             <span class="cat-chip cat-ptot">PT+OT</span>
           </div>
           <div class="period-slots">
-            <div class="slot-card booked" onclick="showPopover(this, {name:'Mdm Wong Ah Kow', nric:'****3456', service:'ME', serviceClass:'badge-me', time:'10:00 – 10:30', date:'Thu, 2 Apr 2026', transport:true, status:'Confirmed'})">
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mdm Wong Ah Kow', nric:'****3456', service:'ME', serviceClass:'badge-me', time:'10:00 – 10:30', date:'Thu, 2 Apr 2026', transport:true, status:'Confirmed', cat:'CBN'})">
               <span class="slot-patient">Mdm Wong Ah Kow</span>
               <div class="slot-service"><span class="badge badge-me">ME</span> <span class="slot-status-txt">Confirmed</span></div>
-              <div class="slot-transport"><input type="checkbox" checked onclick="event.stopPropagation()"> Transport taken</div>
             </div>
             <div class="slot-card open" onclick="bookSlot(this, '10:00 – 10:30')">
               <span>＋</span><span>Available</span>
@@ -414,10 +409,9 @@
                 <div style="font-size:10.5px;color:var(--muted);margin-top:2px;">Staff meeting</div>
               </div>
             </div>
-            <div class="slot-card booked" onclick="showPopover(this, {name:'Mr Rajan Pillai', nric:'****7890', service:'CBN', serviceClass:'badge-cbn', time:'10:30 – 11:00', date:'Thu, 2 Apr 2026', transport:true, status:'Confirmed'})">
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mr Rajan Pillai', nric:'****7890', service:'CBN', serviceClass:'badge-cbn', time:'10:30 – 11:00', date:'Thu, 2 Apr 2026', transport:true, status:'Confirmed', cat:'CBN'})">
               <span class="slot-patient">Mr Rajan Pillai</span>
               <div class="slot-service"><span class="badge badge-cbn">CBN</span> <span class="slot-status-txt">Confirmed</span></div>
-              <div class="slot-transport"><input type="checkbox" checked onclick="event.stopPropagation()"> Transport taken</div>
             </div>
             <div class="slot-card open" onclick="bookSlot(this, '10:30 – 11:00')">
               <span>＋</span><span>Available</span>
@@ -441,10 +435,9 @@
             <span class="cat-chip cat-pt">PT</span>
           </div>
           <div class="period-slots">
-            <div class="slot-card booked" onclick="showPopover(this, {name:'Mdm Lim Siew Lan', nric:'****1234', service:'AR-PT', serviceClass:'badge-ar', time:'14:00 – 14:30', date:'Thu, 2 Apr 2026', transport:true, status:'Completed'})">
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mdm Lim Siew Lan', nric:'****1234', service:'AR-PT', serviceClass:'badge-ar', time:'14:00 – 14:30', date:'Thu, 2 Apr 2026', transport:true, status:'Completed', cat:'PT'})">
               <span class="slot-patient">Mdm Lim Siew Lan</span>
               <div class="slot-service"><span class="badge badge-ar">AR-PT</span> <span style="font-size:10px;color:var(--green);font-weight:600;">✓ Completed</span></div>
-              <div class="slot-transport"><input type="checkbox" checked onclick="event.stopPropagation()"> Transport taken</div>
             </div>
             <div class="slot-card open" onclick="bookSlot(this, '14:00 – 14:30')">
               <span>＋</span><span>Available</span>
@@ -467,15 +460,13 @@
             <span class="cat-chip cat-ot">OT</span>
           </div>
           <div class="period-slots">
-            <div class="slot-card booked" onclick="showPopover(this, {name:'Mr Ahmad Bin Ali', nric:'****2345', service:'AR-OT', serviceClass:'badge-ar', time:'14:30 – 15:00', date:'Thu, 2 Apr 2026', transport:true, status:'Confirmed'})">
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mr Ahmad Bin Ali', nric:'****2345', service:'AR-OT', serviceClass:'badge-ar', time:'14:30 – 15:00', date:'Thu, 2 Apr 2026', transport:true, status:'Confirmed', cat:'OT'})">
               <span class="slot-patient">Mr Ahmad Bin Ali</span>
               <div class="slot-service"><span class="badge badge-ar">AR-OT</span> <span class="slot-status-txt">Confirmed</span></div>
-              <div class="slot-transport"><input type="checkbox" checked onclick="event.stopPropagation()"> Transport taken</div>
             </div>
-            <div class="slot-card booked" onclick="showPopover(this, {name:'Mdm Ng Bee Lian', nric:'****6789', service:'ME', serviceClass:'badge-me', time:'14:30 – 15:00', date:'Thu, 2 Apr 2026', transport:false, status:'Confirmed'})">
+            <div class="slot-card booked" onclick="showPopover(this, {name:'Mdm Ng Bee Lian', nric:'****6789', service:'ME', serviceClass:'badge-me', time:'14:30 – 15:00', date:'Thu, 2 Apr 2026', transport:false, status:'Confirmed', cat:'CBN'})">
               <span class="slot-patient">Mdm Ng Bee Lian</span>
               <div class="slot-service"><span class="badge badge-me">ME</span> <span class="slot-status-txt">Confirmed</span></div>
-              <div class="slot-transport"><input type="checkbox" onclick="event.stopPropagation()"> Transport taken</div>
             </div>
             <div class="slot-card open" onclick="bookSlot(this, '14:30 – 15:00')">
               <span>＋</span><span>Available</span>
@@ -518,8 +509,8 @@
       <span class="popover-val" id="pop-status">—</span>
     </div>
     <div class="popover-transport">
-      <label><input type="checkbox" id="pop-transport" checked> Transport taken</label>
-      <span style="font-size:10.5px;color:var(--muted);">Uncheck if not taken</span>
+      <span class="popover-label">Transport</span>
+      <span id="pop-transport-badge" style="font-size:12px; font-weight:600; padding:3px 10px; border-radius:20px;">—</span>
     </div>
     <div style="margin-top:10px;">
       <select id="utc-select" onchange="utcSelected(this.value)">
@@ -535,7 +526,7 @@
   </div>
   <div class="popover-actions">
     <div class="popover-action-row">
-      <button class="btn btn-green btn-sm" style="flex:1;" onclick="markComplete()">✅ Mark Complete</button>
+      <button class="btn btn-green btn-sm" id="pop-complete-btn" style="flex:1;" onclick="markComplete()">✅ Mark Complete</button>
       <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="toggleUTC()">⚠️ Unable to Complete</button>
     </div>
     <button class="btn btn-ghost btn-sm" style="width:100%;color:var(--red);border-color:rgba(239,68,68,0.3);" onclick="cancelBooking()">✕ Cancel Booking</button>
@@ -586,6 +577,10 @@
 </div>
 
 <script>
+  /* ── Current user (mock) ── */
+  // Change this to demo category restriction on Mark Complete
+  const currentUserCat = 'PT';
+
   /* ── Date navigation ── */
   const dates = [
     'Wed, 1 Apr 2026','Thu, 2 Apr 2026','Fri, 3 Apr 2026',
@@ -632,9 +627,25 @@
     } else {
       statusEl.innerHTML = '<span style="color:var(--muted);">' + data.status + '</span>';
     }
-    document.getElementById('pop-transport').checked = data.transport;
+    // Transport — read-only badge derived from tier
+    const tBadge = document.getElementById('pop-transport-badge');
+    if (data.transport) {
+      tBadge.textContent = '🚌 Included';
+      tBadge.style.cssText = 'font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;';
+    } else {
+      tBadge.textContent = '🚶 Not applicable';
+      tBadge.style.cssText = 'font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;background:#f8fafc;color:var(--muted);border:1.5px solid var(--border);';
+    }
     document.getElementById('utc-select').style.display = 'none';
     document.getElementById('utc-select').value = '';
+    // Category guard on Mark Complete
+    const completeBtn = document.getElementById('pop-complete-btn');
+    const apptCat = data.cat || '';
+    const canComplete = !apptCat || currentUserCat === apptCat;
+    completeBtn.disabled  = !canComplete;
+    completeBtn.style.opacity = canComplete ? '' : '0.4';
+    completeBtn.style.cursor  = canComplete ? '' : 'not-allowed';
+    completeBtn.title = canComplete ? '' : `Only ${apptCat} staff can mark this appointment complete`;
 
     const popover = document.getElementById('slot-popover');
     popover.style.display = 'block';

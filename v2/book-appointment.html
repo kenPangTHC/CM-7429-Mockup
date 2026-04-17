@@ -354,9 +354,9 @@ select.form-input { cursor: pointer; }
                 <label class="form-label">AIC Service</label>
                 <select class="form-input" id="aicService" onchange="selectAicService(this.value)">
                   <option value="">— Select AIC service —</option>
-                  <option value="drp-ot">Day Rehab Programme – OT &nbsp;(Ep: AIC-2026-0041) · 3×/wk</option>
-                  <option value="drp-pt">Day Rehab Programme – PT &nbsp;(Ep: AIC-2026-0038) · 3×/wk</option>
-                  <option value="home-ot">Home Therapy – OT &nbsp;(Ep: AIC-2026-0044) · 2×/wk</option>
+                  <option value="drp-ot">Day Rehab Programme – OT &nbsp;(Ep: AIC-2026-0041) · 3×/wk · Tier 1</option>
+                  <option value="drp-pt">Day Rehab Programme – PT &nbsp;(Ep: AIC-2026-0038) · 3×/wk · Tier 2</option>
+                  <option value="home-ot">Home Therapy – OT &nbsp;(Ep: AIC-2026-0044) · 2×/wk · No Tier</option>
                 </select>
               </div>
 
@@ -382,13 +382,10 @@ select.form-input { cursor: pointer; }
                 </div>
               </div>
 
-              <!-- Transport -->
-              <div class="checkbox-row" style="margin-top:14px;">
-                <div class="checkbox-custom" id="transportCheck" onclick="toggleTransport()">
-                  <span class="checkbox-custom-check">✓</span>
-                </div>
-                <span class="checkbox-label" onclick="toggleTransport()">Transport taken</span>
-                <span id="transportNote" style="font-size:11px; color:var(--muted); margin-left:4px;"></span>
+              <!-- Transport (read-only — derived from AIC Service Tier) -->
+              <div style="margin-top:14px; display:flex; align-items:center; gap:10px;">
+                <span style="font-size:12.5px; font-weight:600; color:var(--text);">Transport</span>
+                <span id="transportBadge" style="font-size:12px; font-weight:600; padding:4px 12px; border-radius:20px; background:#f1f5f9; color:var(--muted); border:1.5px solid var(--border); transition:all .2s;">— Select AIC service first</span>
               </div>
             </div>
           </div>
@@ -408,6 +405,15 @@ select.form-input { cursor: pointer; }
               </div>
 
               <div class="recurrence-panel" id="recurrencePanel">
+                <!-- Stage 1/2 info banner -->
+                <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#1e40af;line-height:1.6;">
+                  <strong>&#x2139;&#xFE0F; How recurring appointments work:</strong><br>
+                  When a week is committed, the system automatically tries to fill slots for all active recurring series
+                  (<strong>Stage 1</strong> auto-fill &mdash; matches by care category + preferred time).<br>
+                  Any occurrences that could not be matched are placed in the <strong>Stage 2 Queue</strong> for a
+                  coordinator to manually assign. You can view the queue at
+                  <a href="stage2queue.html" style="color:#1d4ed8;font-weight:700;text-decoration:underline;">Unmatched Queue</a>.
+                </div>
                 <!-- Frequency + Interval -->
                 <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;margin-bottom:14px;">
                   <div class="form-group" style="margin-bottom:0;">
@@ -708,14 +714,21 @@ function changePatient() {
 
 /* ── AIC Service ── */
 const aicData = {
-  'drp-ot':  { ep: 'AIC-2026-0041', svc: 'Day Rehab Programme – OT', days: ['M','T','W'] },
-  'drp-pt':  { ep: 'AIC-2026-0038', svc: 'Day Rehab Programme – PT', days: ['T','T','F'] },
-  'home-ot': { ep: 'AIC-2026-0044', svc: 'Home Therapy – OT',        days: ['W','F'] },
+  'drp-ot':  { ep: 'AIC-2026-0041', svc: 'Day Rehab Programme – OT', days: ['M','T','W'], tier: '1' },
+  'drp-pt':  { ep: 'AIC-2026-0038', svc: 'Day Rehab Programme – PT', days: ['T','T','F'], tier: '2' },
+  'home-ot': { ep: 'AIC-2026-0044', svc: 'Home Therapy – OT',        days: ['W','F'],     tier: '' },
 };
 function selectAicService(val) {
   const daysEl   = document.getElementById('aicServiceDays');
   const billArea = document.getElementById('bookBillingArea');
-  if (!val) { daysEl.style.display = 'none'; billArea.style.display = 'none'; return; }
+  const tBadge   = document.getElementById('transportBadge');
+  if (!val) {
+    daysEl.style.display = 'none';
+    billArea.style.display = 'none';
+    tBadge.textContent = '— Select AIC service first';
+    tBadge.style.cssText = 'font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;background:#f1f5f9;color:var(--muted);border:1.5px solid var(--border);transition:all .2s;';
+    return;
+  }
   const d = aicData[val];
   document.getElementById('aicDayPills').innerHTML =
     d.days.map(dy => `<div class="day-chip sel" style="width:28px;height:28px;font-size:11px;">${dy}</div>`).join('');
@@ -724,10 +737,18 @@ function selectAicService(val) {
   billArea.style.display = '';
   document.getElementById('bookEpisodeNo').textContent = d.ep;
   document.getElementById('bookEpisodeService').textContent = d.svc;
-  // reset checkbox
-  document.getElementById('bookBillAic').checked = false;
-  document.getElementById('bookEpisodeArea').style.display = 'none';
-  document.getElementById('billAicLabel').style.borderColor = 'var(--border)';
+  // Auto-check bill to AIC service
+  const billChk = document.getElementById('bookBillAic');
+  billChk.checked = true;
+  toggleBookBilling(true);
+  // Update transport badge based on tier
+  if (d.tier === '1' || d.tier === '2') {
+    tBadge.textContent = `🚌 Included — Tier ${d.tier}`;
+    tBadge.style.cssText = 'font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;transition:all .2s;';
+  } else {
+    tBadge.textContent = '🚶 Not applicable — No Tier';
+    tBadge.style.cssText = 'font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;background:#f8fafc;color:var(--muted);border:1.5px solid var(--border);transition:all .2s;';
+  }
   updateSummary();
 }
 function toggleBookBilling(checked) {

@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unmatched Queue (Stage 2) — CARES Scheduler v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #0d9488;
+  --primary-dk: #0f766e;
+  --primary-xdk: #134e4a;
+  --primary-light: #f0fdf9;
+  --primary-mid: #ccfbf1;
+  --nav-bg: #1a2e2c;
+  --bg: #f0fdf9;
+  --text: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --radius: 16px;
+  --green: #10b981;
+  --blue: #3b82f6;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --purple: #8b5cf6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); display: flex !important; min-height: 100vh; }
+
+/* ── Sidebar (matches original pages) ── */
+.nav-sidebar { width: 200px; min-width: 200px; background: #1a2e2c; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 200; display: flex; flex-direction: column; }
+.nav-sidebar-profile { padding: 20px 14px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.nav-sidebar-avatar { width: 46px; height: 46px; border-radius: 50%; background: rgba(13,148,136,0.25); border: 2px solid rgba(13,148,136,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 9px; }
+.nav-sidebar-name { color: #fff; font-weight: 700; font-size: 12px; line-height: 1.4; }
+.nav-sidebar-role { color: rgba(255,255,255,0.5); font-size: 10.5px; margin-top: 2px; cursor: pointer; }
+.nav-sidebar-nav { flex: 1; padding: 4px 0; }
+.nav-section-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); padding: 14px 14px 4px; display: block; }
+.nav-sidebar-link { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; color: rgba(255,255,255,0.68); text-decoration: none; font-size: 12px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
+.nav-sidebar-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.95); }
+.nav-sidebar-link.active { background: rgba(13,148,136,0.18); color: #5eead4; border-left-color: #0d9488; }
+.nav-sidebar-link-inner { display: flex; align-items: center; gap: 8px; }
+.nav-chevron { font-size: 10px; opacity: 0.35; }
+
+/* ── Layout ── */
+.main-wrapper { margin-left: 200px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar-session { font-size: 13px; font-weight: 600; color: var(--text); }
+.topbar-right { display: flex; align-items: center; gap: 14px; }
+.topbar-welcome { font-size: 12.5px; color: var(--muted); }
+.topbar-facility { font-size: 12px; border: 1px solid var(--border); border-radius: 8px; padding: 4px 8px; color: var(--text); font-family: 'Outfit', sans-serif; background: #fff; cursor: pointer; }
+.topbar-logout { font-size: 12px; color: var(--muted); text-decoration: none; font-weight: 500; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); transition: all 0.15s; }
+.topbar-logout:hover { background: #fef2f2; color: var(--red); border-color: #fecaca; }
+.page-content { flex: 1; padding: 28px 28px 40px; }
+
+/* ── Buttons ── */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; border: none; font-family: 'Outfit', sans-serif; transition: all 0.15s; text-decoration: none; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dk); }
+.btn-ghost { background: none; color: var(--text); border: 1.5px solid var(--border); }
+.btn-ghost:hover { border-color: #94a3b8; }
+.btn-amber { background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a; }
+.btn-amber:hover { background: #fde68a; }
+.btn-danger { background: #fef2f2; color: var(--red); border: 1.5px solid #fecaca; }
+.btn-danger:hover { background: #fee2e2; }
+.btn-sm { padding: 5px 11px; font-size: 11.5px; border-radius: 6px; }
+
+/* ── Stats strip ── */
+.stats-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 22px; }
+.stat-card { background: #fff; border-radius: 12px; border: 1px solid var(--border); padding: 14px 16px; box-shadow: var(--shadow); }
+.stat-value { font-size: 28px; font-weight: 900; line-height: 1; }
+.stat-label { font-size: 11.5px; color: var(--muted); margin-top: 4px; font-weight: 600; }
+
+/* ── Filter bar ── */
+.filter-bar { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; box-shadow: var(--shadow); }
+.filter-input { border: 1.5px solid var(--border); border-radius: 8px; padding: 7px 11px; font-size: 12.5px; font-family: 'Outfit', sans-serif; color: var(--text); outline: none; background: #fff; transition: border-color 0.15s; cursor: pointer; }
+.filter-input:focus { border-color: var(--primary); }
+.filter-label { font-size: 11.5px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+.filter-sep { width: 1px; height: 24px; background: var(--border); }
+
+/* ── Info callout ── */
+.info-callout { background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 12px 16px; font-size: 12.5px; color: #92400e; margin-bottom: 20px; line-height: 1.6; }
+.info-callout strong { color: #78350f; }
+
+/* ── Queue group header ── */
+.group-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; margin-top: 22px; }
+.group-header-date { font-size: 14px; font-weight: 800; color: var(--text); }
+.group-header-cat { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+.cat-pt  { background: #dbeafe; color: #1e40af; }
+.cat-ot  { background: #fce7f3; color: #9d174d; }
+.cat-ta  { background: #dcfce7; color: #14532d; }
+.cat-cbn { background: #ede9fe; color: #5b21b6; }
+.group-header-count { margin-left: auto; font-size: 11.5px; color: var(--muted); font-weight: 600; }
+
+/* ── Queue card ── */
+.queue-card { background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; box-shadow: var(--shadow); transition: box-shadow 0.15s; }
+.queue-card:hover { box-shadow: var(--shadow-md); }
+.queue-card.resolved { opacity: 0.55; }
+.queue-card.skipped  { opacity: 0.45; }
+.qc-top { display: flex; align-items: flex-start; gap: 12px; }
+.qc-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary-mid); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.qc-body { flex: 1; min-width: 0; }
+.qc-name { font-size: 14px; font-weight: 700; }
+.qc-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.qc-reason { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; margin-top: 5px; }
+.reason-no-slot  { background: #fef3c7; color: #92400e; }
+.reason-full     { background: #fee2e2; color: #991b1b; }
+.reason-blocked  { background: #f1f5f9; color: #475569; }
+.qc-status { display: flex; align-items: center; gap: 8px; }
+.status-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 99px; }
+.status-pending  { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+.status-resolved { background: #f0fdf4; color: #065f46; border: 1px solid #bbf7d0; }
+.status-skipped  { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+.qc-actions { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.qc-resolved-info { font-size: 12px; color: #065f46; background: #f0fdf4; border-radius: 8px; padding: 6px 10px; flex: 1; }
+.qc-skipped-info  { font-size: 12px; color: #475569; background: #f1f5f9; border-radius: 8px; padding: 6px 10px; flex: 1; }
+
+/* ── Slot picker (inline, visible on Assign) ── */
+.slot-picker-panel { background: #f8fafc; border: 1.5px solid var(--primary-mid); border-radius: 10px; padding: 14px; margin-top: 10px; display: none; }
+.slot-picker-panel.visible { display: block; }
+.slot-picker-title { font-size: 12px; font-weight: 700; color: var(--primary-dk); margin-bottom: 10px; }
+.slot-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+.slot-chip { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+.slot-chip.available { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+.slot-chip.available:hover { background: #bfdbfe; border-color: #3b82f6; }
+.slot-chip.available.selected { background: var(--primary); color: #fff; border-color: var(--primary-dk); }
+.slot-chip.full { background: #fee2e2; color: #991b1b; cursor: not-allowed; opacity: 0.6; }
+.slot-picker-footer { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.slot-picker-legend { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.leg-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+/* ── Empty state ── */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+.empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state-msg { font-size: 15px; font-weight: 700; color: var(--text); }
+.empty-state-sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+/* ── Modal overlay (skip confirm) ── */
+.skip-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 900; display: none; align-items: center; justify-content: center; }
+.skip-overlay.open { display: flex; }
+.skip-modal { background: #fff; border-radius: 16px; width: 380px; max-width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,0.18); overflow: hidden; }
+.skip-modal-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); }
+.skip-modal-title { font-size: 15px; font-weight: 800; }
+.skip-modal-body { padding: 16px 20px; font-size: 13px; color: var(--muted); line-height: 1.6; }
+.skip-modal-footer { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-profile">
+    <div class="nav-sidebar-avatar">🤝</div>
+    <div class="nav-sidebar-name">Cares Admin<br>TETSUYU</div>
+    <div class="nav-sidebar-role">Care Coordinator ▾</div>
+  </div>
+  <nav class="nav-sidebar-nav">
+    <span class="nav-section-label">Therapy Scheduling</span>
+    <a href="dashboard.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🏠</span><span>Dashboard</span></span><span class="nav-chevron">‹</span></a>
+    <a href="schedule.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
+    <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
+    <a href="appointments.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage2queue.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>⚡</span><span>Unmatched Queue</span></span><span style="background:#f59e0b;color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:99px;">4</span></a>
+    <span class="nav-section-label">Management</span>
+    <a href="slot-config.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Slot Config</span></span><span class="nav-chevron">‹</span></a>
+    <a href="non-attendance.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🚫</span><span>Non-Attendance</span></span><span class="nav-chevron">‹</span></a>
+    <a href="reports.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📈</span><span>Reports</span></span><span class="nav-chevron">‹</span></a>
+    <a href="workflow-swimlane.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📊</span><span>Workflow</span></span><span class="nav-chevron">‹</span></a>
+  </nav>
+</aside>
+
+<!-- Main -->
+<div class="main-wrapper">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <span style="font-size:20px;">🏥</span>
+      <span class="topbar-session">Unmatched Queue — Stage 2</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-welcome">Kwong Wai Shiu Hospital</span>
+      <select class="topbar-facility" onchange="">
+        <option>KWSH - Main</option>
+        <option>KWSH - Annex</option>
+      </select>
+      <a href="#" class="topbar-logout">Log Out</a>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- Page header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div>
+        <div style="font-size:22px;font-weight:800;">⚡ Unmatched Queue (Stage 2)</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:3px;">
+          Recurring occurrences that could not be auto-filled during commit. Assign a slot or skip each item.
+        </div>
+      </div>
+      <a href="slot-config.html" class="btn btn-ghost">← Back to Slot Settings</a>
+    </div>
+
+    <!-- Info callout -->
+    <div class="info-callout">
+      <strong>What is Stage 2?</strong> When a week is committed, the system auto-fills recurring appointments where a
+      matching slot was available (<strong>Stage 1</strong>). Items here could <em>not</em> be matched — either no slot
+      existed at the preferred time, or all slots were already taken. Assign a slot manually below, or skip the occurrence
+      to leave it unfilled.
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-strip">
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--amber);" id="countPending">4</div>
+        <div class="stat-label">⏳ Pending</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--green);" id="countResolved">18</div>
+        <div class="stat-label">✅ Resolved this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--muted);" id="countSkipped">2</div>
+        <div class="stat-label">⏭️ Skipped</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--primary);">7–13 Apr</div>
+        <div class="stat-label">📅 Current committed week</div>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <span class="filter-label">Week</span>
+      <select class="filter-input" id="filterWeek" onchange="renderQueue()">
+        <option value="all">All weeks</option>
+        <option value="7 Apr–13 Apr" selected>7–13 Apr 2026</option>
+        <option value="14 Apr–20 Apr">14–20 Apr 2026</option>
+      </select>
+      <div class="filter-sep"></div>
+      <span class="filter-label">Category</span>
+      <select class="filter-input" id="filterCat" onchange="renderQueue()">
+        <option value="">All categories</option>
+        <option value="PT">PT</option>
+        <option value="OT">OT</option>
+        <option value="TA">TA</option>
+        <option value="CBN">CBN</option>
+      </select>
+      <div class="filter-sep"></div>
+      <span class="filter-label">Status</span>
+      <select class="filter-input" id="filterStatus" onchange="renderQueue()">
+        <option value="Pending" selected>Pending only</option>
+        <option value="">All statuses</option>
+        <option value="Resolved">Resolved</option>
+        <option value="Skipped">Skipped</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="resetFilters()">Clear</button>
+      <div style="margin-left:auto;font-size:12px;color:var(--muted);" id="queueFilterCount">Showing 4 items</div>
+    </div>
+
+    <!-- Queue list -->
+    <div id="queueList"></div>
+
+  </div><!-- /page-content -->
+</div><!-- /main-wrapper -->
+
+<!-- Skip confirmation modal -->
+<div class="skip-overlay" id="skipOverlay" onclick="if(event.target===this)closeSkip()">
+  <div class="skip-modal">
+    <div class="skip-modal-header">
+      <div class="skip-modal-title">⏭️ Skip this occurrence?</div>
+    </div>
+    <div class="skip-modal-body">
+      This occurrence of <strong id="skipPatientName">—</strong> on <strong id="skipDate">—</strong> will be marked as
+      <strong>Skipped</strong> and no appointment will be created. The patient's recurring series will continue as
+      normal for future weeks.<br><br>
+      This action cannot be undone.
+    </div>
+    <div class="skip-modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeSkip()">Cancel</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmSkip()">⏭️ Skip Occurrence</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Mock data ──
+const queueData = [
+  {
+    id: 1, status: 'Pending', week: '7 Apr–13 Apr',
+    date: '07-Apr-2026', dateISO: '2026-04-07', dayLabel: 'Tuesday, 7 Apr',
+    cat: 'PT', patient: 'Lim Ah Kow', patientId: 1012,
+    preferredTime: '09:00', reason: 'NO_SLOT',
+    reasonLabel: 'No slot at preferred time',
+    series: 'Weekly · Mon & Wed · every 1 week',
+    resolvedSlot: null, resolvedBy: null
+  },
+  {
+    id: 2, status: 'Pending', week: '7 Apr–13 Apr',
+    date: '08-Apr-2026', dateISO: '2026-04-08', dayLabel: 'Wednesday, 8 Apr',
+    cat: 'PT', patient: 'Tan Boon Seng', patientId: 1034,
+    preferredTime: '09:00', reason: 'ALL_BOOKED',
+    reasonLabel: 'All 09:00 slots are full',
+    series: 'Weekly · Tue & Thu · every 1 week',
+    resolvedSlot: null, resolvedBy: null
+  },
+  {
+    id: 3, status: 'Pending', week: '7 Apr–13 Apr',
+    date: '10-Apr-2026', dateISO: '2026-04-10', dayLabel: 'Friday, 10 Apr',
+    cat: 'OT', patient: 'Wong Mei Ling', patientId: 1056,
+    preferredTime: '10:30', reason: 'SLOT_BLOCKED',
+    reasonLabel: '10:30 slot was blocked out',
+    series: 'Weekly · Mon & Fri · every 1 week',
+    resolvedSlot: null, resolvedBy: null
+  },
+  {
+    id: 4, status: 'Pending', week: '7 Apr–13 Apr',
+    date: '11-Apr-2026', dateISO: '2026-04-11', dayLabel: 'Saturday, 11 Apr',
+    cat: 'TA', patient: 'Ng Siew Hwa', patientId: 1078,
+    preferredTime: '14:00', reason: 'NO_SLOT',
+    reasonLabel: 'No slot at preferred time',
+    series: 'Weekly · Sat · every 1 week',
+    resolvedSlot: null, resolvedBy: null
+  },
+  {
+    id: 5, status: 'Resolved', week: '7 Apr–13 Apr',
+    date: '07-Apr-2026', dateISO: '2026-04-07', dayLabel: 'Tuesday, 7 Apr',
+    cat: 'OT', patient: 'Chan Kim Huat', patientId: 1021,
+    preferredTime: '11:00', reason: 'ALL_BOOKED',
+    reasonLabel: 'All 11:00 slots were full',
+    series: 'Weekly · Tue · every 1 week',
+    resolvedSlot: '11:30', resolvedBy: 'Sarah Tan'
+  },
+  {
+    id: 6, status: 'Skipped', week: '7 Apr–13 Apr',
+    date: '09-Apr-2026', dateISO: '2026-04-09', dayLabel: 'Thursday, 9 Apr',
+    cat: 'CBN', patient: 'Siti Rahimah', patientId: 1099,
+    preferredTime: '09:30', reason: 'NO_SLOT',
+    reasonLabel: 'No slot at preferred time',
+    series: 'Weekly · Thu · every 1 week',
+    resolvedSlot: null, resolvedBy: 'Sarah Tan'
+  }
+];
+
+// Mock available slots per date+category (for slot picker)
+const mockSlots = {
+  'PT-2026-04-07': [
+    { time: '09:00', avail: 0 }, { time: '09:30', avail: 1 }, { time: '10:00', avail: 2 },
+    { time: '10:30', avail: 1 }, { time: '14:00', avail: 2 }, { time: '14:30', avail: 1 }
+  ],
+  'PT-2026-04-08': [
+    { time: '09:00', avail: 0 }, { time: '09:30', avail: 2 }, { time: '10:00', avail: 1 },
+    { time: '14:00', avail: 2 }
+  ],
+  'OT-2026-04-10': [
+    { time: '09:30', avail: 1 }, { time: '10:00', avail: 2 }, { time: '10:30', avail: 0 },
+    { time: '11:00', avail: 1 }, { time: '14:00', avail: 2 }
+  ],
+  'TA-2026-04-11': [
+    { time: '09:00', avail: 1 }, { time: '09:30', avail: 2 }, { time: '11:00', avail: 1 },
+    { time: '14:00', avail: 0 }, { time: '14:30', avail: 1 }
+  ]
+};
+
+let skipTargetId = null;
+let selectedSlots = {}; // itemId → chosen time
+
+function getFilteredData() {
+  const week   = document.getElementById('filterWeek').value;
+  const cat    = document.getElementById('filterCat').value;
+  const status = document.getElementById('filterStatus').value;
+  return queueData.filter(d =>
+    (week   === 'all' || d.week === week) &&
+    (!cat    || d.cat === cat) &&
+    (!status || d.status === status)
+  );
+}
+
+function renderQueue() {
+  const filtered = getFilteredData();
+  const list = document.getElementById('queueList');
+  document.getElementById('queueFilterCount').textContent = `Showing ${filtered.length} item${filtered.length !== 1 ? 's' : ''}`;
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">✅</div>
+      <div class="empty-state-msg">No items match your filters</div>
+      <div class="empty-state-sub">Try clearing the filters or changing the week selection.</div>
+    </div>`;
+    return;
+  }
+
+  // Group by dayLabel
+  const groups = {};
+  filtered.forEach(d => {
+    const key = d.dayLabel + '||' + d.cat;
+    if (!groups[key]) groups[key] = { label: d.dayLabel, cat: d.cat, items: [] };
+    groups[key].items.push(d);
+  });
+
+  let html = '';
+  for (const key of Object.keys(groups)) {
+    const g = groups[key];
+    const catClass = g.cat.toLowerCase();
+    html += `<div class="group-header">
+      <div class="group-header-date">${g.label}</div>
+      <span class="group-header-cat cat-${catClass}">${g.cat}</span>
+      <span class="group-header-count">${g.items.length} item${g.items.length !== 1 ? 's' : ''}</span>
+    </div>`;
+    g.items.forEach(item => { html += renderCard(item); });
+  }
+  list.innerHTML = html;
+
+  // Update pending count badge
+  const pending = queueData.filter(d => d.status === 'Pending').length;
+  document.getElementById('countPending').textContent = pending;
+}
+
+function reasonClass(code) {
+  if (code === 'NO_SLOT')   return 'reason-no-slot';
+  if (code === 'ALL_BOOKED') return 'reason-full';
+  return 'reason-blocked';
+}
+function reasonIcon(code) {
+  if (code === 'NO_SLOT')   return '⏰';
+  if (code === 'ALL_BOOKED') return '🔴';
+  return '🚫';
+}
+function statusClass(s) {
+  if (s === 'Resolved') return 'status-resolved';
+  if (s === 'Skipped')  return 'status-skipped';
+  return 'status-pending';
+}
+
+function renderCard(item) {
+  const slotKey = `${item.cat}-${item.dateISO}`;
+  const slots   = mockSlots[slotKey] || [];
+  const sel     = selectedSlots[item.id] || null;
+
+  let actionsHtml = '';
+  if (item.status === 'Pending') {
+    // slot picker
+    let slotChips = slots.map(s => {
+      const isFull = s.avail === 0;
+      const isSel  = sel === s.time;
+      const cls    = isFull ? 'full' : (isSel ? 'available selected' : 'available');
+      const avTxt  = isFull ? 'Full' : `${s.avail} left`;
+      const click  = isFull ? '' : `onclick="selectSlot(${item.id},'${s.time}')"`;
+      return `<div class="slot-chip ${cls}" ${click} title="${avTxt}">${s.time}<span style="font-size:10px;margin-left:3px;opacity:.75;">${avTxt}</span></div>`;
+    }).join('');
+    if (slotChips === '') slotChips = '<span style="font-size:12px;color:var(--muted);">No committed slots available for this date &amp; category.</span>';
+
+    const pickerVisible = document.getElementById && document.getElementById(`picker-${item.id}`) ? document.getElementById(`picker-${item.id}`).classList.contains('visible') : false;
+
+    actionsHtml = `
+      <div class="qc-actions">
+        <button class="btn btn-primary btn-sm" onclick="togglePicker(${item.id})">📌 Assign Slot</button>
+        <button class="btn btn-danger btn-sm" onclick="openSkip(${item.id},'${item.patient}','${item.date}')">⏭️ Skip</button>
+        <span style="font-size:11px;color:var(--muted);margin-left:4px;">Preferred: <strong>${item.preferredTime}</strong></span>
+      </div>
+      <div class="slot-picker-panel" id="picker-${item.id}" style="${pickerVisible ? '' : ''}">
+        <div class="slot-picker-title">📅 Available slots on ${item.date} · ${item.cat}</div>
+        <div class="slot-grid">${slotChips}</div>
+        <div class="slot-picker-footer">
+          <button class="btn btn-ghost btn-sm" onclick="togglePicker(${item.id})">Cancel</button>
+          <button class="btn btn-primary btn-sm" id="assignBtn-${item.id}" onclick="confirmAssign(${item.id})" ${sel ? '' : 'disabled style="opacity:.5;cursor:not-allowed;"'}>
+            ✅ Assign ${sel ? sel : ''} to ${item.patient}
+          </button>
+          <div class="slot-picker-legend">
+            <span class="leg-dot" style="background:#dbeafe;border:1.5px solid #bfdbfe;"></span><span style="font-size:11px;">Available</span>
+            <span class="leg-dot" style="background:#fee2e2;border:1.5px solid #fecaca;"></span><span style="font-size:11px;">Full</span>
+          </div>
+        </div>
+      </div>`;
+  } else if (item.status === 'Resolved') {
+    actionsHtml = `<div class="qc-actions"><div class="qc-resolved-info">✅ Assigned to <strong>${item.resolvedSlot}</strong> by ${item.resolvedBy}</div></div>`;
+  } else {
+    actionsHtml = `<div class="qc-actions"><div class="qc-skipped-info">⏭️ Skipped by ${item.resolvedBy}</div></div>`;
+  }
+
+  return `<div class="queue-card ${item.status.toLowerCase()}" id="card-${item.id}">
+    <div class="qc-top">
+      <div class="qc-avatar">👤</div>
+      <div class="qc-body">
+        <div class="qc-name">${item.patient} <span style="font-size:11px;color:var(--muted);font-weight:500;">#${item.patientId}</span></div>
+        <div class="qc-meta">${item.series}</div>
+        <div>
+          <span class="qc-reason ${reasonClass(item.reason)}">${reasonIcon(item.reason)} ${item.reasonLabel}</span>
+        </div>
+      </div>
+      <div class="qc-status">
+        <span class="status-badge ${statusClass(item.status)}">${item.status}</span>
+      </div>
+    </div>
+    ${actionsHtml}
+  </div>`;
+}
+
+function togglePicker(id) {
+  const panel = document.getElementById('picker-' + id);
+  if (panel) panel.classList.toggle('visible');
+}
+
+function selectSlot(itemId, time) {
+  selectedSlots[itemId] = time;
+  renderQueue();
+  // Re-open picker after re-render
+  const panel = document.getElementById('picker-' + itemId);
+  if (panel) panel.classList.add('visible');
+}
+
+function confirmAssign(itemId) {
+  const item = queueData.find(d => d.id === itemId);
+  const slot = selectedSlots[itemId];
+  if (!item || !slot) return;
+  item.status = 'Resolved';
+  item.resolvedSlot = slot;
+  item.resolvedBy = 'Sarah Tan';
+  // Update mock stats
+  document.getElementById('countResolved').textContent =
+    parseInt(document.getElementById('countResolved').textContent) + 1;
+  renderQueue();
+}
+
+// Skip modal
+function openSkip(id, patient, date) {
+  skipTargetId = id;
+  document.getElementById('skipPatientName').textContent = patient;
+  document.getElementById('skipDate').textContent = date;
+  document.getElementById('skipOverlay').classList.add('open');
+}
+function closeSkip() {
+  skipTargetId = null;
+  document.getElementById('skipOverlay').classList.remove('open');
+}
+function confirmSkip() {
+  const item = queueData.find(d => d.id === skipTargetId);
+  if (item) {
+    item.status = 'Skipped';
+    item.resolvedBy = 'Sarah Tan';
+    document.getElementById('countSkipped').textContent =
+      parseInt(document.getElementById('countSkipped').textContent) + 1;
+  }
+  closeSkip();
+  renderQueue();
+}
+
+function resetFilters() {
+  document.getElementById('filterWeek').value   = 'all';
+  document.getElementById('filterCat').value    = '';
+  document.getElementById('filterStatus').value = '';
+  renderQueue();
+}
+
+// Initial render
+renderQueue();
+</script>
+</body>
+</html>

@@ -165,6 +165,7 @@ body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--te
     <a href="schedule.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>📅</span><span>Schedule</span></span><span class="nav-chevron">‹</span></a>
     <a href="book-appointment.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>➕</span><span>Book Appointment</span></span><span class="nav-chevron">‹</span></a>
     <a href="appointments.html" class="nav-sidebar-link active"><span class="nav-sidebar-link-inner"><span>📋</span><span>Appointments</span></span><span class="nav-chevron">‹</span></a>
+    <a href="stage2queue.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚡</span><span>Unmatched Queue</span></span><span style="background:#f59e0b;color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:99px;">4</span></a>
     <span class="nav-section-label">Management</span>
     <a href="slot-config.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>⚙️</span><span>Slot Config</span></span><span class="nav-chevron">‹</span></a>
     <a href="non-attendance.html" class="nav-sidebar-link"><span class="nav-sidebar-link-inner"><span>🚫</span><span>Non-Attendance</span></span><span class="nav-chevron">‹</span></a>
@@ -206,6 +207,11 @@ body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--te
           <div class="context-header">
             <div class="context-status-dot"></div>
             <span class="context-status-label">🟢 Session in Progress</span>
+            <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+              <span style="font-size:11px; color:var(--muted);">Signed in as:</span>
+              <span id="currentUserBadge" style="font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:#f0fdf4; color:#15803d; border:1.5px solid #bbf7d0;">PT Therapist</span>
+              <button onclick="toggleDemoRole()" style="font-size:10px; padding:3px 8px; border-radius:6px; border:1px dashed var(--border); background:transparent; cursor:pointer; color:var(--muted);">⇄ Switch role (demo)</button>
+            </div>
           </div>
           <div class="context-grid">
             <div class="context-field">
@@ -222,8 +228,17 @@ body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--te
             </div>
             <div class="context-field">
               <div class="context-field-label">Care Category</div>
-              <div class="context-field-value">PT <small style="color:var(--green);">✅ Transport taken</small></div>
+              <div class="context-field-value">PT <small style="color:var(--green);">🚌 Transport included</small></div>
             </div>
+          </div>
+        </div>
+
+        <!-- Category permission banner -->
+        <div id="categoryBanner" style="display:none; margin-bottom:14px; padding:12px 16px; border-radius:10px; background:#fff7ed; border:1.5px solid #fed7aa; display:flex; align-items:center; gap:10px;">
+          <span style="font-size:18px;">🔒</span>
+          <div>
+            <div style="font-size:13px; font-weight:700; color:#c2410c;" id="categoryBannerTitle">Insufficient permissions</div>
+            <div style="font-size:12px; color:#9a3412; margin-top:2px;" id="categoryBannerDesc">Only <strong>PT</strong> staff can mark this appointment as complete.</div>
           </div>
         </div>
 
@@ -317,7 +332,7 @@ body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--te
 
         <!-- Action buttons -->
         <div class="action-row">
-          <button class="btn btn-primary" onclick="confirmSession()">✅ Confirm &amp; Go to Progress Notes</button>
+          <button class="btn btn-primary" id="confirmBtn" onclick="confirmSession()">✅ Confirm &amp; Go to Progress Notes</button>
           <button class="btn btn-ghost">💾 Save Only</button>
           <button class="btn btn-cancel" onclick="window.location.href='appointments.html'">✕ Cancel — Back to Appointments</button>
         </div>
@@ -351,6 +366,31 @@ body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--te
 let selectedOutcome = null;
 let transportTaken = true;
 
+// Mock: appointment requires PT category; current user starts as OT for demo
+const apptRequiredCat = 'PT';
+let currentUserCat = 'OT';
+
+function toggleDemoRole() {
+  currentUserCat = currentUserCat === 'PT' ? 'OT' : 'PT';
+  const badge = document.getElementById('currentUserBadge');
+  badge.textContent = currentUserCat + ' Therapist';
+  badge.style.background = currentUserCat === apptRequiredCat ? '#f0fdf4' : '#fff7ed';
+  badge.style.color      = currentUserCat === apptRequiredCat ? '#15803d'  : '#c2410c';
+  badge.style.borderColor= currentUserCat === apptRequiredCat ? '#bbf7d0'  : '#fed7aa';
+  checkCategoryPermission();
+}
+
+function checkCategoryPermission() {
+  const allowed = currentUserCat === apptRequiredCat;
+  const banner  = document.getElementById('categoryBanner');
+  const btn     = document.getElementById('confirmBtn');
+  banner.style.display = allowed ? 'none' : 'flex';
+  btn.disabled = !allowed;
+  btn.style.opacity = allowed ? '' : '0.45';
+  btn.style.cursor  = allowed ? '' : 'not-allowed';
+  btn.title = allowed ? '' : `Only ${apptRequiredCat} staff can mark this appointment complete`;
+}
+
 function selectOutcome(type) {
   selectedOutcome = type;
   document.getElementById('oc-completed').className = 'outcome-card';
@@ -378,6 +418,9 @@ function confirmSession() {
   sv.style.display = 'block';
   sv.classList.add('visible');
 }
+
+// Run permission check on load
+checkCategoryPermission();
 </script>
 </body>
 </html>

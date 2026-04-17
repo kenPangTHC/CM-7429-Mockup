@@ -83,6 +83,19 @@
     .commit-warning.visible { display: block; }
     .commit-success { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 12px 14px; font-size: 13px; font-weight: 600; color: #065f46; display: none; align-items: center; gap: 10px; margin-bottom:4px; }
     .commit-success.visible { display: flex; }
+  /* ── Stage 1 results ── */
+  .stage1-step { display: none; }
+  .stage1-step.visible { display: block; }
+  .s1-counter { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; font-weight: 600; }
+  .s1-counter.green { background: #f0fdf4; border: 1px solid #bbf7d0; color: #065f46; }
+  .s1-counter.amber { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+  .s1-counter.blue  { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+  .s1-counter .s1-icon { font-size: 20px; flex-shrink: 0; }
+  .s1-counter .s1-num  { font-size: 22px; font-weight: 900; margin-right: 2px; }
+  .s1-counter .s1-lbl  { font-size: 12px; line-height: 1.3; font-weight: 600; }
+  .s1-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+  .s1-link-btn { display: inline-flex; align-items: center; gap: 6px; background: #fef3c7; border: 1.5px solid #f59e0b; color: #92400e; font-weight: 700; font-size: 13px; border-radius: 8px; padding: 8px 14px; cursor: pointer; text-decoration: none; }
+  .s1-link-btn:hover { background: #fde68a; }
 
     /* ── Locked state banner ── */
     .locked-banner { display: none; background: #fff7ed; border: 2px solid #fdba74; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; align-items: center; gap: 12px; }
@@ -797,9 +810,24 @@
 
   function openCommitModal() {
     commitSelectedMonth = null;
+    commitProcessing = false;
+    // Reset to step 1
+    document.getElementById('commitStep1').style.display = '';
+    document.getElementById('commitStep2').style.display = 'none';
+    document.getElementById('commitStep3').classList.remove('visible');
+    // Reset footer to original buttons
+    const footer = document.getElementById('commitFooter');
+    footer.style.display = 'flex';
+    footer.innerHTML = '<button class="btn btn-ghost" id="commitCancelBtn" onclick="closeCommitModal()">Cancel</button><button class="btn btn-primary" id="commitConfirmBtn" onclick="confirmCommit()">&#x1F512; Confirm Commit Week</button>';
+    // Reset header
+    document.getElementById('commitModalTitle').textContent = '\uD83D\uDD12 Commit Slots for Week';
+    document.getElementById('commitModalSub').textContent = 'Lock the current slot configuration as the committed availability for a specific week. Bookings will draw from committed week slots.';
+    // Reset progress bar
+    const pb = document.getElementById('commitProgress');
+    if (pb) pb.style.width = '0%';
+    // Reset card selections and warning
     document.querySelectorAll('.commit-month-card').forEach(c => c.classList.remove('selected'));
     document.getElementById('commitWarning').classList.remove('visible');
-    document.getElementById('commitSuccess').classList.remove('visible');
     document.getElementById('commitOverlay').classList.add('open');
   }
   function closeCommitModal() {
@@ -815,30 +843,75 @@
       warn.classList.add('visible');
     } else { warn.classList.remove('visible'); }
   }
+  let commitProcessing = false;
   function confirmCommit() {
     if (!commitSelectedMonth) { alert('Please select a week to commit.'); return; }
-    // Mock commit action
-    const succ = document.getElementById('commitSuccess');
-    succ.textContent = '✅ Slot configuration committed for ' + commitSelectedMonth + '. Bookings can now reference these slots.';
-    succ.classList.add('visible');
-    document.getElementById('commitWarning').classList.remove('visible');
-    // Update the strip pill
-    document.querySelectorAll('.month-pill').forEach(p => {
-      if (p.textContent.includes(commitSelectedMonth.replace('–', '–'))) {
-        p.className = 'month-pill locked';
-        p.innerHTML = '🔒 <span>' + commitSelectedMonth + '</span><span class="mp-label">Committed</span>';
-      }
-    });
-    // Update week selector option text and switch to locked view if same week selected
-    const sel = document.getElementById('editingWeek');
-    for (let i = 0; i < sel.options.length; i++) {
-      if (sel.options[i].value === commitSelectedMonth) {
-        sel.options[i].text = sel.options[i].text.replace(/[⚡📝○].*$/, '🔒 Committed');
-        break;
-      }
-    }
-    if (sel.value === commitSelectedMonth) { onEditingWeekChange(commitSelectedMonth); }
-    setTimeout(closeCommitModal, 1800);
+    commitProcessing = true;
+
+    // Switch to Step 2 (processing)
+    document.getElementById('commitStep1').style.display = 'none';
+    document.getElementById('commitStep2').style.display = 'block';
+    document.getElementById('commitFooter').style.display = 'none';
+    document.getElementById('commitModalTitle').textContent = 'Committing…';
+    document.getElementById('commitModalSub').textContent = 'Please wait while slots are generated and recurring appointments are matched.';
+
+    // Animate progress bar
+    setTimeout(() => { document.getElementById('commitProgress').style.width = '60%'; }, 100);
+    setTimeout(() => { document.getElementById('commitProgress').style.width = '90%'; }, 900);
+
+    // After simulated processing → show Stage 1 results
+    setTimeout(() => {
+      document.getElementById('commitProgress').style.width = '100%';
+      setTimeout(() => {
+        document.getElementById('commitStep2').style.display = 'none';
+        document.getElementById('commitStep3').classList.add('visible');
+        document.getElementById('commitModalTitle').textContent = '\u2705 Commit Complete';
+        document.getElementById('commitModalSub').textContent = 'Slots generated. Recurring appointments auto-filled (Stage 1). See results below.';
+
+        // Populate mock Stage 1 numbers
+        document.getElementById('s1WeekLabel').textContent = commitSelectedMonth;
+        document.getElementById('s1SlotsCount').textContent = '42';
+        document.getElementById('s1FilledCount').textContent = '18';
+        document.getElementById('s1UnmatchedCount').textContent = '4';
+
+        // Show Done button, hide cancel
+        document.getElementById('commitCancelBtn').style.display = 'none';
+        const footer = document.getElementById('commitFooter');
+        footer.style.display = 'flex';
+        footer.innerHTML = '<button class="btn btn-ghost" onclick="closeCommitAndUpdate()">Done</button><a href="stage2queue.html" class="btn btn-primary">\u26A1 Go to Unmatched Queue \u2192</a>';
+
+        // Update the strip pill
+        document.querySelectorAll('.month-pill').forEach(p => {
+          if (p.textContent.includes(commitSelectedMonth.replace('\u2013', '\u2013'))) {
+            p.className = 'month-pill locked';
+            p.innerHTML = '\uD83D\uDD12 <span>' + commitSelectedMonth + '</span><span class="mp-label">Committed</span>';
+          }
+        });
+        const sel = document.getElementById('editingWeek');
+        for (let i = 0; i < sel.options.length; i++) {
+          if (sel.options[i].value === commitSelectedMonth) {
+            sel.options[i].text = sel.options[i].text.replace(/[\u26A1\uD83D\uDCDD\u25CB].*$/, '\uD83D\uDD12 Committed');
+            break;
+          }
+        }
+        if (sel.value === commitSelectedMonth) { onEditingWeekChange(commitSelectedMonth); }
+        commitProcessing = false;
+      }, 300);
+    }, 1600);
+  }
+  function closeCommitAndUpdate() {
+    commitProcessing = false;
+    closeCommitModal();
+    // Reset modal state for next use
+    setTimeout(() => {
+      document.getElementById('commitStep1').style.display = '';
+      document.getElementById('commitStep3').classList.remove('visible');
+      document.getElementById('commitModalTitle').textContent = '\uD83D\uDD12 Commit Slots for Week';
+      document.getElementById('commitModalSub').textContent = 'Lock the current slot configuration as the committed availability for a specific week. Bookings will draw from committed week slots.';
+      commitSelectedMonth = null;
+      document.querySelectorAll('.commit-month-card').forEach(c => c.classList.remove('selected'));
+      document.getElementById('commitWarning').classList.remove('visible');
+    }, 300);
   }
 
   // ── Week context selector ──────────────────────────────────────────────────
@@ -854,52 +927,98 @@
 </script>
 
 <!-- Commit Modal -->
-<div class="commit-overlay" id="commitOverlay" onclick="if(event.target===this)closeCommitModal()">
-  <div class="commit-modal" style="width:500px;">
+<div class="commit-overlay" id="commitOverlay" onclick="if(event.target===this&&!commitProcessing)closeCommitModal()">
+  <div class="commit-modal" style="width:540px;">
     <div class="commit-modal-header">
-      <div class="commit-modal-title">🔒 Commit Slots for Week</div>
-      <div class="commit-modal-sub">Lock the current slot configuration as the committed availability for a specific week. Bookings will draw from committed week slots.</div>
+      <div class="commit-modal-title" id="commitModalTitle">&#x1F512; Commit Slots for Week</div>
+      <div class="commit-modal-sub" id="commitModalSub">Lock the current slot configuration as the committed availability for a specific week. Bookings will draw from committed week slots.</div>
     </div>
     <div class="commit-modal-body">
-      <div id="commitWarning" class="commit-warning"></div>
-      <div id="commitSuccess" class="commit-success"></div>
-      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Select Week to Commit</div>
-      <div class="commit-month-grid" style="grid-template-columns:1fr 1fr 1fr;">
-        <div class="commit-month-card" onclick="selectCommitMonth('24 Mar–30 Mar', this)">
-          <div class="cmc-month">24–30 Mar 2026</div>
-          <div class="cmc-status">🔒 Already committed</div>
+
+      <!-- Step 1: Select week -->
+      <div id="commitStep1">
+        <div id="commitWarning" class="commit-warning"></div>
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Select Week to Commit</div>
+        <div class="commit-month-grid" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="commit-month-card" onclick="selectCommitMonth('24 Mar–30 Mar', this)">
+            <div class="cmc-month">24–30 Mar 2026</div>
+            <div class="cmc-status">&#x1F512; Already committed</div>
+          </div>
+          <div class="commit-month-card" onclick="selectCommitMonth('31 Mar–6 Apr', this)">
+            <div class="cmc-month">31 Mar–6 Apr 2026</div>
+            <div class="cmc-status">&#x1F512; Already committed</div>
+          </div>
+          <div class="commit-month-card" onclick="selectCommitMonth('7 Apr–13 Apr', this)">
+            <div class="cmc-month">7–13 Apr 2026</div>
+            <div class="cmc-status">&#x26A1; Active — 6 periods · 15 slots/day</div>
+          </div>
+          <div class="commit-month-card" onclick="selectCommitMonth('14 Apr–20 Apr', this)">
+            <div class="cmc-month">14–20 Apr 2026</div>
+            <div class="cmc-status">&#x1F4DD; Draft — 6 periods · 15 slots/day</div>
+          </div>
+          <div class="commit-month-card" onclick="selectCommitMonth('21 Apr–27 Apr', this)">
+            <div class="cmc-month">21–27 Apr 2026</div>
+            <div class="cmc-status">&#x25CB; Not set — uses current template</div>
+          </div>
+          <div class="commit-month-card" onclick="selectCommitMonth('28 Apr–4 May', this)">
+            <div class="cmc-month">28 Apr–4 May 2026</div>
+            <div class="cmc-status">&#x25CB; Not set — uses current template</div>
+          </div>
         </div>
-        <div class="commit-month-card" onclick="selectCommitMonth('31 Mar–6 Apr', this)">
-          <div class="cmc-month">31 Mar–6 Apr 2026</div>
-          <div class="cmc-status">🔒 Already committed</div>
-        </div>
-        <div class="commit-month-card" onclick="selectCommitMonth('7 Apr–13 Apr', this)">
-          <div class="cmc-month">7–13 Apr 2026</div>
-          <div class="cmc-status">⚡ Active — 6 periods · 15 slots/day</div>
-        </div>
-        <div class="commit-month-card" onclick="selectCommitMonth('14 Apr–20 Apr', this)">
-          <div class="cmc-month">14–20 Apr 2026</div>
-          <div class="cmc-status">📝 Draft — 6 periods · 15 slots/day</div>
-        </div>
-        <div class="commit-month-card" onclick="selectCommitMonth('21 Apr–27 Apr', this)">
-          <div class="cmc-month">21–27 Apr 2026</div>
-          <div class="cmc-status">○ Not set — uses current template</div>
-        </div>
-        <div class="commit-month-card" onclick="selectCommitMonth('28 Apr–4 May', this)">
-          <div class="cmc-month">28 Apr–4 May 2026</div>
-          <div class="cmc-status">○ Not set — uses current template</div>
+        <div style="font-size:11.5px;color:var(--muted);line-height:1.6;">
+          <strong>What gets committed:</strong> All time periods and slot counts for the selected week, based on the current weekly template.<br>
+          <span style="color:#c2410c;">&#x26A0;&#xFE0F; Once committed, slot periods <strong>cannot be changed</strong>. Use <strong>Block Out</strong> on the Schedule page to close individual slots after committing.</span>
         </div>
       </div>
-      <div style="font-size:11.5px;color:var(--muted);line-height:1.6;">
-        <strong>What gets committed:</strong> All time periods and slot counts for the selected week, based on the current weekly template. Public holidays within that week are automatically excluded.<br>
-        <span style="color:#c2410c;">⚠️ Once committed, time periods and slot counts for that week <strong>cannot be changed</strong>. To close a specific slot after committing, use <strong>Block Out</strong> on the Schedule page.</span>
+
+      <!-- Step 2: Processing -->
+      <div id="commitStep2" style="display:none;text-align:center;padding:28px 0 20px;">
+        <div style="font-size:40px;margin-bottom:12px;">&#x2699;&#xFE0F;</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);">Committing week &amp; running auto-fill&#x2026;</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">Generating slot periods &middot; Matching recurring appointments (Stage 1)</div>
+        <div style="margin-top:16px;height:6px;border-radius:3px;background:#e2e8f0;overflow:hidden;">
+          <div id="commitProgress" style="height:100%;background:var(--primary);border-radius:3px;width:0%;transition:width 1.2s ease;"></div>
+        </div>
       </div>
+
+      <!-- Step 3: Stage 1 results -->
+      <div id="commitStep3" class="stage1-step">
+        <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:12px;">&#x2705; Commit complete for <span id="s1WeekLabel">7–13 Apr 2026</span></div>
+        <div class="s1-counter blue">
+          <span class="s1-icon">&#x1F4C5;</span>
+          <div>
+            <span class="s1-num" id="s1SlotsCount">42</span>
+            <span class="s1-lbl"> slot periods generated<br><span style="font-size:11px;color:#64748b;font-weight:400;">7 days &times; templates locked at commit time</span></span>
+          </div>
+        </div>
+        <div class="s1-counter green">
+          <span class="s1-icon">&#x2705;</span>
+          <div>
+            <span class="s1-num" id="s1FilledCount">18</span>
+            <span class="s1-lbl"> recurring occurrences auto-filled <strong>(Stage 1)</strong><br><span style="font-size:11px;color:#065f46;font-weight:400;">Matched by care category &amp; preferred time</span></span>
+          </div>
+        </div>
+        <div class="s1-counter amber" id="s1UnmatchedRow">
+          <span class="s1-icon">&#x26A0;&#xFE0F;</span>
+          <div>
+            <span class="s1-num" id="s1UnmatchedCount">4</span>
+            <span class="s1-lbl"> occurrences could not be matched &rarr; added to <strong>Stage 2 Queue</strong><br><span style="font-size:11px;color:#92400e;font-weight:400;">No slot matched the preferred time, or all slots are full</span></span>
+          </div>
+        </div>
+        <hr class="s1-divider">
+        <div style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:12px;">
+          Stage 2 items require <strong>manual slot assignment</strong>. A coordinator can review and place them from the Unmatched Queue page.
+        </div>
+        <a href="stage2queue.html" class="s1-link-btn">&#x26A1; View Unmatched Queue &rarr;</a>
+      </div>
+
     </div>
-    <div class="commit-modal-footer">
-      <button class="btn btn-ghost" onclick="closeCommitModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="confirmCommit()">🔒 Confirm Commit Week</button>
+    <div class="commit-modal-footer" id="commitFooter">
+      <button class="btn btn-ghost" id="commitCancelBtn" onclick="closeCommitModal()">Cancel</button>
+      <button class="btn btn-primary" id="commitConfirmBtn" onclick="confirmCommit()">&#x1F512; Confirm Commit Week</button>
     </div>
   </div>
+</div>
 </div>
 </body>
 </html>
